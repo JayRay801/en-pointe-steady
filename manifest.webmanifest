@@ -1,0 +1,11 @@
+{
+  "name": "En Pointe & Steady",
+  "short_name": "En Pointe",
+  "description": "Calm Studio Wellness PWA for POTS hydration, sodium, and gallbladder-safe dance fueling.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FAF8F5",
+  "theme_color": "#0F766E",
+  "orientation": "portrait-primary"
+}

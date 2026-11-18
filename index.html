@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0F766E">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>En Pointe &amp; Steady</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <!-- Minimal Top Bar -->
+  <header class="top-bar no-print">
+    <div class="top-bar-inner">
+      <div class="brand-group">
+        <h1 class="app-title">En Pointe &amp; Steady</h1>
+        <div class="brand-meta">
+          <span id="topBarSubtitle" class="muted-text">Dancer • Dancer</span>
+          <span class="sync-pill">
+            <span id="syncStatusDot" class="sync-dot sync-offline"></span>
+            <span id="syncStatusLabel">Offline</span>
+          </span>
+        </div>
+      </div>
+      <button type="button" id="openGearBtn" class="icon-btn" aria-label="Open Settings">⚙</button>
+    </div>
+
+    <!-- Quick "I feel..." Rescue Pill Bar -->
+    <div class="symptom-bar" role="group" aria-label="How do you feel right now?">
+      <span class="symptom-label">I feel:</span>
+      <button type="button" class="pill-btn active" data-symptom-btn="steady">Steady</button>
+      <button type="button" class="pill-btn" data-symptom-btn="dizzy">Dizzy</button>
+      <button type="button" class="pill-btn" data-symptom-btn="tired">Tired</button>
+      <button type="button" class="pill-btn" data-symptom-btn="stomach">Stomach</button>
+    </div>
+
+    <div id="rescueBanner" class="rescue-banner hidden"></div>
+  </header>
+
+  <main class="app-main no-print">
+    <!-- TAB 1: TODAY -->
+    <section id="view-today" class="view-section">
+      <!-- Progress Rings Card -->
+      <div class="card rings-card">
+        <div class="rings-row">
+          <div class="ring-item">
+            <svg class="progress-ring" width="84" height="84" viewBox="0 0 84 84">
+              <circle class="ring-bg" cx="42" cy="42" r="34"></circle>
+              <circle id="sodiumRingProgress" class="ring-fg ring-primary" cx="42" cy="42" r="34"></circle>
+            </svg>
+            <div class="ring-text">
+              <strong id="sodiumRingValue">0</strong>
+              <span id="sodiumRingTarget" class="muted-text">/ 3600 mg</span>
+              <span class="ring-label">Sodium</span>
+            </div>
+            <button type="button" id="addBonusSodiumBtn" class="btn-chip">+500mg Na</button>
+          </div>
+
+          <div class="ring-item">
+            <svg class="progress-ring" width="84" height="84" viewBox="0 0 84 84">
+              <circle class="ring-bg" cx="42" cy="42" r="34"></circle>
+              <circle id="waterRingProgress" class="ring-fg ring-accent" cx="42" cy="42" r="34"></circle>
+            </svg>
+            <div class="ring-text">
+              <strong id="waterRingValue">0</strong>
+              <span id="waterRingTarget" class="muted-text">/ 85 oz</span>
+              <span class="ring-label">Hydration</span>
+            </div>
+            <button type="button" id="addBonusWaterBtn" class="btn-chip">+8oz Water</button>
+          </div>
+        </div>
+        <div class="rings-footer">
+          <span id="todayGbStatus" class="pill-badge badge-safe">✓ GB-Safe (≤ 5.5g/meal)</span>
+        </div>
+      </div>
+
+      <!-- Day Mode Switcher -->
+      <div class="day-mode-bar" role="group" aria-label="Day Mode">
+        <button type="button" class="mode-pill active" data-day-mode="school_dance">School + Studio</button>
+        <button type="button" class="mode-pill" data-day-mode="competition">Competition</button>
+        <button type="button" class="mode-pill" data-day-mode="recovery">Recovery</button>
+      </div>
+
+      <!-- Compact 7-Day History Overview Card -->
+      <div class="card history-overview-card">
+        <div class="card-head">
+          <div>
+            <h3>7-Day History Overview</h3>
+            <div id="history7Dots" class="history-dots-row"></div>
+          </div>
+          <button type="button" id="openFullHistoryBtn" class="btn-text">View Full History →</button>
+        </div>
+        <div class="overview-metrics">
+          <div><span class="muted-text">Avg Na</span><strong id="history7AvgNa">0 mg</strong></div>
+          <div><span class="muted-text">Avg Water</span><strong id="history7AvgWater">0 oz</strong></div>
+          <div><span class="muted-text">Steady</span><strong id="history7Steady">0/0</strong></div>
+        </div>
+      </div>
+
+      <!-- Chronological Schedule Slots -->
+      <div class="section-header">
+        <h3>Today's Fuel &amp; Studio Plan</h3>
+        <button type="button" id="quickAddSlotBtn" class="btn-secondary btn-sm">+ Quick Slot</button>
+      </div>
+      <div id="todaySlotsList" class="slots-list"></div>
+
+      <!-- Daily Notes -->
+      <div class="card">
+        <label for="dailyNotesInput" class="field-label">Daily Symptom &amp; Rehearsal Notes</label>
+        <textarea id="dailyNotesInput" class="input-field" rows="2" placeholder="Optional notes for today (e.g., studio temp, energy during pointe)..."></textarea>
+      </div>
+    </section>
+
+    <!-- TAB 2: FOOD -->
+    <section id="view-food" class="view-section hidden">
+      <div class="card">
+        <div class="search-row">
+          <input type="search" id="foodSearchInput" class="input-field" placeholder="Search 36+ foods or analyze any snack...">
+          <button type="button" id="foodLookupOnlineBtn" class="btn-primary btn-sm">Analyze</button>
+        </div>
+        <div class="filter-pills">
+          <button type="button" class="pill-btn active" data-food-filter="all">All</button>
+          <button type="button" class="pill-btn" data-food-filter="safe">Safe</button>
+          <button type="button" class="pill-btn" data-food-filter="high_na">High Na</button>
+          <button type="button" class="pill-btn" data-food-filter="restaurant">Restaurant</button>
+          <button type="button" class="pill-btn" data-food-filter="avoid">Avoid</button>
+        </div>
+      </div>
+
+      <div id="instantAnalysisCard" class="card analysis-card hidden"></div>
+      <div id="foodLibraryList" class="food-list"></div>
+    </section>
+
+    <!-- TAB 3: CARPOOL -->
+    <section id="view-carpool" class="view-section hidden">
+      <div class="day-mode-bar" role="group" aria-label="Day of Week">
+        <button type="button" class="mode-pill" data-carpool-day="Mon">Mon</button>
+        <button type="button" class="mode-pill" data-carpool-day="Tue">Tue</button>
+        <button type="button" class="mode-pill" data-carpool-day="Wed">Wed</button>
+        <button type="button" class="mode-pill" data-carpool-day="Thu">Thu</button>
+        <button type="button" class="mode-pill" data-carpool-day="Fri">Fri</button>
+        <button type="button" class="mode-pill" data-carpool-day="Sat">Sat</button>
+        <button type="button" class="mode-pill" data-carpool-day="Sun">Sun</button>
+      </div>
+
+      <div id="carpoolDayCard" class="card"></div>
+
+      <div class="carpool-actions">
+        <button type="button" id="toggleCarpoolEditBtn" class="btn-secondary">Edit Day Drivers</button>
+        <button type="button" id="exportIcsBtn" class="btn-primary">Add to Phone Calendar (.ics)</button>
+      </div>
+
+      <div id="carpoolEditForm" class="card hidden">
+        <h4>Update Carpool for Selected Day</h4>
+        <div class="form-grid">
+          <label>To Studio Driver <input type="text" id="editToDriver" class="input-field"></label>
+          <label>To Studio Time <input type="text" id="editToTime" class="input-field" placeholder="3:30 PM"></label>
+          <label>To Studio Note <input type="text" id="editToNote" class="input-field"></label>
+          <label>Home Driver <input type="text" id="editHomeDriver" class="input-field"></label>
+          <label>Home Time <input type="text" id="editHomeTime" class="input-field" placeholder="9:15 PM"></label>
+          <label>Home Note <input type="text" id="editHomeNote" class="input-field"></label>
+        </div>
+        <button type="button" id="saveCarpoolBtn" class="btn-primary">Save Carpool</button>
+      </div>
+    </section>
+
+    <!-- FULL HISTORY & DOCTOR REPORT VIEW -->
+    <section id="view-history" class="view-section hidden">
+      <div class="section-header">
+        <button type="button" id="historyBackBtn" class="btn-text">← Back to Today</button>
+        <h3>History &amp; Doctor Report</h3>
+      </div>
+
+      <div class="day-mode-bar" role="group" aria-label="History Range">
+        <button type="button" class="mode-pill active" data-history-range="7d">7 Days</button>
+        <button type="button" class="mode-pill" data-history-range="30d">30 Days</button>
+        <button type="button" class="mode-pill" data-history-range="all">All Time</button>
+      </div>
+
+      <div id="historySummaryGrid" class="stats-grid"></div>
+      <div id="historyCorrelationCard" class="card"></div>
+
+      <div class="carpool-actions">
+        <button type="button" id="downloadCsvBtn" class="btn-secondary">Download CSV</button>
+        <button type="button" id="printDoctorReportBtn" class="btn-primary">Print / Save Doctor PDF</button>
+      </div>
+
+      <div id="historyEntriesList" class="history-list"></div>
+    </section>
+  </main>
+
+  <!-- Bottom Navigation (3 Simple Tabs) -->
+  <nav class="bottom-nav no-print" aria-label="Primary Navigation">
+    <button type="button" class="nav-tab active" data-nav-tab="today">
+      <span class="nav-icon">☀️</span>
+      <span>Today</span>
+    </button>
+    <button type="button" class="nav-tab" data-nav-tab="food">
+      <span class="nav-icon">🥗</span>
+      <span>Food</span>
+    </button>
+    <button type="button" class="nav-tab" data-nav-tab="carpool">
+      <span class="nav-icon">🚗</span>
+      <span>Carpool</span>
+    </button>
+  </nav>
+
+  <!-- Gear (⚙) Settings Modal -->
+  <div id="gearModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-label="Settings">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <h3>Settings &amp; Profile</h3>
+        <button type="button" id="closeGearBtn" class="icon-btn" aria-label="Close Settings">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="setting-block">
+          <span class="field-label">Viewer Role</span>
+          <div class="day-mode-bar">
+            <button type="button" class="mode-pill active" data-role-btn="Dancer">Dancer</button>
+            <button type="button" class="mode-pill" data-role-btn="Mom">Mom</button>
+          </div>
+        </div>
+
+        <div class="setting-block">
+          <button type="button" id="gearOpenHistoryBtn" class="btn-secondary full-width">Open Full History &amp; Doctor Report →</button>
+        </div>
+
+        <div class="setting-block">
+          <h4>Dancer Profile &amp; Targets</h4>
+          <div class="form-grid">
+            <label>Name <input type="text" id="profName" class="input-field"></label>
+            <label>Age <input type="number" id="profAge" class="input-field"></label>
+            <label>Weight (lbs) <input type="number" id="profWeight" class="input-field"></label>
+            <label>Height (ft) <input type="number" id="profHeightFt" class="input-field"></label>
+            <label>Height (in) <input type="number" id="profHeightIn" class="input-field"></label>
+            <label>Dance Hrs/Day <input type="number" step="0.5" id="profDanceHours" class="input-field"></label>
+            <label>POTS Sodium Level
+              <select id="profPotsLevel" class="input-field">
+                <option value="mild">Mild (3000mg base)</option>
+                <option value="standard">Standard (3600mg base)</option>
+                <option value="high">High (4500mg base)</option>
+              </select>
+            </label>
+            <label>Gallbladder Fat Cap
+              <select id="profGbLevel" class="input-field">
+                <option value="flare">Flare (2.5g/meal)</option>
+                <option value="strict">Strict (4.0g/meal)</option>
+                <option value="moderate">Moderate (5.5g/meal)</option>
+              </select>
+            </label>
+          </div>
+
+          <label class="checkbox-row">
+            <input type="checkbox" id="profDoctorOverride">
+            <span>Use Doctor Override Targets</span>
+          </label>
+
+          <div id="doctorOverrideFields" class="form-grid hidden">
+            <label>Custom Sodium (mg) <input type="number" id="profCustomSodium" class="input-field"></label>
+            <label>Custom Water (oz) <input type="number" id="profCustomWater" class="input-field"></label>
+            <label>Custom Max Meal Fat (g) <input type="number" step="0.5" id="profCustomMealFat" class="input-field"></label>
+            <label>Custom Calories <input type="number" id="profCustomCalories" class="input-field"></label>
+          </div>
+        </div>
+
+        <div class="setting-block">
+          <h4>Cloud Sync &amp; Family PIN</h4>
+          <label>Apps Script Sync URL
+            <input type="url" id="gearSyncUrlInput" class="input-field" placeholder="https://script.google.com/macros/s/.../exec">
+          </label>
+          <div class="carpool-actions">
+            <button type="button" id="saveProfileBtn" class="btn-primary">Save Settings</button>
+            <button type="button" id="gearSyncNowBtn" class="btn-secondary">Sync Now</button>
+          </div>
+          <button type="button" id="lockAppBtn" class="btn-danger full-width">Lock App</button>
+        </div>
+
+        <div class="setting-block">
+          <h4>Night-Before Dance Bag Checklist</h4>
+          <div id="gearBagChecklist" class="bag-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- First-Visit / Remember-Device PIN Overlay -->
+  <div id="pinOverlay" class="pin-overlay no-print" role="dialog" aria-modal="true" aria-label="Family PIN Unlock">
+    <form id="pinUnlockForm" class="pin-card">
+      <h2>En Pointe &amp; Steady</h2>
+      <p class="muted-text">Enter your Family PIN to unlock encrypted wellness &amp; carpool data on this device.</p>
+      <label>Family PIN
+        <input type="password" id="pinInput" class="input-field" autocomplete="current-password" placeholder="Enter PIN" required>
+      </label>
+      <label>Apps Script Sync URL (optional, saved once)
+        <input type="url" id="pinSyncUrlInput" class="input-field" placeholder="https://script.google.com/macros/s/.../exec">
+      </label>
+      <label class="checkbox-row">
+        <input type="checkbox" id="pinRememberCheck" checked>
+        <span>Remember this device</span>
+      </label>
+      <p id="pinErrorMsg" class="error-text"></p>
+      <button type="submit" class="btn-primary full-width">Unlock &amp; Sync</button>
+    </form>
+  </div>
+
+  <!-- Dedicated Print-Only Clinical Doctor Report -->
+  <div id="printable-doctor-report" class="print-only"></div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
