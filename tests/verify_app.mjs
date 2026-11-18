@@ -113,6 +113,24 @@ function testPotsAndGallbladderMath() {
   assert.equal(overrideTargets.maxMealFat, 4.0);
   assert.equal(overrideTargets.dailyFatCap, 24);
 
+  const extremeOverride = getCalculatedTargets({
+    ...profile,
+    useDoctorOverride: true,
+    customCalories: 5000
+  });
+  assert.equal(extremeOverride.portionMultiplier, 1.65, "Doctor Override portionMultiplier must clamp to 1.65");
+
+  const lowOverride = getCalculatedTargets({
+    ...profile,
+    useDoctorOverride: true,
+    customCalories: 800
+  });
+  assert.equal(lowOverride.portionMultiplier, 0.65, "Doctor Override portionMultiplier must clamp to 0.65");
+
+  const zeroInchTargets = getCalculatedTargets({ ...profile, heightIn: 0 });
+  const twoInchTargets = getCalculatedTargets({ ...profile, heightIn: 2 });
+  assert.notEqual(zeroInchTargets.calories, twoInchTargets.calories, "heightIn=0 must not be coerced to 2");
+
   const scaledHigh = formatScaledPortion("1 cup rice", { portionMultiplier: 1.25 }, "high");
   assert.ok(scaledHigh.includes("1.5x High-Output Portion"), `Unexpected portion label: ${scaledHigh}`);
 
@@ -130,6 +148,9 @@ function testPotsAndGallbladderMath() {
   const avoidFood = evaluateFoodSafety(500, 8.0, 400, 5.5);
   assert.equal(avoidFood.gbRating.status, "avoid");
   assert.equal(avoidFood.overall, "avoid");
+
+  const zeroCapFood = evaluateFoodSafety(500, 1.0, 200, 0);
+  assert.equal(zeroCapFood.gbRating.status, "caution", "maxMealFat=0 must not be coerced to 5.5");
 
   const potsCaution = evaluateFoodSafety(100, 2.0, 450, 5.5);
   assert.equal(potsCaution.potsRating.status, "caution");
@@ -200,6 +221,28 @@ function testHistoryAndDoctorReport() {
   assert.ok(csv.startsWith("Date,Day Mode,Sodium (mg)"), "CSV header mismatch");
   assert.ok(csv.includes("2026-11-18"), "CSV missing today's entry");
   assert.ok(csv.includes("2026-11-17"), "CSV missing previous entry");
+
+  const formulaCsv = generateHistoryCsv([
+    { date: "2026-11-18", notes: "=CMD|'/C calc'!A0" },
+    { date: "2026-11-17", notes: "+1+1" },
+    { date: "2026-11-16", notes: "-1+1" },
+    { date: "2026-11-15", notes: "@SUM(1,2)" },
+    { date: "2026-11-14", notes: "\t=1+1" },
+    { date: "2026-11-13", notes: "\r=1+1" }
+  ]);
+  assert.ok(formulaCsv.includes(",'=CMD|'/C calc'!A0"), "CSV formula '=' must be prefixed with '");
+  assert.ok(formulaCsv.includes(",'+1+1"), "CSV formula '+' must be prefixed with '");
+  assert.ok(formulaCsv.includes(",'-1+1"), "CSV formula '-' must be prefixed with '");
+  assert.ok(formulaCsv.includes(",\"'@SUM(1,2)\""), "CSV formula '@' with comma must be prefixed with ' and quoted");
+  assert.ok(formulaCsv.includes(",'\t=1+1"), "CSV formula tab must be prefixed with '");
+  assert.ok(formulaCsv.includes(",\"'\r=1+1\""), "CSV formula CR must be prefixed with ' and quoted");
+
+  const unknownSymptomStats = computeHistoryStats([
+    { sodiumMg: 3000, waterOz: 70, totalFatG: 15, gbCompliant: true, symptomStatus: "nausea" }
+  ]);
+  assert.equal(unknownSymptomStats.symptomCounts.steady, 1, "Unknown symptomStatus should normalize to steady in symptomCounts");
+  assert.equal(unknownSymptomStats.symptomCorrelation.steadyDays, 1, "Unknown symptomStatus should normalize to steadyDays");
+  assert.equal(unknownSymptomStats.symptomCorrelation.symptomaticDays, 0, "Unknown symptomStatus should not increment symptomaticDays");
 
   state.history = filtered7d;
   const reportHtml = renderDoctorReportHtml(state, targets, "30d");

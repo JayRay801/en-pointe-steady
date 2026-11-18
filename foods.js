@@ -83,7 +83,10 @@ export function evaluateFoodSafety(sodium, fat, kcal, maxMealFat = 5.5) {
   const na = Number(sodium) || 0;
   const f = Number(fat) || 0;
   const cal = Number(kcal) || 0;
-  const cap = Number(maxMealFat) || 5.5;
+  const cap =
+    maxMealFat != null && maxMealFat !== "" && Number.isFinite(Number(maxMealFat))
+      ? Number(maxMealFat)
+      : 5.5;
 
   let potsRating;
   if (na < 250 && cal > 350) {

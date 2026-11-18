@@ -158,12 +158,9 @@ export function computeHistoryStats(entries) {
     sumFat += fat;
     if (item.gbCompliant !== false) gbCompliantDays += 1;
 
-    const status = item.symptomStatus || "steady";
-    if (Object.prototype.hasOwnProperty.call(symptomCounts, status)) {
-      symptomCounts[status] += 1;
-    } else {
-      symptomCounts.steady += 1;
-    }
+    const rawStatus = item.symptomStatus || "steady";
+    const status = Object.prototype.hasOwnProperty.call(symptomCounts, rawStatus) ? rawStatus : "steady";
+    symptomCounts[status] += 1;
 
     if (status === "steady") {
       steadyDays += 1;
@@ -196,7 +193,10 @@ export function computeHistoryStats(entries) {
 }
 
 function escapeCsvCell(val) {
-  const s = val == null ? "" : String(val);
+  let s = val == null ? "" : String(val);
+  if (/^[=+\-@\t\r]/.test(s)) {
+    s = `'${s}`;
+  }
   if (/[",\r\n]/.test(s)) {
     return `"${s.replace(/"/g, '""')}"`;
   }

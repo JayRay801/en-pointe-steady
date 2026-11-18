@@ -126,13 +126,13 @@ export function getCalculatedTargets(profile) {
       water,
       maxMealFat,
       dailyFatCap: Math.round(maxMealFat * 6),
-      portionMultiplier: calories / 2150
+      portionMultiplier: Math.max(0.65, Math.min(1.65, calories / 2150))
     };
   }
 
   const weightLbs = Number(p.weightLbs) || 110;
   const heightFt = Number(p.heightFt) || 5;
-  const heightIn = Number(p.heightIn) || 2;
+  const heightIn = p.heightIn != null && p.heightIn !== "" && Number.isFinite(Number(p.heightIn)) ? Number(p.heightIn) : 2;
   const age = Number(p.age) || 14;
   const danceHours = Number(p.danceHours) || 0;
 
@@ -183,6 +183,7 @@ if (typeof document !== "undefined") {
   let state = loadLocalState();
   let auth = loadDeviceAuth();
   let syncStatus = "offline"; // "synced" | "syncing" | "offline"
+  let hasPendingCloudPush = false;
   const scheduleCloudPush = createDebouncedPush(1500);
 
   function loadLocalState() {
@@ -255,6 +256,22 @@ if (typeof document !== "undefined") {
     }
   }
 
+  async function silentPushToCloud() {
+    if (!auth?.unlocked || !auth?.passphrase) return false;
+    const url = state.googleSheetWebAppUrl || auth.syncUrl;
+    if (!url) return false;
+    setSyncIndicator("syncing");
+    try {
+      const encrypted = await encryptBundle(buildSyncPayload(), auth.passphrase);
+      const res = await pushToCloud(url, encrypted, state.viewerRole || "Dancer");
+      setSyncIndicator(res.ok ? "synced" : "offline");
+      return res.ok;
+    } catch (_err) {
+      setSyncIndicator("offline");
+      return false;
+    }
+  }
+
   function saveAndSync({ skipPush = false } = {}) {
     rolloverDayIfNeeded();
     const targets = getCalculatedTargets(state.profile);
@@ -265,17 +282,12 @@ if (typeof document !== "undefined") {
     } catch (_e) {
       // Ignore storage quota issues
     }
-    if (!skipPush && auth.unlocked && auth.passphrase && (state.googleSheetWebAppUrl || auth.syncUrl)) {
-      const url = state.googleSheetWebAppUrl || auth.syncUrl;
+    if (!skipPush && auth?.unlocked && auth?.passphrase && (state.googleSheetWebAppUrl || auth.syncUrl)) {
+      hasPendingCloudPush = true;
       setSyncIndicator("syncing");
       scheduleCloudPush(async () => {
-        try {
-          const encrypted = await encryptBundle(buildSyncPayload(), auth.passphrase);
-          const res = await pushToCloud(url, encrypted, state.viewerRole || "Dancer");
-          setSyncIndicator(res.ok ? "synced" : "offline");
-        } catch (_err) {
-          setSyncIndicator("offline");
-        }
+        hasPendingCloudPush = false;
+        await silentPushToCloud();
       });
     }
   }
@@ -310,32 +322,60 @@ if (typeof document !== "undefined") {
     label.textContent = status === "synced" ? "Synced" : status === "syncing" ? "Syncing..." : "Offline";
   }
 
-  async function silentPullFromCloud() {
-    const url = state.googleSheetWebAppUrl || auth.syncUrl;
-    if (!url || !auth.passphrase) {
+  async function silentPullFromCloud({ passphraseOverride = "", urlOverride = "", allowWhenLocked = false } = {}) {
+    if (!allowWhenLocked && hasPendingCloudPush) {
+      return { ok: true, skipped: true };
+    }
+    const url = urlOverride || state.googleSheetWebAppUrl || auth?.syncUrl;
+    const passphrase = passphraseOverride || auth?.passphrase;
+    if (!url || !passphrase) {
       setSyncIndicator("offline");
-      return false;
+      return { ok: false, reason: "missing_config" };
     }
     setSyncIndicator("syncing");
     const res = await pullFromCloud(url);
     if (!res.ok) {
       setSyncIndicator("offline");
-      return false;
+      return { ok: false, reason: "network" };
     }
     if (!res.payload) {
       setSyncIndicator("synced");
-      return true;
+      return { ok: true, empty: true };
     }
     try {
-      const decrypted = await decryptBundle(res.payload, auth.passphrase);
-      state = mergeState(createDefaultState(), { ...decrypted, googleSheetWebAppUrl: url });
+      const decrypted = await decryptBundle(res.payload, passphrase);
+      const prevUiState = {
+        activeTab: state.activeTab,
+        historyRange: state.historyRange,
+        foodFilter: state.foodFilter,
+        foodSearchQuery: document.getElementById("foodSearchInput")?.value ?? ""
+      };
+      const gearModalEl = document.getElementById("gearModal");
+      const wasGearModalOpen = gearModalEl ? !gearModalEl.classList.contains("hidden") : false;
+
+      state = mergeState(createDefaultState(), {
+        ...decrypted,
+        activeTab: prevUiState.activeTab,
+        historyRange: prevUiState.historyRange,
+        foodFilter: prevUiState.foodFilter,
+        googleSheetWebAppUrl: url
+      });
       localStorage.setItem(STORAGE_STATE_KEY, JSON.stringify(state));
       setSyncIndicator("synced");
       renderAll();
-      return true;
+
+      const searchEl = document.getElementById("foodSearchInput");
+      if (searchEl && searchEl.value !== prevUiState.foodSearchQuery) {
+        searchEl.value = prevUiState.foodSearchQuery;
+        renderFoodView();
+      }
+      if (gearModalEl) {
+        gearModalEl.classList.toggle("hidden", !wasGearModalOpen);
+      }
+      return { ok: true };
     } catch (_err) {
       setSyncIndicator("offline");
-      return false;
+      return { ok: false, reason: "decrypt" };
     }
   }
 
@@ -1123,7 +1163,12 @@ if (typeof document !== "undefined") {
     });
 
     document.getElementById("lockAppBtn")?.addEventListener("click", () => {
+      hasPendingCloudPush = false;
       saveDeviceAuth({ unlocked: false, passphrase: "", syncUrl: state.googleSheetWebAppUrl || "", rememberDevice: true });
+      const pinInput = document.getElementById("pinInput");
+      if (pinInput) pinInput.value = "";
+      const errEl = document.getElementById("pinErrorMsg");
+      if (errEl) errEl.textContent = "";
       document.getElementById("gearModal")?.classList.add("hidden");
       document.getElementById("pinOverlay")?.classList.remove("hidden");
     });
@@ -1142,16 +1187,24 @@ if (typeof document !== "undefined") {
       }
 
       if (errEl) errEl.textContent = "";
-      state.googleSheetWebAppUrl = syncUrl;
-      saveDeviceAuth({ unlocked: true, passphrase: pin, syncUrl, rememberDevice: remember });
 
       if (syncUrl) {
-        const pulled = await silentPullFromCloud();
-        if (!pulled && errEl) {
-          errEl.textContent = "Unlocked locally (cloud sync unavailable or PIN mismatch).";
+        const pullResult = await silentPullFromCloud({
+          passphraseOverride: pin,
+          urlOverride: syncUrl,
+          allowWhenLocked: true
+        });
+        if (!pullResult.ok && pullResult.reason === "decrypt") {
+          if (errEl) errEl.textContent = "Incorrect PIN — could not decrypt cloud sync bundle.";
+          return;
+        }
+        if (!pullResult.ok && errEl) {
+          errEl.textContent = "Unlocked locally (cloud sync unavailable).";
         }
       }
 
+      state.googleSheetWebAppUrl = syncUrl;
+      saveDeviceAuth({ unlocked: true, passphrase: pin, syncUrl, rememberDevice: remember });
       document.getElementById("pinOverlay")?.classList.add("hidden");
       renderAll();
     });
