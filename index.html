@@ -24,7 +24,10 @@
           </span>
         </div>
       </div>
-      <button type="button" id="openGearBtn" class="icon-btn" aria-label="Open Settings">⚙</button>
+      <div class="top-bar-actions">
+        <button type="button" id="openManualBtn" class="icon-btn icon-btn-text" aria-label="Open Quick Start Guide" title="Quick Start Guide">📖 Manual</button>
+        <button type="button" id="openGearBtn" class="icon-btn" aria-label="Open Settings" title="Settings">⚙</button>
+      </div>
     </div>
 
     <!-- Quick "I feel..." Rescue Pill Bar -->
@@ -53,9 +56,15 @@
             <div class="ring-text">
               <strong id="sodiumRingValue">0</strong>
               <span id="sodiumRingTarget" class="muted-text">/ 3600 mg</span>
-              <span class="ring-label">Sodium</span>
+              <span class="ring-label">
+                Sodium
+                <button type="button" id="infoSodiumBtn" class="info-btn" data-info-topic="sodium" aria-label="About Sodium Target">ℹ</button>
+              </span>
             </div>
-            <button type="button" id="addBonusSodiumBtn" class="btn-chip">+500mg Na</button>
+            <div class="ring-btn-group">
+              <button type="button" id="subBonusSodiumBtn" class="btn-chip btn-chip-sub" aria-label="Subtract 500mg Sodium">-500</button>
+              <button type="button" id="addBonusSodiumBtn" class="btn-chip">+500mg Na</button>
+            </div>
           </div>
 
           <div class="ring-item">
@@ -66,21 +75,31 @@
             <div class="ring-text">
               <strong id="waterRingValue">0</strong>
               <span id="waterRingTarget" class="muted-text">/ 85 oz</span>
-              <span class="ring-label">Hydration</span>
+              <span class="ring-label">
+                Hydration
+                <button type="button" id="infoWaterBtn" class="info-btn" data-info-topic="water" aria-label="About Hydration Target">ℹ</button>
+              </span>
             </div>
-            <button type="button" id="addBonusWaterBtn" class="btn-chip">+8oz Water</button>
+            <div class="ring-btn-group">
+              <button type="button" id="subBonusWaterBtn" class="btn-chip btn-chip-sub" aria-label="Subtract 8oz Water">-8oz</button>
+              <button type="button" id="addBonusWaterBtn" class="btn-chip">+8oz Water</button>
+            </div>
           </div>
         </div>
         <div class="rings-footer">
           <span id="todayGbStatus" class="pill-badge badge-safe">✓ GB-Safe (≤ 5.5g/meal)</span>
+          <button type="button" id="infoGbBtn" class="info-btn" data-info-topic="gb" aria-label="About Gallbladder Safety">ℹ</button>
         </div>
       </div>
 
       <!-- Day Mode Switcher -->
-      <div class="day-mode-bar" role="group" aria-label="Day Mode">
-        <button type="button" class="mode-pill active" data-day-mode="school_dance">School + Studio</button>
-        <button type="button" class="mode-pill" data-day-mode="competition">Competition</button>
-        <button type="button" class="mode-pill" data-day-mode="recovery">Recovery</button>
+      <div class="day-mode-row">
+        <div class="day-mode-bar" role="group" aria-label="Day Mode">
+          <button type="button" class="mode-pill active" data-day-mode="school_dance">School + Studio</button>
+          <button type="button" class="mode-pill" data-day-mode="competition">Competition</button>
+          <button type="button" class="mode-pill" data-day-mode="recovery">Recovery</button>
+        </div>
+        <button type="button" id="infoDayModeBtn" class="info-btn" data-info-topic="dayMode" aria-label="About Day Modes">ℹ</button>
       </div>
 
       <!-- Compact 7-Day History Overview Card -->
@@ -102,13 +121,25 @@
       <!-- Chronological Schedule Slots -->
       <div class="section-header">
         <h3>Today's Fuel &amp; Studio Plan</h3>
-        <button type="button" id="quickAddSlotBtn" class="btn-secondary btn-sm">+ Quick Slot</button>
+        <button type="button" id="quickAddSlotBtn" class="btn-primary btn-sm">+ Quick Log</button>
       </div>
       <div id="todaySlotsList" class="slots-list"></div>
 
-      <!-- Daily Notes -->
+      <!-- Collapsible Night-Before Dance Bag Checklist -->
+      <div id="todayBagCard" class="card collapsible-card">
+        <button type="button" id="toggleTodayBagBtn" class="collapsible-header" aria-expanded="false">
+          <span class="collapsible-title">🎒 Dance Bag Checklist <span id="todayBagProgress" class="pill-badge badge-safe">0/8 packed</span></span>
+          <span class="collapsible-chevron">▼</span>
+        </button>
+        <div id="todayBagBody" class="collapsible-body hidden">
+          <div id="todayBagChecklist" class="bag-list"></div>
+        </div>
+      </div>
+
+      <!-- Daily Notes & Quick Symptom Tags -->
       <div class="card">
         <label for="dailyNotesInput" class="field-label">Daily Symptom &amp; Rehearsal Notes</label>
+        <div id="symptomQuickTags" class="symptom-tag-chips" aria-label="Quick symptom tags"></div>
         <textarea id="dailyNotesInput" class="input-field" rows="2" placeholder="Optional notes for today (e.g., studio temp, energy during pointe)..."></textarea>
       </div>
     </section>
@@ -120,12 +151,15 @@
           <input type="search" id="foodSearchInput" class="input-field" placeholder="Search 36+ foods or analyze any snack...">
           <button type="button" id="foodLookupOnlineBtn" class="btn-primary btn-sm">Analyze</button>
         </div>
-        <div class="filter-pills">
-          <button type="button" class="pill-btn active" data-food-filter="all">All</button>
-          <button type="button" class="pill-btn" data-food-filter="safe">Safe</button>
-          <button type="button" class="pill-btn" data-food-filter="high_na">High Na</button>
-          <button type="button" class="pill-btn" data-food-filter="restaurant">Restaurant</button>
-          <button type="button" class="pill-btn" data-food-filter="avoid">Avoid</button>
+        <div class="food-toolbar-row">
+          <div class="filter-pills">
+            <button type="button" class="pill-btn active" data-food-filter="all">All</button>
+            <button type="button" class="pill-btn" data-food-filter="safe">Safe</button>
+            <button type="button" class="pill-btn" data-food-filter="high_na">High Na</button>
+            <button type="button" class="pill-btn" data-food-filter="restaurant">Restaurant</button>
+            <button type="button" class="pill-btn" data-food-filter="avoid">Avoid</button>
+          </div>
+          <button type="button" id="openAddCustomFoodBtn" class="btn-secondary btn-sm">+ Custom Food</button>
         </div>
       </div>
 
@@ -149,7 +183,8 @@
 
       <div class="carpool-actions">
         <button type="button" id="toggleCarpoolEditBtn" class="btn-secondary">Edit Day Drivers</button>
-        <button type="button" id="exportIcsBtn" class="btn-primary">Add to Phone Calendar (.ics)</button>
+        <button type="button" id="shareCarpoolBtn" class="btn-secondary">Share / Copy Ride</button>
+        <button type="button" id="exportIcsBtn" class="btn-primary">Calendar (.ics)</button>
       </div>
 
       <div id="carpoolEditForm" class="card hidden">
@@ -256,6 +291,7 @@
           <label class="checkbox-row">
             <input type="checkbox" id="profDoctorOverride">
             <span>Use Doctor Override Targets</span>
+            <button type="button" id="infoDoctorOverrideBtn" class="info-btn" data-info-topic="doctorOverride" aria-label="About Doctor Override">ℹ</button>
           </label>
 
           <div id="doctorOverrideFields" class="form-grid hidden">
@@ -267,13 +303,20 @@
         </div>
 
         <div class="setting-block">
-          <h4>Cloud Sync &amp; Family PIN</h4>
+          <h4 class="heading-with-info">
+            Cloud Sync &amp; Family PIN
+            <button type="button" id="infoSyncBtn" class="info-btn" data-info-topic="sync" aria-label="About Zero-PII Cloud Sync">ℹ</button>
+          </h4>
           <label>Apps Script Sync URL
             <input type="url" id="gearSyncUrlInput" class="input-field" placeholder="https://script.google.com/macros/s/.../exec">
           </label>
           <div class="carpool-actions">
             <button type="button" id="saveProfileBtn" class="btn-primary">Save Settings</button>
             <button type="button" id="gearSyncNowBtn" class="btn-secondary">Sync Now</button>
+          </div>
+          <div class="carpool-actions">
+            <button type="button" id="openPairDeviceBtn" class="btn-secondary">Pair Another Device</button>
+            <button type="button" id="openChangePinBtn" class="btn-secondary">Change Family PIN</button>
           </div>
           <button type="button" id="lockAppBtn" class="btn-danger full-width">Lock App</button>
         </div>
@@ -286,6 +329,188 @@
     </div>
   </div>
 
+  <!-- Interactive Quick Log & Slot Edit Modal -->
+  <div id="quickLogModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-label="Quick Log Fuel & Hydration">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <h3 id="quickLogModalTitle">Quick Log Fuel &amp; Hydration</h3>
+        <button type="button" id="closeQuickLogBtn" class="icon-btn" aria-label="Close Quick Log">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-block">
+          <span class="field-label">1-Tap Presets</span>
+          <div id="quickLogPresets" class="preset-chips-scroll"></div>
+        </div>
+
+        <div class="setting-block">
+          <label class="field-label" for="logCatalogSearch">Search Food Catalog (optional autofill)</label>
+          <input type="search" id="logCatalogSearch" class="input-field" placeholder="Type e.g. broth, pretzels, turkey, soup...">
+          <div id="logCatalogSuggestions" class="catalog-suggestions hidden"></div>
+        </div>
+
+        <form id="quickLogForm">
+          <div class="form-grid">
+            <label class="grid-span-2">Item / Fuel Name
+              <input type="text" id="logItemName" class="input-field" placeholder="e.g. LMNT Watermelon + Pretzels" required>
+            </label>
+            <label>Time
+              <input type="text" id="logItemTime" class="input-field" placeholder="3:30 PM">
+            </label>
+            <label>Portion / Serving
+              <input type="text" id="logItemPortion" class="input-field" placeholder="16oz / 1 pack">
+            </label>
+            <label>Sodium (mg)
+              <input type="number" id="logItemSodium" class="input-field" min="0" step="10" value="0" required>
+            </label>
+            <label>Water (oz)
+              <input type="number" id="logItemWater" class="input-field" min="0" step="1" value="0" required>
+            </label>
+            <label>Fat (g)
+              <input type="number" id="logItemFat" class="input-field" min="0" step="0.5" value="0" required>
+            </label>
+            <label>Calories (kcal)
+              <input type="number" id="logItemKcal" class="input-field" min="0" step="5" value="0">
+            </label>
+          </div>
+          <div class="live-safety-row">
+            <span id="logGbSafetyBadge" class="pill-badge badge-safe">✓ GB-Safe</span>
+          </div>
+          <div class="carpool-actions">
+            <button type="button" id="cancelQuickLogBtn" class="btn-secondary">Cancel</button>
+            <button type="submit" class="btn-primary">Save Entry</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Custom Food Modal -->
+  <div id="customFoodModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-label="Add Custom Food">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <h3>Add Custom Food to Library</h3>
+        <button type="button" id="closeCustomFoodBtn" class="icon-btn" aria-label="Close Custom Food">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="customFoodForm">
+          <div class="form-grid">
+            <label class="grid-span-2">Food Name
+              <input type="text" id="customFoodName" class="input-field" placeholder="e.g. Homemade Salted Rice Bowl" required>
+            </label>
+            <label>Serving Size
+              <input type="text" id="customFoodServing" class="input-field" placeholder="1 bowl">
+            </label>
+            <label>Category
+              <select id="customFoodCategory" class="input-field">
+                <option value="Custom">Custom</option>
+                <option value="Morning / School">Morning / School</option>
+                <option value="Between Classes">Between Classes</option>
+                <option value="Electrolyte / Drink">Electrolyte / Drink</option>
+                <option value="Late-Night Recovery">Late-Night Recovery</option>
+                <option value="Restaurant / Fast Food">Restaurant / Fast Food</option>
+              </select>
+            </label>
+            <label>Sodium (mg)
+              <input type="number" id="customFoodSodium" class="input-field" min="0" value="400" required>
+            </label>
+            <label>Water (oz)
+              <input type="number" id="customFoodWater" class="input-field" min="0" value="8" required>
+            </label>
+            <label>Fat (g)
+              <input type="number" id="customFoodFat" class="input-field" min="0" step="0.5" value="2.0" required>
+            </label>
+            <label>Calories (kcal)
+              <input type="number" id="customFoodKcal" class="input-field" min="0" value="200">
+            </label>
+          </div>
+          <div class="carpool-actions">
+            <button type="button" id="cancelCustomFoodBtn" class="btn-secondary">Cancel</button>
+            <button type="submit" class="btn-primary">Save to Library</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Family PIN Modal -->
+  <div id="changePinModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-label="Change Family PIN">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <h3>Change Family PIN</h3>
+        <button type="button" id="closeChangePinBtn" class="icon-btn" aria-label="Close Change PIN">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="muted-text">Changing your PIN re-encrypts your data with a new key and updates Cloud Sync automatically. Remember to enter the new PIN on other family devices.</p>
+        <form id="changePinForm">
+          <div class="form-stack">
+            <label>Current Family PIN
+              <input type="password" id="changePinCurrent" class="input-field" autocomplete="current-password" required>
+            </label>
+            <label>New Family PIN (at least 4 characters)
+              <input type="password" id="changePinNew" class="input-field" autocomplete="new-password" minlength="4" required>
+            </label>
+            <label>Confirm New PIN
+              <input type="password" id="changePinConfirm" class="input-field" autocomplete="new-password" minlength="4" required>
+            </label>
+          </div>
+          <p id="changePinError" class="error-text"></p>
+          <div class="carpool-actions">
+            <button type="button" id="cancelChangePinBtn" class="btn-secondary">Cancel</button>
+            <button type="submit" class="btn-primary">Update PIN &amp; Re-Encrypt</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pair Another Device Modal (Eliminates Manual URL Typing) -->
+  <div id="pairDeviceModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-label="Pair Another Device">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <h3>Pair Another Family Device</h3>
+        <button type="button" id="closePairDeviceBtn" class="icon-btn" aria-label="Close Pair Device">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="muted-text">Send this 1-tap pairing link to Dancer or Mom. Opening it automatically configures Cloud Sync without typing the script URL — they only need the Family PIN.</p>
+        <label class="field-label" for="pairLinkInput">1-Tap Pairing Link</label>
+        <input type="text" id="pairLinkInput" class="input-field" readonly>
+        <p id="pairNoUrlWarn" class="error-text hidden">Save an Apps Script Sync URL in Settings first before generating a pairing link.</p>
+        <div class="carpool-actions" style="margin-top: 12px;">
+          <button type="button" id="copyPairLinkBtn" class="btn-secondary">Copy Link</button>
+          <button type="button" id="sharePairLinkBtn" class="btn-primary">Send / Share Link</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contextual ℹ️ Info Explainer Modal -->
+  <div id="infoModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-label="Clinical & App Information">
+    <div class="modal-sheet modal-sheet-compact">
+      <div class="modal-head">
+        <h3 id="infoModalTitle">Info</h3>
+        <button type="button" id="closeInfoModalBtn" class="icon-btn" aria-label="Close Info">✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="infoModalBody" class="info-modal-body"></p>
+        <button type="button" id="infoGotItBtn" class="btn-primary full-width">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- In-App Quick Start Guide & Manual Modal -->
+  <div id="manualModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-label="Quick Start Guide & Manual">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <h3>📖 Quick Start Guide &amp; Manual</h3>
+        <button type="button" id="closeManualBtn" class="icon-btn" aria-label="Close Manual">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="manualTabs" class="filter-pills manual-tabs" role="tablist"></div>
+        <div id="manualContent" class="manual-content"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- First-Visit / Remember-Device PIN Overlay -->
   <div id="pinOverlay" class="pin-overlay no-print" role="dialog" aria-modal="true" aria-label="Family PIN Unlock">
     <form id="pinUnlockForm" class="pin-card">
@@ -294,7 +519,7 @@
       <label>Family PIN
         <input type="password" id="pinInput" class="input-field" autocomplete="current-password" placeholder="Enter PIN" required>
       </label>
-      <label>Apps Script Sync URL (optional, saved once)
+      <label>Apps Script Sync URL (auto-filled via pairing link, or optional)
         <input type="url" id="pinSyncUrlInput" class="input-field" placeholder="https://script.google.com/macros/s/.../exec">
       </label>
       <label class="checkbox-row">
@@ -305,6 +530,9 @@
       <button type="submit" class="btn-primary full-width">Unlock &amp; Sync</button>
     </form>
   </div>
+
+  <!-- Toast Notification -->
+  <div id="toastNotification" class="toast hidden" role="status" aria-live="polite"></div>
 
   <!-- Dedicated Print-Only Clinical Doctor Report -->
   <div id="printable-doctor-report" class="print-only"></div>

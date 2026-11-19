@@ -2,7 +2,7 @@
  * sw.js — Offline App-Shell Service Worker for En Pointe & Steady
  */
 
-const CACHE_NAME = "en-pointe-steady-v2";
+const CACHE_NAME = "en-pointe-steady-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -11,7 +11,8 @@ const APP_SHELL = [
   "./crypto.js",
   "./foods.js",
   "./history.js",
-  "./manifest.webmanifest"
+  "./manifest.webmanifest",
+  "./USER_GUIDE.md"
 ];
 
 self.addEventListener("install", (event) => {

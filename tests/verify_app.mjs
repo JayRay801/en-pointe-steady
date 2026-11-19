@@ -12,7 +12,19 @@ import {
   generateHistoryCsv,
   renderDoctorReportHtml
 } from "../history.js";
-import { createDefaultState, getCalculatedTargets, formatScaledPortion } from "../app.js";
+import {
+  createDefaultState,
+  getCalculatedTargets,
+  formatScaledPortion,
+  cloneScheduleTemplate,
+  adjustBonusValue,
+  applyRolloverState,
+  parseSyncHashOrQuery,
+  formatCarpoolShareText,
+  QUICK_LOG_PRESETS,
+  CLINICAL_INFO_TOPICS,
+  MANUAL_SECTIONS
+} from "../app.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, "..");
@@ -252,9 +264,10 @@ function testHistoryAndDoctorReport() {
   console.log("PASS [3/5] History & Doctor Report Logic");
 }
 
-// Test 4: WebCrypto AES-256-GCM Round-Trip
+// Test 4: WebCrypto AES-256-GCM Round-Trip & PIN Change Re-Encryption
 async function testWebCryptoRoundTrip() {
   const passphrase = "test-passphrase-123";
+  const newPassphrase = "updated-family-pin-999";
   const payload = {
     viewerRole: "Dancer",
     dayMode: "school_dance",
@@ -278,13 +291,93 @@ async function testWebCryptoRoundTrip() {
     "Expected wrong passphrase to fail AES-GCM authentication"
   );
 
-  console.log("PASS [4/5] WebCrypto AES-256-GCM Round-Trip");
+  // Simulate Family PIN change: re-encrypt with new passphrase
+  const reEncryptedToken = await encryptBundle(decrypted, newPassphrase);
+  const reDecrypted = await decryptBundle(reEncryptedToken, newPassphrase);
+  assert.equal(reDecrypted.history[0].sodiumMg, 4100);
+  await assert.rejects(
+    () => decryptBundle(reEncryptedToken, passphrase),
+    /./,
+    "Old PIN must fail to decrypt after PIN change re-encryption"
+  );
+
+  console.log("PASS [4/6] WebCrypto AES-256-GCM & PIN Change Round-Trip");
 }
 
-// Test 5: Apps Script Target Check
+// Test 5: Daily Usability Helpers (Templates, Rollover, Bonus Clamp, Pairing Hash, Carpool Share)
+function testDailyUsabilityHelpers() {
+  const defState = createDefaultState();
+  assert.ok(defState.schedules.school_dance.length >= 4, "Default school_dance template should be pre-populated");
+  assert.ok(defState.schedules.competition.length >= 3, "Default competition template should be pre-populated");
+  assert.ok(defState.schedules.recovery.length >= 3, "Default recovery template should be pre-populated");
+  assert.ok(QUICK_LOG_PRESETS.length >= 5, "Quick log presets should be populated");
+  assert.ok(Object.keys(CLINICAL_INFO_TOPICS).length >= 5, "Clinical info topics should be populated");
+  assert.ok(MANUAL_SECTIONS.length >= 3, "Manual sections should be populated");
+
+  // Bonus value clamping >= 0
+  assert.equal(adjustBonusValue(500, -500), 0);
+  assert.equal(adjustBonusValue(0, -500), 0);
+  assert.equal(adjustBonusValue(200, -500), 0);
+  assert.equal(adjustBonusValue(0, 500), 500);
+
+  // Midnight rollover filters out isAdHoc slots while keeping template slots
+  const rolloverInput = createDefaultState();
+  rolloverInput.lastActiveDate = "2026-11-17";
+  rolloverInput.bonusSodium = 500;
+  rolloverInput.bonusWater = 16;
+  rolloverInput.symptomStatus = "dizzy";
+  rolloverInput.dailyNotes = "High HR";
+  rolloverInput.schedules.school_dance = [
+    ...cloneScheduleTemplate("school_dance"),
+    {
+      id: "adhoc_12345",
+      isAdHoc: true,
+      time: "4:00 PM",
+      phase: "Quick Log",
+      options: [{ name: "LMNT", basePortion: "16oz", kcal: 5, sodium: 1000, water: 16, fat: 0 }]
+    }
+  ];
+  rolloverInput.checkedSlots = { sd_1: true, adhoc_12345: true };
+
+  const { rolledOver, nextState } = applyRolloverState(rolloverInput, "2026-11-18");
+  assert.equal(rolledOver, true);
+  assert.equal(nextState.lastActiveDate, "2026-11-18");
+  assert.equal(nextState.bonusSodium, 0);
+  assert.equal(nextState.bonusWater, 0);
+  assert.equal(nextState.symptomStatus, "steady");
+  assert.equal(nextState.dailyNotes, "");
+  assert.equal(Object.keys(nextState.checkedSlots).length, 0);
+  assert.ok(!nextState.schedules.school_dance.some((s) => s.isAdHoc), "Ad-hoc slots must be cleared at rollover");
+  assert.equal(nextState.schedules.school_dance.length, cloneScheduleTemplate("school_dance").length);
+  assert.equal(nextState.history.length, 1);
+
+  // Pairing URL hash and query extraction
+  const hashSync = parseSyncHashOrQuery("", "#sync=https%3A%2F%2Fscript.google.com%2Fmacros%2Fs%2Fabc%2Fexec");
+  assert.equal(hashSync, "https://script.google.com/macros/s/abc/exec");
+  const querySync = parseSyncHashOrQuery("?sync=https%3A%2F%2Fscript.google.com%2Fmacros%2Fs%2Fxyz%2Fexec", "");
+  assert.equal(querySync, "https://script.google.com/macros/s/xyz/exec");
+  assert.equal(parseSyncHashOrQuery("", "#sync=javascript:alert(1)"), "");
+
+  // Carpool text sharing format
+  const shareTxt = formatCarpoolShareText("Wed", {
+    toDriver: "Driver A",
+    toTime: "3:30 PM",
+    toNote: "Side door",
+    homeDriver: "Driver B",
+    homeTime: "9:15 PM",
+    homeNote: ""
+  });
+  assert.ok(shareTxt.includes("Wed Dance Carpool"));
+  assert.ok(shareTxt.includes("Driver A @ 3:30 PM (Side door)"));
+  assert.ok(shareTxt.includes("Driver B @ 9:15 PM"));
+
+  console.log("PASS [5/6] Daily Usability Helpers & Rollover");
+}
+
+// Test 6: Apps Script Target Check
 function testAppsScriptTarget(gsPath) {
   if (!gsPath) {
-    console.log("SKIP [5/5] Apps Script Target Check (no --gs-path provided)");
+    console.log("SKIP [6/6] Apps Script Target Check (no --gs-path provided)");
     return;
   }
   const gsCode = fs.readFileSync(gsPath, "utf8");
@@ -297,7 +390,7 @@ function testAppsScriptTarget(gsPath) {
     !gsCode.includes("getSheets()[0]"),
     "Apps Script must NOT use getSheets()[0]"
   );
-  console.log("PASS [5/5] Apps Script Target Check");
+  console.log("PASS [6/6] Apps Script Target Check");
 }
 
 const args = parseArgs(process.argv);
@@ -305,5 +398,6 @@ testZeroPii();
 testPotsAndGallbladderMath();
 testHistoryAndDoctorReport();
 await testWebCryptoRoundTrip();
+testDailyUsabilityHelpers();
 testAppsScriptTarget(args.gsPath);
 console.log("ALL_VERIFY_APP_CHECKS_PASSED");

@@ -57,6 +57,248 @@ export const RESCUE_PROTOCOLS = {
   }
 };
 
+export const QUICK_LOG_PRESETS = [
+  { id: "p_lmnt", label: "LMNT (1000mg)", name: "LMNT Electrolyte Packet", portion: "16oz water + 1 packet", sodium: 1000, water: 16, fat: 0, kcal: 5 },
+  { id: "p_liquidiv", label: "Liquid I.V. (500mg)", name: "Liquid I.V. Hydration", portion: "16oz water + 1 stick", sodium: 500, water: 16, fat: 0, kcal: 45 },
+  { id: "p_trioral", label: "TriOral (1000mg)", name: "TriOral ORS Packet", portion: "32oz water + 1 packet", sodium: 1000, water: 32, fat: 0, kcal: 40 },
+  { id: "p_pretzels", label: "Pretzels (850mg)", name: "Salted Mini Pretzels", portion: "15-20 twists (~1.5 oz)", sodium: 850, water: 0, fat: 0.5, kcal: 130 },
+  { id: "p_broth", label: "Bone Broth (580mg)", name: "Warm Chicken Bone Broth", portion: "12oz warm mug", sodium: 580, water: 12, fat: 0.5, kcal: 45 },
+  { id: "p_applesauce", label: "Applesauce", name: "Unsweetened Applesauce Pouch", portion: "1 squeeze pouch", sodium: 0, water: 4, fat: 0, kcal: 60 },
+  { id: "p_saltstick", label: "SaltStick (215mg)", name: "SaltStick Caps / Vitassium", portion: "1 capsule + water", sodium: 215, water: 4, fat: 0, kcal: 0 }
+];
+
+export const SYMPTOM_QUICK_TAGS = [
+  "Lightheaded at barre",
+  "High HR",
+  "Brain fog",
+  "Heavy legs",
+  "Nausea / GI",
+  "Hot studio"
+];
+
+export const CLINICAL_INFO_TOPICS = {
+  sodium: {
+    title: "Why High Sodium for POTS?",
+    body: "Dancers with POTS need extra sodium (typically 3,000–4,500+ mg/day plus rehearsal sweat losses) to expand blood volume, stabilize blood pressure during jumps and pointe work, and prevent dizziness. Use +500mg Na / -500 to quickly adjust."
+  },
+  water: {
+    title: "Hydration & Electrolyte Pairing",
+    body: "Your daily hydration goal scales with body weight and dance hours (+8 oz per hour of class). Pair water with sodium or electrolytes so fluids stay in your bloodstream instead of flushing straight through."
+  },
+  gb: {
+    title: "Gallbladder Fat Cap (≤ 5.5g / Meal)",
+    body: "Higher-fat meals trigger strong gallbladder contractions that can cause upper-abdominal pain or nausea. Keeping each meal or snack at or below your meal cap (Moderate: 5.5g, Strict: 4.0g, Flare: 2.5g) lets you fuel safely without biliary flares."
+  },
+  dayMode: {
+    title: "Choosing Your Day Mode",
+    body: "Each Day Mode (School + Studio, Competition, Recovery) holds its own routine fuel timeline. Switch modes anytime without losing your saved routines. One-off items added with '+ Quick Log' automatically clear at midnight while keeping your base routine."
+  },
+  doctorOverride: {
+    title: "Doctor Override Targets",
+    body: "Turn this on if your cardiologist, POTS specialist, or gastroenterologist gave you specific daily Sodium (mg), Hydration (oz), Max Meal Fat (g), or Calorie targets that differ from the automatic calculator."
+  },
+  sync: {
+    title: "Zero-PII Encrypted Cloud Sync",
+    body: "All personal details, notes, carpool schedules, and health history are encrypted inside your browser (AES-256-GCM) with your Family PIN BEFORE being sent to Google Sheets. Use 'Pair Another Device' to share a 1-tap link so family members never have to type the script URL."
+  }
+};
+
+export const MANUAL_SECTIONS = [
+  {
+    id: "quickstart",
+    label: "Quick Start",
+    title: "Daily Routine in 60 Seconds",
+    items: [
+      "<strong>Check off meals &amp; drinks:</strong> Tap the checkbox beside each scheduled slot (or switch meal options in the dropdown) as you eat or drink. Your Sodium and Hydration rings fill automatically.",
+      "<strong>Log anything extra fast:</strong> Tap <strong>+ Quick Log</strong> to pick 1-tap electrolyte presets (LMNT, Liquid I.V., TriOral, Pretzels, Broth) or search 36+ safe foods.",
+      "<strong>Fix mistakes anytime:</strong> Tap <strong>✏️</strong> on any timeline card to adjust amounts, <strong>🗑️</strong> to delete it, or use <strong>-500 / -8oz</strong> under the rings to undo taps.",
+      "<strong>Switch Day Modes &amp; templates:</strong> Choose <em>School + Studio</em>, <em>Competition</em>, or <em>Recovery</em>—each saves its own routine. If a mode is cleared, tap <strong>Load Dance Routine Template</strong> to restore it.",
+      "<strong>Pack the night before:</strong> Expand the <strong>🎒 Dance Bag Checklist</strong> right on Today's screen before bed."
+    ]
+  },
+  {
+    id: "fueling",
+    label: "POTS & Gallbladder",
+    title: "Fueling Rules for Dancers",
+    items: [
+      "<strong>Sodium + Water together:</strong> Plain water alone flushes out fast. Pair every 16oz bottle with an electrolyte packet or salty snack.",
+      "<strong>Gallbladder safety cap:</strong> Keep each meal/snack under your fat cap (default <strong>≤ 5.5g fat/meal</strong>, or Strict 4.0g / Flare 2.5g / Doctor Override). Watch the live badge in Quick Log and Food Analyzer.",
+      "<strong>Custom foods &amp; Analyzer:</strong> Use the <strong>Food</strong> tab to analyze snacks or restaurant items, save your own with <strong>+ Custom Food</strong>, and remove custom items anytime with <strong>🗑️</strong>.",
+      "<strong>Tap ℹ for instant context:</strong> Small <strong>ℹ</strong> buttons next to rings, Day Modes, Doctor Override, and Cloud Sync open quick plain-language explainers.",
+      "<strong>Clean midnight reset:</strong> One-off '+ Quick Log' items automatically archive to History and clear at midnight so tomorrow's routine starts fresh."
+    ]
+  },
+  {
+    id: "rescue",
+    label: "Rescue & Symptoms",
+    title: "When You Don't Feel Steady",
+    items: [
+      "<strong>Tap 'I feel:' at the top:</strong> Selecting <em>Dizzy</em>, <em>Tired</em>, or <em>Stomach</em> opens an immediate sideline rescue protocol with step-by-step actions.",
+      "<strong>1-Tap Symptom Tags:</strong> Above Daily Notes, tap tags like <em>Lightheaded at barre</em>, <em>High HR</em>, or <em>Hot studio</em> to log patterns for your doctor.",
+      "<strong>Doctor Report &amp; CSV:</strong> Tap <strong>View Full History →</strong> (or Settings ⚙ → <strong>Open Full History &amp; Doctor Report</strong>) to view symptom correlation, download CSV, or <strong>Print / Save Doctor PDF</strong>."
+    ]
+  },
+  {
+    id: "family",
+    label: "Sync, PIN & Carpool",
+    title: "Family Sync, Security & Rides",
+    items: [
+      "<strong>No typing long URLs:</strong> On a configured phone, go to Settings (⚙) → <strong>Pair Another Device</strong> and text the 1-tap pairing link to Dancer or Mom.",
+      "<strong>Change Family PIN:</strong> Go to Settings (⚙) → <strong>Change Family PIN</strong>. Your data is re-encrypted (AES-256-GCM) and pushed to Cloud Sync automatically.",
+      "<strong>1-Tap Carpool Share &amp; Calendar:</strong> On the <strong>Carpool</strong> tab, tap <strong>Share / Copy Ride</strong> to paste pickup and drop-off details straight into family texts, or <strong>Calendar (.ics)</strong> to add rides and fuel slots to your calendar."
+    ]
+  }
+];
+
+export const DEFAULT_SCHEDULE_TEMPLATES = {
+  school_dance: [
+    {
+      id: "sd_1",
+      time: "7:15 AM",
+      phase: "Morning Wake-Up",
+      location: "Home",
+      intensity: "moderate",
+      options: [
+        { name: "16oz Electrolyte Water (LMNT / Liquid I.V.) + Salted Pretzels", basePortion: "16oz drink + 15 pretzel twists", kcal: 130, sodium: 850, water: 16, fat: 0.5 },
+        { name: "Warm Oatmeal with Sea Salt, Maple & Banana", basePortion: "1 cup oats + 1 banana + 1/4 tsp salt", kcal: 290, sodium: 480, water: 8, fat: 2.0 }
+      ]
+    },
+    {
+      id: "sd_2",
+      time: "12:15 PM",
+      phase: "School Lunch",
+      location: "School",
+      intensity: "moderate",
+      options: [
+        { name: "Deli Oven-Roasted Turkey Roll-Ups + Pickle Spear + Pretzels", basePortion: "4 slices turkey + 1 pickle + 12 pretzels", kcal: 240, sodium: 820, water: 12, fat: 2.0 },
+        { name: "Grilled Chicken & Honey Mustard Wrap + Baked Lay's", basePortion: "1 wrap + 1oz baked chips", kcal: 370, sodium: 910, water: 16, fat: 4.5 }
+      ]
+    },
+    {
+      id: "sd_3",
+      time: "3:30 PM",
+      phase: "Pre-Studio Fuel",
+      location: "Car / Studio",
+      intensity: "high",
+      options: [
+        { name: "Gatorade Zero / Pedialyte Sport (16oz) + Salted Rice Cake", basePortion: "16oz bottle + 1 salted rice cake", kcal: 55, sodium: 590, water: 16, fat: 0.0 },
+        { name: "Salted Rice Cakes + PB2 + Banana Slices", basePortion: "2 rice cakes + 2 tbsp PB2 + 1/2 banana", kcal: 220, sodium: 450, water: 12, fat: 2.0 }
+      ]
+    },
+    {
+      id: "sd_4",
+      time: "6:15 PM",
+      phase: "Between Classes",
+      location: "Studio",
+      intensity: "high",
+      options: [
+        { name: "Thermos Warm Low-Fat Chicken & Rice Soup + Saltines", basePortion: "1.5 cups warm soup + 6 crackers", kcal: 260, sodium: 890, water: 12, fat: 2.5 },
+        { name: "Watermelon Cubes with Sea Salt + 12oz Water", basePortion: "1.5 cups watermelon + 1/4 tsp salt", kcal: 75, sodium: 560, water: 16, fat: 0.2 }
+      ]
+    },
+    {
+      id: "sd_5",
+      time: "9:00 PM",
+      phase: "Post-Rehearsal Recovery",
+      location: "Car / Home",
+      intensity: "moderate",
+      options: [
+        { name: "Warm Jasmine Rice Bowl with Grilled Teriyaki Chicken", basePortion: "1 cup white rice + 3.5oz chicken breast", kcal: 340, sodium: 640, water: 10, fat: 3.0 },
+        { name: "Baked Potato with Sea Salt, 0% Yogurt & Lean Turkey", basePortion: "1 medium potato + 2 tbsp yogurt + 2oz turkey", kcal: 310, sodium: 580, water: 10, fat: 2.0 }
+      ]
+    }
+  ],
+  competition: [
+    {
+      id: "comp_1",
+      time: "7:30 AM",
+      phase: "Comp Morning Load",
+      location: "Hotel / Home",
+      intensity: "high",
+      options: [
+        { name: "16oz Electrolyte Water (LMNT / Liquid I.V.) + Salted Pretzels", basePortion: "16oz drink + 15 pretzel twists", kcal: 130, sodium: 850, water: 16, fat: 0.5 },
+        { name: "Plain Bagel Thin with Jam + 3 Slices Deli Turkey", basePortion: "1 bagel thin + 1 tbsp jam + 3oz turkey", kcal: 260, sodium: 690, water: 8, fat: 2.0 }
+      ]
+    },
+    {
+      id: "comp_2",
+      time: "11:00 AM",
+      phase: "Backstage Grazing",
+      location: "Venue",
+      intensity: "high",
+      options: [
+        { name: "Pickle Juice Shot (2oz) + Applesauce Pouch + Pretzels", basePortion: "2oz brine + 1 pouch + 10 pretzels", kcal: 150, sodium: 680, water: 12, fat: 0.5 },
+        { name: "Miso Soup Packet in Hot Thermos + Pretzel Thins", basePortion: "12oz warm miso + 10 pretzel thins", kcal: 165, sodium: 840, water: 12, fat: 1.5 }
+      ]
+    },
+    {
+      id: "comp_3",
+      time: "3:00 PM",
+      phase: "Mid-Day Refuel",
+      location: "Venue",
+      intensity: "high",
+      options: [
+        { name: "Subway 6-Inch Turkey Sub (Mustard/Pickles, No Cheese/Mayo)", basePortion: "1 6-inch sub + Baked Lay's", kcal: 380, sodium: 960, water: 16, fat: 4.0 },
+        { name: "Chick-fil-A Grilled Nuggets (8 ct) + Fruit Cup", basePortion: "8 nuggets + fruit cup + 16oz water", kcal: 210, sodium: 530, water: 16, fat: 3.0 }
+      ]
+    },
+    {
+      id: "comp_4",
+      time: "8:00 PM",
+      phase: "Post-Stage Recovery",
+      location: "Dinner",
+      intensity: "moderate",
+      options: [
+        { name: "Warm Egg-Drop Broth Soup with White Rice", basePortion: "1.5 cups soup + 1/2 cup white rice", kcal: 250, sodium: 790, water: 12, fat: 3.0 },
+        { name: "Whole-Wheat Pasta with Marinara & 99% Lean Turkey", basePortion: "1 cup pasta + marinara + 3oz turkey", kcal: 350, sodium: 670, water: 10, fat: 3.0 }
+      ]
+    }
+  ],
+  recovery: [
+    {
+      id: "rec_1",
+      time: "8:30 AM",
+      phase: "Gentle Hydration",
+      location: "Home",
+      intensity: "light",
+      options: [
+        { name: "Warm Mug of Chicken Bone Broth + Saltines", basePortion: "12oz warm mug + 4 crackers", kcal: 95, sodium: 780, water: 12, fat: 1.0 },
+        { name: "0% Greek Yogurt Parfait + Honey + Pretzel Crumble", basePortion: "3/4 cup yogurt + 1/3 cup pretzels", kcal: 230, sodium: 390, water: 8, fat: 0.5 }
+      ]
+    },
+    {
+      id: "rec_2",
+      time: "1:00 PM",
+      phase: "Easy Midday Meal",
+      location: "Home",
+      intensity: "light",
+      options: [
+        { name: "Low-Fat Cottage Cheese (1%) with Fruit + Salted Crackers", basePortion: "1/2 cup cottage cheese + fruit + 5 crackers", kcal: 190, sodium: 540, water: 8, fat: 1.5 },
+        { name: "Thermos Warm Low-Fat Chicken & Rice Soup + Saltines", basePortion: "1.5 cups warm soup + 6 crackers", kcal: 260, sodium: 890, water: 12, fat: 2.5 }
+      ]
+    },
+    {
+      id: "rec_3",
+      time: "6:30 PM",
+      phase: "Light Dinner",
+      location: "Home",
+      intensity: "light",
+      options: [
+        { name: "Grilled White Fish / Shrimp Soft Tacos on Corn Tortillas", basePortion: "2 corn tortillas + 3.5oz fish + salsa", kcal: 295, sodium: 610, water: 10, fat: 3.0 },
+        { name: "Baked Potato with Sea Salt, 0% Yogurt & Lean Turkey", basePortion: "1 medium potato + 2 tbsp yogurt + 2oz turkey", kcal: 310, sodium: 580, water: 10, fat: 2.0 }
+      ]
+    }
+  ]
+};
+
+export function cloneScheduleTemplate(mode) {
+  const list = DEFAULT_SCHEDULE_TEMPLATES[mode] || [];
+  return list.map((slot) => ({
+    ...slot,
+    options: (slot.options || []).map((o) => ({ ...o }))
+  }));
+}
+
 export function createEmptyCarpool() {
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const obj = {};
@@ -90,9 +332,9 @@ export function createDefaultState() {
       customCalories: 2000
     },
     schedules: {
-      school_dance: [],
-      competition: [],
-      recovery: []
+      school_dance: cloneScheduleTemplate("school_dance"),
+      competition: cloneScheduleTemplate("competition"),
+      recovery: cloneScheduleTemplate("recovery")
     },
     carpool: createEmptyCarpool(),
     foodLibrary: DEFAULT_FOOD_LIBRARY.map((item) => ({ ...item })),
@@ -175,6 +417,71 @@ export function formatScaledPortion(baseServing, targets, intensity = "moderate"
   return baseServing ? `${label} — ${baseServing}` : label;
 }
 
+/**
+ * Pure bonus value adjuster clamped at >= 0.
+ */
+export function adjustBonusValue(currentVal, delta) {
+  return Math.max(0, (Number(currentVal) || 0) + (Number(delta) || 0));
+}
+
+/**
+ * Pure midnight rollover helper: snapshots previous day, clears ad-hoc slots, preserves routines.
+ */
+export function applyRolloverState(currentState, todayStr = getLocalDateString()) {
+  if (!currentState || !currentState.lastActiveDate || currentState.lastActiveDate === todayStr) {
+    return { rolledOver: false, nextState: currentState };
+  }
+  const targets = getCalculatedTargets(currentState.profile);
+  const { history } = snapshotToday(currentState, targets, currentState.lastActiveDate);
+
+  const nextSchedules = {};
+  for (const mode of ["school_dance", "competition", "recovery"]) {
+    const list = currentState.schedules?.[mode] || [];
+    nextSchedules[mode] = list.filter((slot) => !slot.isAdHoc);
+  }
+
+  const nextState = {
+    ...currentState,
+    schedules: nextSchedules,
+    history,
+    checkedSlots: {},
+    bonusSodium: 0,
+    bonusWater: 0,
+    symptomStatus: "steady",
+    dailyNotes: "",
+    lastActiveDate: todayStr,
+    dayOfWeek: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][new Date().getDay()] || currentState.dayOfWeek || "Mon"
+  };
+  return { rolledOver: true, nextState };
+}
+
+/**
+ * Extract pairing sync URL from ?sync=... or #sync=... without leaking to server logs.
+ */
+export function parseSyncHashOrQuery(searchStr = "", hashStr = "") {
+  const cleanHash = String(hashStr || "").replace(/^#/, "");
+  const hashParams = new URLSearchParams(cleanHash);
+  const searchParams = new URLSearchParams(String(searchStr || ""));
+  const candidate = (hashParams.get("sync") || searchParams.get("sync") || "").trim();
+  if (/^https?:\/\//i.test(candidate)) {
+    return candidate;
+  }
+  return "";
+}
+
+/**
+ * Format a carpool day into a parent/dancer-friendly text snippet.
+ */
+export function formatCarpoolShareText(dayOfWeek, cp = {}) {
+  const toDriver = cp.toDriver || "TBD";
+  const toTime = cp.toTime || "TBD";
+  const toNote = cp.toNote ? ` (${cp.toNote})` : "";
+  const homeDriver = cp.homeDriver || "TBD";
+  const homeTime = cp.homeTime || "TBD";
+  const homeNote = cp.homeNote ? ` (${cp.homeNote})` : "";
+  return `🩰 ${dayOfWeek} Dance Carpool\n• To Studio: ${toDriver} @ ${toTime}${toNote}\n• Home: ${homeDriver} @ ${homeTime}${homeNote}`;
+}
+
 // ============================================================================
 // BROWSER RUNTIME CONTROLLER
 // ============================================================================
@@ -184,7 +491,27 @@ if (typeof document !== "undefined") {
   let auth = loadDeviceAuth();
   let syncStatus = "offline"; // "synced" | "syncing" | "offline"
   let hasPendingCloudPush = false;
+  let activeEditSlotId = null;
+  let activeManualSection = "quickstart";
+  let toastTimer = null;
   const scheduleCloudPush = createDebouncedPush(1500);
+
+  function hapticTap() {
+    try {
+      if (navigator.vibrate) navigator.vibrate(10);
+    } catch (_e) {}
+  }
+
+  function showToast(msg) {
+    const el = document.getElementById("toastNotification");
+    if (!el || !msg) return;
+    el.textContent = msg;
+    el.classList.remove("hidden");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      el.classList.add("hidden");
+    }, 2600);
+  }
 
   function loadLocalState() {
     const def = createDefaultState();
@@ -204,9 +531,9 @@ if (typeof document !== "undefined") {
       ...incoming,
       profile: { ...base.profile, ...(incoming.profile || {}) },
       schedules: {
-        school_dance: incoming.schedules?.school_dance || base.schedules.school_dance,
-        competition: incoming.schedules?.competition || base.schedules.competition,
-        recovery: incoming.schedules?.recovery || base.schedules.recovery
+        school_dance: Array.isArray(incoming.schedules?.school_dance) ? incoming.schedules.school_dance : base.schedules.school_dance,
+        competition: Array.isArray(incoming.schedules?.competition) ? incoming.schedules.competition : base.schedules.competition,
+        recovery: Array.isArray(incoming.schedules?.recovery) ? incoming.schedules.recovery : base.schedules.recovery
       },
       carpool: { ...base.carpool, ...(incoming.carpool || {}) },
       foodLibrary: Array.isArray(incoming.foodLibrary) && incoming.foodLibrary.length
@@ -240,19 +567,9 @@ if (typeof document !== "undefined") {
   }
 
   function rolloverDayIfNeeded() {
-    const today = getLocalDateString();
-    if (state.lastActiveDate && state.lastActiveDate !== today) {
-      // Snapshot previous day before resetting daily checkboxes
-      const targets = getCalculatedTargets(state.profile);
-      const { history } = snapshotToday(state, targets, state.lastActiveDate);
-      state.history = history;
-      state.checkedSlots = {};
-      state.bonusSodium = 0;
-      state.bonusWater = 0;
-      state.symptomStatus = "steady";
-      state.dailyNotes = "";
-      state.lastActiveDate = today;
-      state.dayOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][new Date().getDay()] || "Mon";
+    const { rolledOver, nextState } = applyRolloverState(state, getLocalDateString());
+    if (rolledOver) {
+      state = nextState;
     }
   }
 
@@ -462,6 +779,44 @@ if (typeof document !== "undefined") {
     circle.style.strokeDashoffset = `${circumference * (1 - clamped / 100)}`;
   }
 
+  function renderBagChecklistInto(containerId) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    el.innerHTML = state.bagItems
+      .map((item) => {
+        const checked = !!state.bagChecked[item.id];
+        return `
+          <label class="bag-item ${checked ? "checked" : ""}">
+            <input type="checkbox" data-bag-check="${esc(item.id)}" ${checked ? "checked" : ""}>
+            <span>${esc(item.text)}</span>
+            <span class="chip">${esc(item.tag)}</span>
+          </label>
+        `;
+      })
+      .join("");
+  }
+
+  function renderTodayBagCard() {
+    const total = state.bagItems.length;
+    const packed = state.bagItems.filter((item) => !!state.bagChecked[item.id]).length;
+    const progEl = document.getElementById("todayBagProgress");
+    if (progEl) {
+      progEl.textContent = `${packed}/${total} packed`;
+      progEl.className = `pill-badge ${packed === total && total > 0 ? "badge-safe" : "badge-caution"}`;
+    }
+    renderBagChecklistInto("todayBagChecklist");
+  }
+
+  function renderSymptomQuickTags() {
+    const container = document.getElementById("symptomQuickTags");
+    if (!container) return;
+    const notesLower = (state.dailyNotes || "").toLowerCase();
+    container.innerHTML = SYMPTOM_QUICK_TAGS.map((tag) => {
+      const isActive = notesLower.includes(tag.toLowerCase());
+      return `<button type="button" class="symptom-tag-btn ${isActive ? "active" : ""}" data-symptom-tag="${esc(tag)}">${isActive ? "✓ " : "+ "}${esc(tag)}</button>`;
+    }).join("");
+  }
+
   function renderTodayView() {
     const targets = getCalculatedTargets(state.profile);
     const totals = computeDailyTotals(state, targets);
@@ -521,7 +876,9 @@ if (typeof document !== "undefined") {
     if (avg7Water) avg7Water.textContent = `${stats7.avgWater} oz`;
     if (steady7) steady7.textContent = `${stats7.symptomFreeCount}/${stats7.count || 0} steady`;
 
-    // Notes
+    // Bag checklist & symptom tags & notes
+    renderTodayBagCard();
+    renderSymptomQuickTags();
     const notesEl = document.getElementById("dailyNotesInput");
     if (notesEl && notesEl.value !== (state.dailyNotes || "")) {
       notesEl.value = state.dailyNotes || "";
@@ -535,7 +892,8 @@ if (typeof document !== "undefined") {
       slotsContainer.innerHTML = `
         <div class="empty-card">
           <p>No schedule slots yet for this Day Mode.</p>
-          <p class="muted-text">Add a quick slot below, import a BAND schedule in Carpool, or unlock with your Family PIN to pull synced schedules.</p>
+          <p class="muted-text">Load a balanced dance routine template or tap + Quick Log above.</p>
+          <button type="button" id="loadRoutineTemplateBtn" class="btn-primary btn-sm">Load Dance Routine Template</button>
         </div>
       `;
       return;
@@ -566,6 +924,7 @@ if (typeof document !== "undefined") {
                 <span class="slot-time">${esc(slot.time || "")}</span>
                 <span class="slot-phase">${esc(slot.phase || "Fuel")}</span>
                 ${slot.location ? `<span class="slot-loc">${esc(slot.location)}</span>` : ""}
+                ${slot.isAdHoc ? `<span class="slot-adhoc-tag">Quick Log</span>` : ""}
               </div>
               ${optionsSelect}
               <div class="slot-portion">${esc(scaledPortion)}</div>
@@ -575,6 +934,10 @@ if (typeof document !== "undefined") {
                 <span class="chip ${safety.gbRating.tone}">${opt.fat}g Fat</span>
                 <span class="chip">${Math.round((opt.kcal || 200) * targets.portionMultiplier)} kcal</span>
               </div>
+            </div>
+            <div class="slot-actions">
+              <button type="button" class="slot-action-btn" data-edit-slot="${esc(slot.id)}" aria-label="Edit ${esc(opt.name)}" title="Edit entry">✏️</button>
+              <button type="button" class="slot-action-btn delete-btn" data-delete-slot="${esc(slot.id)}" aria-label="Delete ${esc(opt.name)}" title="Delete entry">🗑️</button>
             </div>
           </div>
         `;
@@ -608,6 +971,7 @@ if (typeof document !== "undefined") {
       .map((item) => {
         const safety = evaluateFoodSafety(item.sodium, item.fat, item.kcal, targets.maxMealFat);
         const badgeClass = safety.overall === "safe" ? "badge-safe" : safety.overall === "caution" ? "badge-caution" : "badge-avoid";
+        const isCustom = !!(item.isCustom || String(item.id || "").startsWith("custom_"));
         return `
           <div class="food-card">
             <div class="food-card-top">
@@ -624,8 +988,9 @@ if (typeof document !== "undefined") {
               <span>💧 ${item.water}oz</span>
               <span>⚡ ${item.kcal} kcal</span>
             </div>
-            <div class="food-actions">
+            <div class="food-card-actions">
               <button type="button" class="btn-secondary btn-sm" data-log-food="${esc(item.id)}">+ Log to Today</button>
+              ${isCustom ? `<button type="button" class="slot-action-btn delete-btn" data-delete-food="${esc(item.id)}" aria-label="Delete ${esc(item.name)}" title="Delete custom food">🗑️</button>` : ""}
             </div>
           </div>
         `;
@@ -668,6 +1033,7 @@ if (typeof document !== "undefined") {
     document.getElementById("analysisSaveLibBtn")?.addEventListener("click", () => {
       state.foodLibrary.unshift({
         id: "custom_" + Date.now(),
+        isCustom: true,
         name: est.name,
         baseServing: est.serving,
         category: est.category || "Looked Up Food",
@@ -678,6 +1044,7 @@ if (typeof document !== "undefined") {
       });
       saveAndSync();
       renderFoodView();
+      showToast("Saved to Food Library");
     });
   }
 
@@ -811,34 +1178,107 @@ if (typeof document !== "undefined") {
     if (overrideToggle) overrideToggle.checked = !!p.useDoctorOverride;
     if (overrideFields) overrideFields.classList.toggle("hidden", !p.useDoctorOverride);
 
-    const bagEl = document.getElementById("gearBagChecklist");
-    if (bagEl) {
-      bagEl.innerHTML = state.bagItems
-        .map((item) => {
-          const checked = !!state.bagChecked[item.id];
-          return `
-            <label class="bag-item ${checked ? "checked" : ""}">
-              <input type="checkbox" data-bag-check="${esc(item.id)}" ${checked ? "checked" : ""}>
-              <span>${esc(item.text)}</span>
-              <span class="chip">${esc(item.tag)}</span>
-            </label>
-          `;
-        })
-        .join("");
-    }
+    renderBagChecklistInto("gearBagChecklist");
+  }
+
+  function renderManualModal() {
+    const tabsEl = document.getElementById("manualTabs");
+    const bodyEl = document.getElementById("manualContent");
+    if (!tabsEl || !bodyEl) return;
+
+    tabsEl.innerHTML = MANUAL_SECTIONS.map(
+      (sec) => `<button type="button" class="pill-btn ${sec.id === activeManualSection ? "active" : ""}" data-manual-tab="${esc(sec.id)}">${esc(sec.label)}</button>`
+    ).join("");
+
+    const active = MANUAL_SECTIONS.find((s) => s.id === activeManualSection) || MANUAL_SECTIONS[0];
+    bodyEl.innerHTML = `
+      <h4>${esc(active.title)}</h4>
+      <ul>
+        ${active.items.map((item) => `<li>${item}</li>`).join("")}
+      </ul>
+    `;
   }
 
   // ==========================================================================
-  // ACTIONS
+  // MODAL HELPERS & ACTIONS
   // ==========================================================================
 
-  function addFoodSlotToToday(name, baseServing, kcal, sodium, fat, water = 12) {
+  function updateQuickLogSafetyBadge() {
+    const badge = document.getElementById("logGbSafetyBadge");
+    if (!badge) return;
+    const targets = getCalculatedTargets(state.profile);
+    const na = parseFloat(document.getElementById("logItemSodium")?.value) || 0;
+    const fat = parseFloat(document.getElementById("logItemFat")?.value) || 0;
+    const kcal = parseFloat(document.getElementById("logItemKcal")?.value) || 0;
+    const safety = evaluateFoodSafety(na, fat, kcal, targets.maxMealFat);
+    const cls = safety.gbRating.status === "safe" ? "badge-safe" : safety.gbRating.status === "caution" ? "badge-caution" : "badge-avoid";
+    badge.className = `pill-badge ${cls}`;
+    badge.textContent = safety.gbRating.status === "safe"
+      ? `✓ GB-Safe (${fat}g ≤ ${targets.maxMealFat}g cap)`
+      : `⚠️ ${safety.gbRating.label} (${fat}g > ${targets.maxMealFat}g cap)`;
+  }
+
+  function openQuickLogModal(slotId = null) {
+    activeEditSlotId = slotId;
+    const modal = document.getElementById("quickLogModal");
+    const titleEl = document.getElementById("quickLogModalTitle");
+    const presetsEl = document.getElementById("quickLogPresets");
+    const searchEl = document.getElementById("logCatalogSearch");
+    const suggEl = document.getElementById("logCatalogSuggestions");
+
+    if (presetsEl) {
+      presetsEl.innerHTML = QUICK_LOG_PRESETS.map(
+        (p) => `<button type="button" class="preset-chip" data-preset-id="${esc(p.id)}">${esc(p.label)}</button>`
+      ).join("");
+    }
+    if (searchEl) searchEl.value = "";
+    if (suggEl) {
+      suggEl.innerHTML = "";
+      suggEl.classList.add("hidden");
+    }
+
+    const nowStr = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    if (slotId) {
+      const slots = state.schedules[state.dayMode] || [];
+      const slot = slots.find((s) => s.id === slotId);
+      const optIdx = state.selectedOptionIdx[slotId] || 0;
+      const opt = slot?.options?.[optIdx] || slot?.options?.[0];
+      if (titleEl) titleEl.textContent = "Edit Fuel / Hydration Entry";
+      document.getElementById("logItemName").value = opt?.name || "";
+      document.getElementById("logItemTime").value = slot?.time || nowStr;
+      document.getElementById("logItemPortion").value = opt?.basePortion || "";
+      document.getElementById("logItemSodium").value = opt?.sodium ?? 0;
+      document.getElementById("logItemWater").value = opt?.water ?? 0;
+      document.getElementById("logItemFat").value = opt?.fat ?? 0;
+      document.getElementById("logItemKcal").value = opt?.kcal ?? 0;
+    } else {
+      if (titleEl) titleEl.textContent = "Quick Log Fuel & Hydration";
+      document.getElementById("logItemName").value = "";
+      document.getElementById("logItemTime").value = nowStr;
+      document.getElementById("logItemPortion").value = "";
+      document.getElementById("logItemSodium").value = 500;
+      document.getElementById("logItemWater").value = 16;
+      document.getElementById("logItemFat").value = 0;
+      document.getElementById("logItemKcal").value = 45;
+    }
+
+    updateQuickLogSafetyBadge();
+    modal?.classList.remove("hidden");
+  }
+
+  function closeQuickLogModal() {
+    activeEditSlotId = null;
+    document.getElementById("quickLogModal")?.classList.add("hidden");
+  }
+
+  function addFoodSlotToToday(name, baseServing, kcal, sodium, fat, water = 12, customTime = "") {
     const slots = state.schedules[state.dayMode] || [];
-    const id = `quick_${Date.now()}`;
+    const id = `adhoc_${Date.now()}`;
     slots.push({
       id,
-      time: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
-      phase: "Quick Fuel",
+      isAdHoc: true,
+      time: customTime || new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
+      phase: "Quick Log",
       location: "Logged",
       intensity: "moderate",
       options: [{ name, basePortion: baseServing, kcal, sodium, water, fat }]
@@ -848,6 +1288,7 @@ if (typeof document !== "undefined") {
     state.activeTab = "today";
     saveAndSync();
     renderAll();
+    showToast(`Logged: ${name}`);
   }
 
   function exportIcsCalendar() {
@@ -940,11 +1381,67 @@ if (typeof document !== "undefined") {
     URL.revokeObjectURL(url);
   }
 
+  async function shareOrCopyText(text, title, successToast) {
+    try {
+      if (navigator.share) {
+        await navigator.share({ title, text });
+        return;
+      }
+    } catch (_err) {
+      // Fall back to clipboard if user cancels or share fails
+    }
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        showToast(successToast);
+        return;
+      }
+    } catch (_err) {}
+    showToast("Copy ready — select and copy text manually");
+  }
+
   // ==========================================================================
   // EVENT WIRING & BOOTSTRAP
   // ==========================================================================
 
   function wireEvents() {
+    // Tactile haptic tap on buttons
+    document.addEventListener("click", (e) => {
+      if (e.target.closest("button")) hapticTap();
+    });
+
+    // Contextual ℹ️ info buttons
+    document.addEventListener("click", (e) => {
+      const infoBtn = e.target.closest("[data-info-topic]");
+      if (!infoBtn) return;
+      const topic = CLINICAL_INFO_TOPICS[infoBtn.getAttribute("data-info-topic")];
+      if (!topic) return;
+      document.getElementById("infoModalTitle").textContent = topic.title;
+      document.getElementById("infoModalBody").textContent = topic.body;
+      document.getElementById("infoModal")?.classList.remove("hidden");
+    });
+    document.getElementById("closeInfoModalBtn")?.addEventListener("click", () => {
+      document.getElementById("infoModal")?.classList.add("hidden");
+    });
+    document.getElementById("infoGotItBtn")?.addEventListener("click", () => {
+      document.getElementById("infoModal")?.classList.add("hidden");
+    });
+
+    // Quick Start Guide & Manual modal
+    document.getElementById("openManualBtn")?.addEventListener("click", () => {
+      renderManualModal();
+      document.getElementById("manualModal")?.classList.remove("hidden");
+    });
+    document.getElementById("closeManualBtn")?.addEventListener("click", () => {
+      document.getElementById("manualModal")?.classList.add("hidden");
+    });
+    document.getElementById("manualTabs")?.addEventListener("click", (e) => {
+      const tab = e.target.closest("[data-manual-tab]");
+      if (!tab) return;
+      activeManualSection = tab.getAttribute("data-manual-tab");
+      renderManualModal();
+    });
+
     // Bottom nav & View History
     document.querySelectorAll("[data-nav-tab]").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -986,25 +1483,73 @@ if (typeof document !== "undefined") {
       });
     });
 
-    // Quick bonus buttons
+    // Quick bonus +/- buttons
     document.getElementById("addBonusSodiumBtn")?.addEventListener("click", () => {
-      state.bonusSodium = (state.bonusSodium || 0) + 500;
+      state.bonusSodium = adjustBonusValue(state.bonusSodium, 500);
+      saveAndSync();
+      renderTodayView();
+    });
+    document.getElementById("subBonusSodiumBtn")?.addEventListener("click", () => {
+      state.bonusSodium = adjustBonusValue(state.bonusSodium, -500);
       saveAndSync();
       renderTodayView();
     });
     document.getElementById("addBonusWaterBtn")?.addEventListener("click", () => {
-      state.bonusWater = (state.bonusWater || 0) + 8;
+      state.bonusWater = adjustBonusValue(state.bonusWater, 8);
       saveAndSync();
       renderTodayView();
+    });
+    document.getElementById("subBonusWaterBtn")?.addEventListener("click", () => {
+      state.bonusWater = adjustBonusValue(state.bonusWater, -8);
+      saveAndSync();
+      renderTodayView();
+    });
+
+    // Collapsible Today Dance Bag Checklist
+    document.getElementById("toggleTodayBagBtn")?.addEventListener("click", () => {
+      const btn = document.getElementById("toggleTodayBagBtn");
+      const body = document.getElementById("todayBagBody");
+      const expanded = btn?.getAttribute("aria-expanded") === "true";
+      btn?.setAttribute("aria-expanded", String(!expanded));
+      body?.classList.toggle("hidden", expanded);
+    });
+    document.getElementById("todayBagChecklist")?.addEventListener("change", (e) => {
+      const id = e.target.getAttribute("data-bag-check");
+      if (!id) return;
+      state.bagChecked[id] = e.target.checked;
+      saveAndSync();
+      renderTodayBagCard();
+      renderGearModal();
+    });
+
+    // Symptom Quick Tags
+    document.getElementById("symptomQuickTags")?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-symptom-tag]");
+      if (!btn) return;
+      const tag = btn.getAttribute("data-symptom-tag");
+      const current = (state.dailyNotes || "").trim();
+      const parts = current ? current.split(",").map((s) => s.trim()).filter(Boolean) : [];
+      const existingIdx = parts.findIndex((p) => p.toLowerCase() === tag.toLowerCase());
+      if (existingIdx >= 0) {
+        parts.splice(existingIdx, 1);
+      } else {
+        parts.push(tag);
+      }
+      state.dailyNotes = parts.join(", ");
+      const notesEl = document.getElementById("dailyNotesInput");
+      if (notesEl) notesEl.value = state.dailyNotes;
+      saveAndSync();
+      renderSymptomQuickTags();
     });
 
     // Daily notes
     document.getElementById("dailyNotesInput")?.addEventListener("input", (e) => {
       state.dailyNotes = e.target.value;
       saveAndSync();
+      renderSymptomQuickTags();
     });
 
-    // Slot check / option change delegation
+    // Slot check / option change / edit / delete / template loader delegation
     document.getElementById("todaySlotsList")?.addEventListener("change", (e) => {
       const checkId = e.target.getAttribute("data-slot-check");
       if (checkId) {
@@ -1021,12 +1566,126 @@ if (typeof document !== "undefined") {
       }
     });
 
-    // Quick add slot
-    document.getElementById("quickAddSlotBtn")?.addEventListener("click", () => {
-      addFoodSlotToToday("Electrolyte Water + Salted Pretzels", "16oz + 15 twists", 130, 850, 0.5, 16);
+    document.getElementById("todaySlotsList")?.addEventListener("click", (e) => {
+      const editBtn = e.target.closest("[data-edit-slot]");
+      if (editBtn) {
+        openQuickLogModal(editBtn.getAttribute("data-edit-slot"));
+        return;
+      }
+      const delBtn = e.target.closest("[data-delete-slot]");
+      if (delBtn) {
+        const id = delBtn.getAttribute("data-delete-slot");
+        const slots = state.schedules[state.dayMode] || [];
+        state.schedules[state.dayMode] = slots.filter((s) => s.id !== id);
+        delete state.checkedSlots[id];
+        delete state.selectedOptionIdx[id];
+        saveAndSync();
+        renderTodayView();
+        showToast("Entry removed");
+        return;
+      }
+      if (e.target.closest("#loadRoutineTemplateBtn")) {
+        state.schedules[state.dayMode] = cloneScheduleTemplate(state.dayMode);
+        saveAndSync();
+        renderTodayView();
+        showToast("Routine template loaded");
+      }
     });
 
-    // Food search & filters
+    // Quick Log modal wiring
+    document.getElementById("quickAddSlotBtn")?.addEventListener("click", () => openQuickLogModal(null));
+    document.getElementById("closeQuickLogBtn")?.addEventListener("click", closeQuickLogModal);
+    document.getElementById("cancelQuickLogBtn")?.addEventListener("click", closeQuickLogModal);
+
+    document.getElementById("quickLogPresets")?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-preset-id]");
+      if (!btn) return;
+      const preset = QUICK_LOG_PRESETS.find((p) => p.id === btn.getAttribute("data-preset-id"));
+      if (!preset) return;
+      document.getElementById("logItemName").value = preset.name;
+      document.getElementById("logItemPortion").value = preset.portion;
+      document.getElementById("logItemSodium").value = preset.sodium;
+      document.getElementById("logItemWater").value = preset.water;
+      document.getElementById("logItemFat").value = preset.fat;
+      document.getElementById("logItemKcal").value = preset.kcal;
+      updateQuickLogSafetyBadge();
+    });
+
+    document.getElementById("logCatalogSearch")?.addEventListener("input", (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      const suggEl = document.getElementById("logCatalogSuggestions");
+      if (!suggEl) return;
+      if (q.length < 2) {
+        suggEl.innerHTML = "";
+        suggEl.classList.add("hidden");
+        return;
+      }
+      const matches = state.foodLibrary.filter((f) => f.name.toLowerCase().includes(q)).slice(0, 6);
+      if (!matches.length) {
+        suggEl.classList.add("hidden");
+        return;
+      }
+      suggEl.classList.remove("hidden");
+      suggEl.innerHTML = matches
+        .map(
+          (m) => `<button type="button" class="catalog-suggestion-item" data-suggest-food="${esc(m.id)}">
+            <span>${esc(m.name)}</span>
+            <span class="muted-text">${m.sodium}mg Na • ${m.fat}g fat</span>
+          </button>`
+        )
+        .join("");
+    });
+
+    document.getElementById("logCatalogSuggestions")?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-suggest-food]");
+      if (!btn) return;
+      const item = state.foodLibrary.find((f) => f.id === btn.getAttribute("data-suggest-food"));
+      if (!item) return;
+      document.getElementById("logItemName").value = item.name;
+      document.getElementById("logItemPortion").value = item.baseServing;
+      document.getElementById("logItemSodium").value = item.sodium;
+      document.getElementById("logItemWater").value = item.water || 8;
+      document.getElementById("logItemFat").value = item.fat;
+      document.getElementById("logItemKcal").value = item.kcal;
+      document.getElementById("logCatalogSuggestions")?.classList.add("hidden");
+      updateQuickLogSafetyBadge();
+    });
+
+    ["logItemSodium", "logItemFat", "logItemKcal"].forEach((id) => {
+      document.getElementById(id)?.addEventListener("input", updateQuickLogSafetyBadge);
+    });
+
+    document.getElementById("quickLogForm")?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("logItemName")?.value.trim();
+      if (!name) return;
+      const time = document.getElementById("logItemTime")?.value.trim() || new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+      const portion = document.getElementById("logItemPortion")?.value.trim() || "1 serving";
+      const sodium = parseFloat(document.getElementById("logItemSodium")?.value) || 0;
+      const water = parseFloat(document.getElementById("logItemWater")?.value) || 0;
+      const fat = parseFloat(document.getElementById("logItemFat")?.value) || 0;
+      const kcal = parseFloat(document.getElementById("logItemKcal")?.value) || 0;
+
+      if (activeEditSlotId) {
+        const slots = state.schedules[state.dayMode] || [];
+        const slot = slots.find((s) => s.id === activeEditSlotId);
+        if (slot) {
+          slot.time = time;
+          const optIdx = state.selectedOptionIdx[activeEditSlotId] || 0;
+          if (!slot.options) slot.options = [];
+          slot.options[optIdx] = { name, basePortion: portion, kcal, sodium, water, fat };
+          saveAndSync();
+          renderAll();
+          showToast("Entry updated");
+        }
+        closeQuickLogModal();
+      } else {
+        closeQuickLogModal();
+        addFoodSlotToToday(name, portion, kcal, sodium, fat, water, time);
+      }
+    });
+
+    // Food search, filters & custom food management
     document.getElementById("foodSearchInput")?.addEventListener("input", (e) => {
       const q = e.target.value.trim();
       if (q.length >= 2) {
@@ -1054,16 +1713,57 @@ if (typeof document !== "undefined") {
     });
 
     document.getElementById("foodLibraryList")?.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-log-food]");
-      if (!btn) return;
-      const id = btn.getAttribute("data-log-food");
-      const item = state.foodLibrary.find((f) => f.id === id);
-      if (item) {
-        addFoodSlotToToday(item.name, item.baseServing, item.kcal, item.sodium, item.fat, item.water || 12);
+      const logBtn = e.target.closest("[data-log-food]");
+      if (logBtn) {
+        const id = logBtn.getAttribute("data-log-food");
+        const item = state.foodLibrary.find((f) => f.id === id);
+        if (item) {
+          addFoodSlotToToday(item.name, item.baseServing, item.kcal, item.sodium, item.fat, item.water || 12);
+        }
+        return;
+      }
+      const delBtn = e.target.closest("[data-delete-food]");
+      if (delBtn) {
+        const id = delBtn.getAttribute("data-delete-food");
+        state.foodLibrary = state.foodLibrary.filter((f) => f.id !== id);
+        saveAndSync();
+        renderFoodView();
+        showToast("Custom food removed");
       }
     });
 
-    // Carpool day switcher & editor
+    document.getElementById("openAddCustomFoodBtn")?.addEventListener("click", () => {
+      document.getElementById("customFoodForm")?.reset();
+      document.getElementById("customFoodModal")?.classList.remove("hidden");
+    });
+    document.getElementById("closeCustomFoodBtn")?.addEventListener("click", () => {
+      document.getElementById("customFoodModal")?.classList.add("hidden");
+    });
+    document.getElementById("cancelCustomFoodBtn")?.addEventListener("click", () => {
+      document.getElementById("customFoodModal")?.classList.add("hidden");
+    });
+    document.getElementById("customFoodForm")?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("customFoodName")?.value.trim();
+      if (!name) return;
+      state.foodLibrary.unshift({
+        id: "custom_" + Date.now(),
+        isCustom: true,
+        name,
+        baseServing: document.getElementById("customFoodServing")?.value.trim() || "1 serving",
+        category: document.getElementById("customFoodCategory")?.value || "Custom",
+        sodium: parseFloat(document.getElementById("customFoodSodium")?.value) || 0,
+        water: parseFloat(document.getElementById("customFoodWater")?.value) || 0,
+        fat: parseFloat(document.getElementById("customFoodFat")?.value) || 0,
+        kcal: parseFloat(document.getElementById("customFoodKcal")?.value) || 0
+      });
+      saveAndSync();
+      renderFoodView();
+      document.getElementById("customFoodModal")?.classList.add("hidden");
+      showToast(`Added "${name}" to Library`);
+    });
+
+    // Carpool day switcher, editor & 1-tap share
     document.querySelectorAll("[data-carpool-day]").forEach((btn) => {
       btn.addEventListener("click", () => {
         state.dayOfWeek = btn.getAttribute("data-carpool-day");
@@ -1073,6 +1773,12 @@ if (typeof document !== "undefined") {
 
     document.getElementById("toggleCarpoolEditBtn")?.addEventListener("click", () => {
       document.getElementById("carpoolEditForm")?.classList.toggle("hidden");
+    });
+
+    document.getElementById("shareCarpoolBtn")?.addEventListener("click", async () => {
+      const cp = state.carpool[state.dayOfWeek] || {};
+      const text = formatCarpoolShareText(state.dayOfWeek, cp);
+      await shareOrCopyText(text, `${state.dayOfWeek} Dance Carpool`, "Carpool details copied!");
     });
 
     document.getElementById("saveCarpoolBtn")?.addEventListener("click", () => {
@@ -1087,6 +1793,7 @@ if (typeof document !== "undefined") {
       document.getElementById("carpoolEditForm")?.classList.add("hidden");
       saveAndSync();
       renderCarpoolView();
+      showToast("Carpool updated");
     });
 
     document.getElementById("exportIcsBtn")?.addEventListener("click", exportIcsCalendar);
@@ -1146,6 +1853,7 @@ if (typeof document !== "undefined") {
       }
       saveAndSync();
       renderAll();
+      showToast("Settings saved");
     });
 
     document.getElementById("gearBagChecklist")?.addEventListener("change", (e) => {
@@ -1154,12 +1862,95 @@ if (typeof document !== "undefined") {
       state.bagChecked[id] = e.target.checked;
       saveAndSync();
       renderGearModal();
+      renderTodayBagCard();
     });
 
     document.getElementById("gearSyncNowBtn")?.addEventListener("click", async () => {
       const syncUrl = document.getElementById("gearSyncUrlInput")?.value.trim() || "";
       state.googleSheetWebAppUrl = syncUrl;
-      await silentPullFromCloud();
+      const res = await silentPullFromCloud();
+      showToast(res.ok ? "Synced with Cloud" : "Cloud sync offline");
+    });
+
+    // Pair Another Device Modal
+    document.getElementById("openPairDeviceBtn")?.addEventListener("click", () => {
+      const syncUrl = document.getElementById("gearSyncUrlInput")?.value.trim() || state.googleSheetWebAppUrl || auth.syncUrl || "";
+      const linkInput = document.getElementById("pairLinkInput");
+      const warnEl = document.getElementById("pairNoUrlWarn");
+      if (syncUrl) {
+        const base = `${window.location.origin}${window.location.pathname}`;
+        if (linkInput) linkInput.value = `${base}#sync=${encodeURIComponent(syncUrl)}`;
+        warnEl?.classList.add("hidden");
+      } else {
+        if (linkInput) linkInput.value = "";
+        warnEl?.classList.remove("hidden");
+      }
+      document.getElementById("pairDeviceModal")?.classList.remove("hidden");
+    });
+    document.getElementById("closePairDeviceBtn")?.addEventListener("click", () => {
+      document.getElementById("pairDeviceModal")?.classList.add("hidden");
+    });
+    document.getElementById("copyPairLinkBtn")?.addEventListener("click", async () => {
+      const link = document.getElementById("pairLinkInput")?.value;
+      if (!link) return;
+      try {
+        await navigator.clipboard.writeText(link);
+        showToast("Pairing link copied!");
+      } catch (_e) {
+        showToast("Select and copy the pairing link above");
+      }
+    });
+    document.getElementById("sharePairLinkBtn")?.addEventListener("click", async () => {
+      const link = document.getElementById("pairLinkInput")?.value;
+      if (!link) return;
+      await shareOrCopyText(
+        `Tap to pair En Pointe & Steady (only Family PIN needed): ${link}`,
+        "En Pointe & Steady Device Pairing",
+        "Pairing link copied!"
+      );
+    });
+
+    // Change Family PIN Modal
+    document.getElementById("openChangePinBtn")?.addEventListener("click", () => {
+      document.getElementById("changePinForm")?.reset();
+      const errEl = document.getElementById("changePinError");
+      if (errEl) errEl.textContent = "";
+      document.getElementById("changePinModal")?.classList.remove("hidden");
+    });
+    document.getElementById("closeChangePinBtn")?.addEventListener("click", () => {
+      document.getElementById("changePinModal")?.classList.add("hidden");
+    });
+    document.getElementById("cancelChangePinBtn")?.addEventListener("click", () => {
+      document.getElementById("changePinModal")?.classList.add("hidden");
+    });
+    document.getElementById("changePinForm")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const cur = document.getElementById("changePinCurrent")?.value.trim() || "";
+      const next = document.getElementById("changePinNew")?.value.trim() || "";
+      const conf = document.getElementById("changePinConfirm")?.value.trim() || "";
+      const errEl = document.getElementById("changePinError");
+
+      if (auth.passphrase && cur !== auth.passphrase) {
+        if (errEl) errEl.textContent = "Current PIN is incorrect.";
+        return;
+      }
+      if (next.length < 4) {
+        if (errEl) errEl.textContent = "New PIN must be at least 4 characters.";
+        return;
+      }
+      if (next !== conf) {
+        if (errEl) errEl.textContent = "New PIN and confirmation do not match.";
+        return;
+      }
+
+      if (errEl) errEl.textContent = "";
+      saveDeviceAuth({ ...auth, unlocked: true, passphrase: next });
+      hasPendingCloudPush = false;
+      saveAndSync({ skipPush: true });
+      const pushed = await silentPushToCloud();
+      document.getElementById("changePinModal")?.classList.add("hidden");
+      document.getElementById("changePinForm")?.reset();
+      showToast(pushed ? "Family PIN updated & cloud re-encrypted!" : "Family PIN updated locally");
     });
 
     document.getElementById("lockAppBtn")?.addEventListener("click", () => {
@@ -1215,13 +2006,21 @@ if (typeof document !== "undefined") {
   }
 
   function initApp() {
-    // Support ?sync=<url> pairing query parameter
-    const params = new URLSearchParams(window.location.search);
-    const paramSync = params.get("sync");
+    // Support #sync=<url> or ?sync=<url> pairing parameter without manual URL typing
+    const paramSync = parseSyncHashOrQuery(window.location.search, window.location.hash);
     if (paramSync) {
       state.googleSheetWebAppUrl = paramSync;
+      try {
+        localStorage.setItem(STORAGE_STATE_KEY, JSON.stringify(state));
+      } catch (_e) {}
       const pinUrlInput = document.getElementById("pinSyncUrlInput");
       if (pinUrlInput) pinUrlInput.value = paramSync;
+      if (window.location.hash.includes("sync=")) {
+        try {
+          window.history.replaceState(null, "", window.location.pathname + window.location.search);
+        } catch (_e) {}
+      }
+      showToast("Sync link detected! Enter Family PIN to unlock.");
     }
 
     rolloverDayIfNeeded();
