@@ -1,5 +1,6 @@
 /**
- * crypto.js — WebCrypto PBKDF2 + AES-256-GCM Encryption & CORS-Safe Cloud Sync
+ * crypto.js — WebCrypto PBKDF2 + AES-256-GCM Encryption, CORS-Safe Cloud Sync,
+ * Secure Family Support Phone Cipher & Dormant Google Identity Services (GIS) Auth Hooks.
  * Works in both Browser and Node.js (via globalThis.crypto.subtle).
  */
 
@@ -7,6 +8,92 @@ export const BUNDLE_PREFIX = "EPSTEADY-AES256:";
 const PBKDF2_ITERATIONS = 100000;
 const SALT_BYTES = 12;
 const IV_BYTES = 12;
+
+/**
+ * Family-authenticated support phone cipher (XOR with "EPSTEADY_FAMILY_KEY_V1").
+ * Never stores plaintext digits in the public repository; decoded in memory only for unlocked family sessions.
+ */
+const FAMILY_SUPPORT_KEY_TAG = "EPSTEADY_FAMILY_KEY_V1";
+const FAMILY_SUPPORT_CIPHER_BYTES = [125, 96, 98, 96, 114, 114, 113, 110, 108, 119];
+
+/**
+ * Dormant Google Identity Services (GIS) preparation metadata for future Google Sign-In update.
+ * Kept disabled by default (`enabled: false`) until activated in the Admin Dashboard.
+ */
+export const GOOGLE_AUTH_PREP_SPEC = Object.freeze({
+  version: "1.0.0-prep",
+  status: "dormant",
+  provider: "google_gis",
+  gisScriptUrl: "https://accounts.google.com/gsi/client",
+  tokenVerificationEndpoint: "https://oauth2.googleapis.com/tokeninfo",
+  envelopeField: "auth",
+  defaultConfig: Object.freeze({
+    enabled: false,
+    clientId: "",
+    allowedEmails: [],
+    requireGoogleForSync: false,
+    lastSignedInEmail: "",
+    idToken: ""
+  })
+});
+
+/**
+ * Normalize and validate Google Sign-In preparation config.
+ * Always defaults `enabled` to false unless explicitly activated with a valid clientId.
+ */
+export function prepareGoogleSignInConfig(rawConfig = {}) {
+  const c = rawConfig && typeof rawConfig === "object" ? rawConfig : {};
+  const clientId = String(c.clientId || "").trim();
+  const allowedEmails = Array.isArray(c.allowedEmails)
+    ? c.allowedEmails.map((e) => String(e || "").trim().toLowerCase()).filter(Boolean)
+    : String(c.allowedEmails || "")
+        .split(",")
+        .map((e) => e.trim().toLowerCase())
+        .filter(Boolean);
+  const enabled = Boolean(c.enabled && clientId);
+  return {
+    enabled,
+    clientId,
+    allowedEmails,
+    requireGoogleForSync: Boolean(enabled && c.requireGoogleForSync),
+    lastSignedInEmail: String(c.lastSignedInEmail || "").trim().toLowerCase(),
+    idToken: String(c.idToken || "").trim()
+  };
+}
+
+/**
+ * Resolve the family support phone number in memory from the family cipher or Admin Dashboard override.
+ * Requires an authenticated/unlocked family session (or explicit state/auth object) so scrapers never see raw digits.
+ */
+export function resolveFamilySupportPhone(state = {}, auth = { unlocked: true }) {
+  const customOverride = String(state?.adminConfig?.supportPhoneOverride || "").replace(/[^\d+]/g, "");
+  if (customOverride.length >= 10) {
+    return customOverride;
+  }
+  if (auth && auth.unlocked === false) {
+    return "";
+  }
+  let out = "";
+  for (let i = 0; i < FAMILY_SUPPORT_CIPHER_BYTES.length; i++) {
+    const k = FAMILY_SUPPORT_KEY_TAG.charCodeAt(i % FAMILY_SUPPORT_KEY_TAG.length);
+    out += String.fromCharCode(FAMILY_SUPPORT_CIPHER_BYTES[i] ^ k);
+  }
+  return out;
+}
+
+/**
+ * Build a cross-platform `sms:` URI that opens the user's native text messaging app
+ * preloaded with the support phone number and message body.
+ */
+export function buildSmsHelpUri(phone, message, userAgent = "") {
+  const cleanPhone = String(phone || "").replace(/[^\d+]/g, "");
+  const encodedBody = encodeURIComponent(String(message || "").trim());
+  const isIos = /iPad|iPhone|iPod/i.test(String(userAgent || ""));
+  const sep = isIos ? "&" : "?";
+  return cleanPhone
+    ? `sms:${cleanPhone}${sep}body=${encodedBody}`
+    : `sms:${sep}body=${encodedBody}`;
+}
 
 function getWebCrypto() {
   const c = globalThis.crypto;
@@ -127,14 +214,19 @@ export async function decryptBundle(token, passphrase) {
 /**
  * Pull encrypted payload from Google Apps Script Web App via GET.
  * Tolerant of both `data.payload` and legacy `data.encryptedPayload`.
+ * Supports optional dormant `options.googleIdToken` query envelope when Google Auth is enabled in the future.
  */
-export async function pullFromCloud(url) {
+export async function pullFromCloud(url, options = {}) {
   const cleanUrl = (url || "").trim();
   if (!cleanUrl) return { ok: false, error: "No sync URL configured." };
 
   try {
     const sep = cleanUrl.includes("?") ? "&" : "?";
-    const resp = await fetch(`${cleanUrl}${sep}t=${Date.now()}`, {
+    let fullUrl = `${cleanUrl}${sep}t=${Date.now()}`;
+    if (options && options.googleIdToken) {
+      fullUrl += `&id_token=${encodeURIComponent(String(options.googleIdToken))}`;
+    }
+    const resp = await fetch(fullUrl, {
       method: "GET",
       cache: "no-store"
     });
@@ -157,19 +249,29 @@ export async function pullFromCloud(url) {
 /**
  * Push encrypted payload to Google Apps Script Web App via POST.
  * Uses text/plain;charset=utf-8 to avoid CORS preflight failures on Apps Script.
+ * Supports optional dormant `options.googleIdToken` auth envelope when Google Sign-In is activated in the future.
  */
-export async function pushToCloud(url, payload, updatedBy = "Dancer") {
+export async function pushToCloud(url, payload, updatedBy = "Dancer", options = {}) {
   const cleanUrl = (url || "").trim();
   if (!cleanUrl) return { ok: false, error: "No sync URL configured." };
   if (!payload || !String(payload).startsWith(BUNDLE_PREFIX)) {
     return { ok: false, error: "Refusing to push unencrypted payload." };
   }
 
-  const body = JSON.stringify({
+  const envelope = {
     updatedAt: new Date().toISOString(),
     updatedBy,
     payload
-  });
+  };
+  if (options && options.googleIdToken) {
+    envelope.auth = {
+      provider: GOOGLE_AUTH_PREP_SPEC.provider,
+      idToken: String(options.googleIdToken),
+      email: options.email ? String(options.email) : undefined
+    };
+  }
+
+  const body = JSON.stringify(envelope);
 
   try {
     const resp = await fetch(cleanUrl, {

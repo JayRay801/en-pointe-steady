@@ -1,212 +1,103 @@
-# En Pointe & Steady — User Guide
+# En Pointe & Steady — Simple Family & Dancer Guide
 
-Welcome to **En Pointe & Steady**, your calm, privacy-first daily companion for dancing strong with **POTS** and **gallbladder-safe nutrition**. Whether you are a dancer checking in between classes or a parent coordinating meals and carpools, everything here is designed to take seconds—not minutes.
-
-> **Privacy First (Zero PII):** Your profile, daily logs, notes, and carpool details stay encrypted right inside your browser (AES-256-GCM with your Family PIN). Nothing personal is stored unencrypted on the public web or in this repository.
+Welcome to **En Pointe & Steady**, your calm, easy-to-use daily companion for feeling strong during school and dance with **POTS** and **stomach-friendly meals**. Whether you are a dancer checking in before class or a parent helping with meals, schedules, and carpools, everything takes just a few taps.
 
 ---
 
-## Table of Contents
+## 1. Opening the App & Switching Between Dancer and Mom View
 
-1. [Getting Started & Daily Rhythm](#1-getting-started--daily-rhythm)
-2. [Progress Rings & +/- Ring Controls](#2-progress-rings---ring-controls)
-3. [Today's Fuel Plan, Routine Templates & Edit/Delete Slots](#3-todays-fuel-plan-routine-templates--editdelete-slots)
-4. [Quick Log & 1-Tap Presets](#4-quick-log--1-tap-presets)
-5. [Night-Before Dance Bag Checklist](#5-night-before-dance-bag-checklist)
-6. [Symptom Rescue Bar & 1-Tap Symptom Tags](#6-symptom-rescue-bar--1-tap-symptom-tags)
-7. [Food Library, Instant Analyzer & Custom Food Management](#7-food-library-instant-analyzer--custom-food-management)
-8. [Carpool Coordination, 1-Tap Share & Calendar Export](#8-carpool-coordination-1-tap-share--calendar-export)
-9. [Contextual Info (ℹ) & In-App Quick Start Manual (📖)](#9-contextual-info--in-app-quick-start-manual)
-10. [History, Symptom Correlation & Doctor PDF](#10-history-symptom-correlation--doctor-pdf)
-11. [Profile Targets, Clinical Math & Doctor Override](#11-profile-targets-clinical-math--doctor-override)
-12. [Family Sync, 1-Tap Device Pairing & Changing Your Family PIN](#12-family-sync-1-tap-device-pairing--changing-your-family-pin)
+When you open the app, type your **Family PIN** and check **Keep me signed in on this phone** so it opens right up next time.
 
----
+### Daughter's View ("I feel:" Quick Check-In Popup)
+- Whenever the **Dancer** opens the app, a friendly popup asks **"I feel:"** with four big buttons:
+  - **✨ Steady** — Energized, balanced, and ready
+  - **💫 Dizzy** — Shows a quick 2-minute sideline salt and water rescue
+  - **🔋 Tired** — Shows quick energy snack ideas for dance
+  - **🍵 Stomach** — Shows gentle, soothing low-fat food and drink tips
+- You can also tap the **"I feel:"** bar at the top of the screen anytime during the day.
 
-## 1. Getting Started & Daily Rhythm
-
-When you open the app, enter your **Family PIN** (4+ characters) on the unlock screen:
-- Check **Remember this device** so you stay signed in on your personal phone.
-- If you opened a **1-Tap Pairing Link** from a family member, your Cloud Sync URL is already filled in for you—just enter the Family PIN and tap **Unlock & Sync**.
-
-At the top of the screen, you will see:
-- **Dancer Name & Viewer Role** (e.g., `Dancer • Dancer` or `Dancer • Mom`)
-- **Sync Status Pill** (`Synced`, `Syncing...`, or `Offline`)
-- **📖 Manual** (opens the in-app Quick Start Guide) and **⚙** (opens Settings & Profile)
-
-At the bottom, switch between three simple tabs: **☀️ Today**, **🥗 Food**, and **🚗 Carpool**.
+### Mom's View (Logging on Behalf of the Dancer)
+- Tap the **🩰 Dancer View / 💛 Mom View** pill at the top of the screen (or inside **⚙ Settings**) to switch to **Mom's View**.
+- In **Mom's View**, the entire app switches to third-person (**"The Dancer"** or your dancer's name, and **"they / their"**) so Mom can easily fill out meals, feelings, notes, schedules, and carpools for her dancer.
 
 ---
 
-## 2. Progress Rings & +/- Ring Controls
+## 2. Salt & Hydration Rings + Daily Target Score
 
-At the top of **☀️ Today**, two progress rings track your core daily POTS goals:
+At the top of **☀️ Today**, two rings and a color-coded score show how the day is going:
 
-- **Sodium Ring (mg):** Tracks total sodium from checked-off schedule slots plus quick bonus taps.
-  - Tap **`+500mg Na`** anytime you grab an extra salt packet, pickle spear, or broth mug.
-  - Made an accidental tap? Tap **`-500`** right next to it to subtract 500 mg (safely stops at 0 so bonus sodium never goes negative).
-- **Hydration Ring (oz):** Tracks fluids in ounces from checked-off slots and quick water taps.
-  - Tap **`+8oz Water`** each time you finish a glass or half-bottle.
-  - Tap **`-8oz`** to undo an accidental tap (safely stops at 0).
-- **Gallbladder Safety Badge:** Below the rings, a live badge confirms your meals stay within your per-meal fat cap—for example, **`✓ GB-Safe (≤ 5.5g/meal)`** by default. If a checked meal exceeds your cap, it switches to **`⚠️ Meal > 5.5g fat`** so you can spot it immediately.
+- **Salt (Sodium) Ring:** Shows how much salt has been logged from meals and snacks.
+  - Tap **`+500mg Na`** anytime an extra electrolyte packet, pickle, or salty snack is taken.
+  - Tap **`-500`** to undo an accidental tap.
+- **Hydration Ring:** Shows ounces of water and electrolyte drinks logged today.
+  - Tap **`+8oz Water`** each time a glass or half-bottle is finished, or **`-8oz`** to undo.
+- **Daily Target Score (Green, Yellow, Red):**
+  - **🟢 Green (80–100% • Most Goals Hit):** Salt, water, and stomach-safe meal goals are on track!
+  - **🟡 Yellow (50–79% • Partial Goals Hit):** Getting close—keep sipping water with salt.
+  - **🔴 Red (Under 50% • Needs Fuel):** A gentle reminder to grab an electrolyte drink and a stomach-safe snack.
 
-> **Why pair sodium and water?** Plain water on its own flushes straight through. Pairing fluids with electrolytes or salty snacks helps your body hold onto blood volume during barre, center, and rehearsals.
-
----
-
-## 3. Today's Fuel Plan, Routine Templates & Edit/Delete Slots
-
-### Day Modes & Routine Templates
-Right under the rings, choose your schedule mode:
-- **School + Studio** (default 5-slot routine: Morning Wake-Up, School Lunch, Pre-Studio Fuel, Between Classes, Post-Rehearsal Recovery)
-- **Competition** (4-slot venue & backstage grazing plan)
-- **Recovery** (3 gentle, light-digestion meals for rest or flare days)
-
-Each Day Mode saves its own timeline independently, so switching modes never erases another mode's routine.
-- Many routine slots include a **dropdown menu** so you can pick between two balanced options (e.g., electrolyte drink + pretzels vs. warm oatmeal).
-- Portion labels automatically scale to your profile and slot intensity (from `0.75x Lighter Portion` up to `1.5x High-Output Portion`).
-- If you ever clear out all slots in a Day Mode, tap **`Load Dance Routine Template`** to restore the balanced template in one tap.
-
-### Checking Off, Editing & Deleting Slots
-Every card in **Today's Fuel & Studio Plan** lets you:
-- **Check off (`☑`):** Tap the checkbox on the left as you finish eating or drinking to immediately update your Sodium and Hydration rings.
-- **Edit (`✏️`):** Tap the pencil icon on any card to open **Edit Fuel / Hydration Entry**, where you can tweak the item name, time, portion, sodium (mg), water (oz), fat (g), or calories (kcal).
-- **Delete (`🗑️`):** Tap the trash icon on any card to remove that slot from today's plan.
-
-### Clean Midnight Reset
-Any one-off entry you add with **`+ Quick Log`** (tagged `Quick Log`) is automatically archived into **History** at midnight and cleared before morning, while your core Day Mode routine stays ready for the new day.
+> **Why pair salt and water together?** Plain water on its own passes right through the body. Pairing water with salt or electrolytes helps the body hold onto fluids so dizziness stays away during turns and leaps.
 
 ---
 
-## 4. Quick Log & 1-Tap Presets
+## 3. Custom Daily Dance Schedule, Calendar Views, BAND Sync & Carpool
 
-Need to log an extra electrolyte bottle, studio snack, or broth between classes? Tap **`+ Quick Log`** above your timeline:
+Tap the **📅 Schedule** tab at the bottom of the screen to manage school, dance classes, and carpool rides all in one place:
 
-1. **1-Tap Presets:** Scroll the preset chips at the top to autofill common dancer staples in one tap:
-   - **LMNT (1000mg)** — 16 oz water + 1 packet (`1000 mg Na`, `16 oz`, `0 g fat`, `5 kcal`)
-   - **Liquid I.V. (500mg)** — 16 oz water + 1 stick (`500 mg Na`, `16 oz`, `0 g fat`, `45 kcal`)
-   - **TriOral (1000mg)** — 32 oz water + 1 packet (`1000 mg Na`, `32 oz`, `0 g fat`, `40 kcal`)
-   - **Pretzels (850mg)** — Salted mini pretzels (`850 mg Na`, `0 oz`, `0.5 g fat`, `130 kcal`)
-   - **Bone Broth (580mg)** — 12 oz warm mug (`580 mg Na`, `12 oz`, `0.5 g fat`, `45 kcal`)
-   - **Applesauce** — 1 squeeze pouch (`0 mg Na`, `4 oz`, `0 g fat`, `60 kcal`)
-   - **SaltStick (215mg)** — 1 capsule + water (`215 mg Na`, `4 oz`, `0 g fat`, `0 kcal`)
-2. **Search Food Catalog (Optional Autofill):** Type 2+ letters (like `broth`, `turkey`, or `soup`) to pick from the 36+ item Food Library and any custom foods you saved.
-3. **Live Gallbladder Safety Badge:** As you enter or adjust numbers, the badge updates live (`✓ GB-Safe` or `⚠️ Caution/Avoid`) against your current per-meal fat cap.
-4. Tap **`Save Entry`**—the item is added to today's timeline and automatically checked off toward your rings.
+### Month, Week, and Day Calendar Views
+- **Month View:** Shows a full monthly calendar with badges for each day's **Dance Hours**, **School**, and **Carpool**. Tap any date on the calendar to see that day's full schedule right underneath!
+- **Week View:** Shows a 7-day hourly timeline (just like Google Calendar) so you can see the whole week's school hours, dance classes, and carpool pickups at a glance.
+- **Day View:** Shows a single day's hour-by-hour timeline from morning to night.
 
----
+### Customizing Each Day's Dance Classes (Dynamic Food & Water Goals)
+- Because dance schedules change every day (and some days have no dance at all!), tap **`+ Add Class / Event`** or **`+ Customize Day`** to set the exact dance classes, rehearsals, or school hours for any day of the week or specific date.
+- **Automatic Daily Food & Water Adjustment:** The app automatically totals that day's scheduled dance hours (including **0 hours** on rest days!) and adjusts that day's recommended **Calories, Portion Sizes, Salt, and Water** to match how much activity is happening that day.
 
-## 5. Night-Before Dance Bag Checklist
+### Syncing with the BAND App
+- Tap **`🔄 BAND Sync`** at the top of the **📅 Schedule** tab to import your studio's schedule from BAND:
+  1. Upload a BAND calendar file (`.ics`),
+  2. Sync a BAND calendar link, or
+  3. Paste a weekly class schedule post straight from BAND.
 
-Scroll below Today's timeline to find the collapsible **🎒 Dance Bag Checklist** card (showing `0/8 packed` → `8/8 packed`):
-- Tap the header to expand or collapse it right on the **Today** screen before bed.
-- Check off essentials like your 2x 24oz insulated electrolyte bottles, extra stick packs, salted pretzel pouches, warm soup thermos, applesauce pouches, cooler pouch with lean turkey & pickles, late-night car recovery container, and compression socks.
-- Progress stays synced with the **Night-Before Dance Bag Checklist** inside Settings (**⚙**) and across family devices.
-
----
-
-## 6. Symptom Rescue Bar & 1-Tap Symptom Tags
-
-### "I feel..." Sideline Rescue Bar
-Always visible at the top of the app, the **`I feel:`** pill bar lets you tap how your body feels right now:
-- **Steady:** Default calm state (no banner shown).
-- **Dizzy:** Opens the **2-Minute Studio Side-Line POTS Rescue Protocol** (sit on the floor with knees up or legs crossed, drink 8–12 oz cold electrolyte water or take a salt packet / 6 salted pretzels right away, and flex calf & thigh muscles before standing slowly).
-- **Tired:** Opens **Quick Low-Fat Dance Energy Rescue** (pair fast carbs + sodium like applesauce + salted pretzels or half a banana + electrolyte drink; skip heavy-fat nuts or dense protein bars during rehearsal).
-- **Stomach:** Opens **Gentle Gallbladder Soothing Mode** (keep fat near `0g–2g` for your next two slots using warm broth, miso soup, or chamomile tea with plain salted crackers or rice cakes).
-
-When you feel better, tap **`I feel steady now ✓`** on the banner or tap **`Steady`**.
-
-### 1-Tap Quick Symptom Tags & Daily Notes
-At the bottom of **☀️ Today**, above **Daily Symptom & Rehearsal Notes**, tap quick chips to log specific patterns in one tap:
-- `Lightheaded at barre`
-- `High HR`
-- `Brain fog`
-- `Heavy legs`
-- `Nausea / GI`
-- `Hot studio`
-
-Tapping a chip toggles it into or out of your notes automatically, and you can type extra context (like studio temperature or pointe class notes) anytime. All notes and symptom states are saved in your daily History snapshot.
+### School & Dance Carpool Subsection
+- Scroll down inside **📅 Schedule** to the **🚗 Carpool — School & Dance Rides** subsection.
+- View or edit **To School**, **From School**, **To Studio**, and **Home from Studio** drivers, times, and pickup notes for each day (`Mon`–`Sun`).
+- Tap **`Share / Copy Rides`** to text the day's ride plan to family or carpool drivers in one tap, or tap **`Calendar (.ics)`** to save the schedule to your phone's calendar.
 
 ---
 
-## 7. Food Library, Instant Analyzer & Custom Food Management
+## 4. Food Library, Safe Snacks & Nutritional Sources
 
-Open the **🥗 Food** tab to browse, analyze, and customize foods:
+Open the **🥗 Food** tab to check meals, snacks, and restaurant options:
 
-- **36+ Curated Dancer Foods & Filter Pills:** Filter by **`All`**, **`Safe`**, **`High Na`** (≥ 600 mg sodium and GB-safe), **`Restaurant`** (safe fast-food picks and warning items), or **`Avoid`**.
-- **Instant Food Analyzer:** Type any food or restaurant snack into the search box (2+ characters) to get an immediate POTS & Gallbladder safety rating using the built-in library and 28 nutrition keyword rules. Tap **`Analyze`** to also check OpenFoodFacts online (falls back cleanly to local estimates if offline).
-  - From the analysis card, tap **`+ Log to Today`** to add it straight to Today's timeline, or **`+ Save to Library`** to keep it in your Food Library.
-- **Add Custom Food (`+ Custom Food`):**
-  1. Tap **`+ Custom Food`** in the Food toolbar.
-  2. Enter Food Name, Serving Size, Category, Sodium (mg), Water (oz), Fat (g), and Calories (kcal).
-  3. Tap **`Save to Library`**.
-- **Delete Custom Foods:** Any food you saved or added via `+ Custom Food` shows a **`🗑️`** button on its card so you can remove it anytime. Built-in library foods stay protected.
+- **Search & Filter:** Filter by **All**, **Safe**, **High Na** (high salt), **Restaurant**, or **Avoid**.
+- **Instant Snack Analyzer:** Type any food into the search box and tap **Analyze** to see if it has enough salt for POTS and stays gentle on the stomach (low fat).
+- **Add Custom Foods:** Tap **`+ Custom Food`** to save your own family recipes or favorite snacks.
+- **📚 Nutritional & Recommendation Sources:** Tap **`📚 Sources`** in the Food tab, Today card, or Manual to see the exact medical, dancer nutrition, and food databases used for every number in the app.
 
 ---
 
-## 8. Carpool Coordination, 1-Tap Share & Calendar Export
+## 5. Color-Coded History, Logging Missed Past Days & Doctor Summary
 
-Open the **🚗 Carpool** tab to keep studio rides stress-free for dancers and parents:
+Tap **`Full History →`** on the Today screen (or inside **⚙ Settings**):
 
-- **Day Switcher:** Tap **`Mon`**–**`Sun`** to view or edit that day's **TO STUDIO** and **HOME** rides (driver, pickup time, and notes).
-- **Edit Day Drivers:** Tap **`Edit Day Drivers`**, update driver names, times, or pickup notes, and tap **`Save Carpool`**.
-- **1-Tap Carpool Share (`Share / Copy Ride`):** Tap **`Share / Copy Ride`** to open your phone's Share sheet (Messages, WhatsApp, etc.) or copy a clean ride summary to your clipboard ready to paste into family texts.
-- **Calendar Export (`Calendar (.ics)`):** Tap **`Calendar (.ics)`** to download a standard `.ics` calendar file containing today's scheduled fuel slots and the selected day's carpool rides.
-
----
-
-## 9. Contextual Info (ℹ) & In-App Quick Start Manual (📖)
-
-- **Contextual `ℹ` Buttons:** Look for small **`ℹ`** buttons next to **Sodium**, **Hydration**, the **GB-Safe** badge, **Day Modes**, **Use Doctor Override Targets**, and **Cloud Sync & Family PIN**. Tap any **`ℹ`** to pop open a short, plain-language explanation without cluttering your daily screen.
-- **In-App Quick Start Guide (`📖 Manual`):** Tap **`📖 Manual`** in the top-right header anytime to browse four bite-sized tabs (**Quick Start**, **POTS & Gallbladder**, **Rescue & Symptoms**, and **Sync, PIN & Carpool**) right inside the app—even offline.
+- **Color-Coded Daily Scores:** Every logged day shows a **🟢 Green**, **🟡 Yellow**, or **🔴 Red** score badge and checkmarks showing which goals (Salt, Water, Stomach-Safe Fat) were hit.
+- **Log or Edit Past / Missed Days:** Forgot to log yesterday or a day last week?
+  - Tap **`+ Log Past / Missed Day`** at the top of History (or tap **`+ Log Missed Day`** / any dot on Today's 7-Day overview, or **`✏️ Edit This Day's Record`** on any history card).
+  - Pick the date, use a 1-tap preset (*Hit Full Goals*, *Typical Dance Day*, or *Rest Day*) or enter that day's numbers, and save!
+- **Print / Save Doctor PDF:** Tap **`Print / Save Doctor PDF`** to create a clean summary sheet of averages, scores, feelings, and nutrition sources to bring to doctor appointments.
 
 ---
 
-## 10. History, Symptom Correlation & Doctor PDF
+## 6. Profile (Male / Female), Studio Themes & Need Help? Text Button
 
-Open **History & Doctor Report** from **View Full History →** on the Today screen, or via **⚙ Settings → Open Full History & Doctor Report →**:
+### Profile & Studio Personalizations (⚙ Settings)
+- Open **⚙ Settings** at the top right to customize:
+  - **Studio Color Theme:** Pick *Calm Studio Teal*, *Pointe Slipper Rose & Sage*, *Lavender Adagio*, *Stage Spotlight Gold & Emerald*, or *Late Car Ride Home (Dim Mode)* for dark car rides home after rehearsal.
+  - **Dancer Emblem, Studio Name & Daily Encouragement:** Pick an icon (`🩰`, `🦢`, `✨`, `👑`, `🌸`, `🦋`) and a favorite daily motto.
+  - **Dancer Profile & Gender:** Set Name, **Gender (Female or Male)**, Age, Weight, Height, POTS Salt Level, and Stomach Fat Limit (or turn on **Use Custom Doctor Goals**).
 
-- **Time Ranges:** Switch between **`7 Days`**, **`30 Days`**, and **`All Time`**.
-- **Summary Tiles:** See `Avg Sodium`, `Avg Water`, `GB Safe Days %`, and `Steady Days`.
-- **Hydration & Symptom Correlation:** Compares your average sodium and water on **Steady Days** versus **Symptomatic Days** so you and your doctor can clearly see how hydration affects symptoms.
-- **Daily Log Cards:** Tap any day to expand its sodium, water, max meal fat, GB compliance, symptom status, and notes.
-- **Download CSV:** Exports an RFC-4180 spreadsheet (with formula-injection protection) for your records.
-- **Print / Save Doctor PDF:** Tap **`Print / Save Doctor PDF`** to generate a clean, 1–2 page clinical summary (*En Pointe & Steady — Clinical POTS & Gallbladder Summary*) ready to print or save as PDF for cardiology or GI visits.
-
----
-
-## 11. Profile Targets, Clinical Math & Doctor Override
-
-Open **⚙ Settings** to customize profile and clinical thresholds:
-
-- **Viewer Role:** Switch between **`Dancer`** and **`Mom`** (shown in the top bar and recorded as `updatedBy` during cloud sync).
-- **Automatic Clinical Targets:**
-  - **POTS Sodium Target:** Pick **Mild** (`3,000 mg` base), **Standard** (`3,600 mg` base), or **High** (`4,500 mg` base). The app adds **`+180 mg` per dance hour**.
-  - **Hydration Target:** Calculated as `Weight (lbs) × 0.62 + Dance Hours × 8 oz` per day.
-  - **Gallbladder Meal Fat Cap:** Pick **Moderate** (`≤ 5.5g/meal` default), **Strict** (`≤ 4.0g/meal`), or **Flare** (`≤ 2.5g/meal`). Daily fat budget is `6 × meal cap` (e.g., `33g/day` at `5.5g/meal`).
-  - **Food Safety Ratings:**
-    - **Safe:** Meal fat `≤` your meal cap (and adequate sodium).
-    - **Caution:** Meal fat `>` your cap (up to `max(8.0g, cap + 2.5g)`), OR heavy carbs (`> 350 kcal`) with very low sodium (`< 250 mg`).
-    - **Avoid:** Meal fat `≥ 8.0g` or `> cap + 2.5g` (gallbladder spasm risk).
-- **Use Doctor Override Targets:** Check this box if your cardiologist, POTS specialist, or gastroenterologist prescribed exact daily Sodium (mg), Hydration (oz), Max Meal Fat (g), or Calorie targets. Tap the **`ℹ`** next to it for a quick reminder.
-
----
-
-## 12. Family Sync, 1-Tap Device Pairing & Changing Your Family PIN
-
-En Pointe & Steady can sync encrypted data across Dancer's and Mom's devices using your private Google Apps Script Web App (`Cloud_Sync_Store` tab).
-
-### 1-Tap Device Pairing Link (No URL Typing!)
-1. On a phone that already has Cloud Sync configured, open **⚙ Settings**.
-2. Under **Cloud Sync & Family PIN**, tap **`Pair Another Device`**.
-3. Tap **`Copy Link`** or **`Send / Share Link`** and text it to Dancer or Mom.
-4. When they open the link, the Apps Script URL is pre-loaded safely in the URL hash (`#sync=...`)—they only need to enter the **Family PIN** and tap **`Unlock & Sync`**.
-
-### Changing Your Family PIN
-1. Open **⚙ Settings** → **`Change Family PIN`**.
-2. Enter your **Current Family PIN**, type a **New Family PIN** (at least 4 characters), and confirm it.
-3. Tap **`Update PIN & Re-Encrypt`**. Your wellness data is re-encrypted with PBKDF2 (100,000 iterations) + AES-256-GCM and pushed to Cloud Sync automatically.
-4. On other family devices, enter the new PIN the next time the app unlocks or syncs.
-
-### Locking the App
-Tap **`Lock App`** at the bottom of Settings (**⚙**) to clear the unlocked session on the current device and return to the PIN screen.
+### Need Help? Send a Quick Text (💬 Help)
+- Tap **`💬 Help`** at the top of the screen anytime you have a question or need something adjusted.
+- Pick a topic, write what you need help with, and tap **`Send in Text App 💬`**.
+- Your phone's text messaging app will open right up with your message and family support number ready to send!

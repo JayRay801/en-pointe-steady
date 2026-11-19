@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="studio_teal" data-palette="blush" data-lighting="day">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#0F766E">
+  <meta name="theme-color" content="#E11D74">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>En Pointe &amp; Steady</title>
@@ -11,13 +11,19 @@
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <!-- Minimal Top Bar -->
-  <header class="top-bar no-print">
+  <!-- Minimal Frosted Glass Top Bar -->
+  <header class="top-bar glass-bar no-print">
     <div class="top-bar-inner">
       <div class="brand-group">
-        <h1 class="app-title">En Pointe &amp; Steady</h1>
+        <div class="brand-title-row">
+          <span id="topBarAvatar" class="brand-avatar" aria-hidden="true">🩰</span>
+          <h1 id="appBrandTitle" class="app-title" title="En Pointe &amp; Steady">En Pointe &amp; Steady</h1>
+        </div>
         <div class="brand-meta">
           <span id="topBarSubtitle" class="muted-text">Dancer • Dancer</span>
+          <button type="button" id="topRoleSwitchBtn" class="role-switch-pill spring-btn" aria-label="Switch Viewer Role" title="Tap to switch between Dancer and Mom view">
+            <span id="topRoleSwitchLabel">🩰 Dancer View</span>
+          </button>
           <span class="sync-pill">
             <span id="syncStatusDot" class="sync-dot sync-offline"></span>
             <span id="syncStatusLabel">Offline</span>
@@ -25,18 +31,20 @@
         </div>
       </div>
       <div class="top-bar-actions">
-        <button type="button" id="openManualBtn" class="icon-btn icon-btn-text" aria-label="Open Quick Start Guide" title="Quick Start Guide">📖 Manual</button>
-        <button type="button" id="openGearBtn" class="icon-btn" aria-label="Open Settings" title="Settings">⚙</button>
+        <button type="button" id="openHelpBtn" class="icon-btn icon-btn-text spring-btn" aria-label="Text for Help" title="Text for Help">💬 Help</button>
+        <button type="button" id="openManualBtn" class="icon-btn icon-btn-text spring-btn" aria-label="Open Quick Start Guide" title="Quick Start Guide">📖 Manual</button>
+        <button type="button" id="openSettingsBtn" class="icon-btn icon-btn-round spring-btn" aria-label="Open Settings" title="Appearance &amp; Personalization Settings">⚙️</button>
+        <button type="button" id="openGearBtn" class="icon-btn icon-btn-round spring-btn" aria-label="Open Profile" title="Dancer Profile &amp; Family Sync">👤</button>
       </div>
     </div>
 
-    <!-- Quick "I feel..." Rescue Pill Bar -->
-    <div class="symptom-bar" role="group" aria-label="How do you feel right now?">
-      <span class="symptom-label">I feel:</span>
-      <button type="button" class="pill-btn active" data-symptom-btn="steady">Steady</button>
-      <button type="button" class="pill-btn" data-symptom-btn="dizzy">Dizzy</button>
-      <button type="button" class="pill-btn" data-symptom-btn="tired">Tired</button>
-      <button type="button" class="pill-btn" data-symptom-btn="stomach">Stomach</button>
+    <!-- Quick "I feel..." / "The Dancer feels..." Rescue Pill Bar (No Day/Night pill here) -->
+    <div id="symptomBarGroup" class="symptom-bar" role="group" aria-label="How do you feel right now?">
+      <span id="symptomBarLabel" class="symptom-label">I feel:</span>
+      <button type="button" class="pill-btn spring-btn active" data-symptom-btn="steady">Steady</button>
+      <button type="button" class="pill-btn spring-btn" data-symptom-btn="dizzy">Dizzy</button>
+      <button type="button" class="pill-btn spring-btn" data-symptom-btn="tired">Tired</button>
+      <button type="button" class="pill-btn spring-btn" data-symptom-btn="stomach">Stomach</button>
     </div>
 
     <div id="rescueBanner" class="rescue-banner hidden"></div>
@@ -45,50 +53,131 @@
   <main class="app-main no-print">
     <!-- TAB 1: TODAY -->
     <section id="view-today" class="view-section">
-      <!-- Progress Rings Card -->
-      <div class="card rings-card">
-        <div class="rings-row">
-          <div class="ring-item">
-            <svg class="progress-ring" width="84" height="84" viewBox="0 0 84 84">
-              <circle class="ring-bg" cx="42" cy="42" r="34"></circle>
-              <circle id="sodiumRingProgress" class="ring-fg ring-primary" cx="42" cy="42" r="34"></circle>
-            </svg>
-            <div class="ring-text">
-              <strong id="sodiumRingValue">0</strong>
-              <span id="sodiumRingTarget" class="muted-text">/ 3600 mg</span>
-              <span class="ring-label">
-                Sodium
-                <button type="button" id="infoSodiumBtn" class="info-btn" data-info-topic="sodium" aria-label="About Sodium Target">ℹ</button>
-              </span>
+      <!-- Studio Encouragement & Dynamic Daily Activity Banner -->
+      <div id="studioPersonalBanner" class="card studio-banner-card">
+        <div class="studio-banner-main">
+          <div class="studio-banner-copy">
+            <span id="studioBannerName" class="studio-tag">🩰 Calm Studio Plan</span>
+            <div class="motto-row">
+              <p id="studioBannerMotto" class="studio-motto">Steady salt, gentle fuel, strong turns.</p>
+              <button type="button" id="shuffleMottoBtn" class="motto-shuffle-btn spring-btn" aria-label="Shuffle motivational motto" title="Shuffle motivational motto">↻</button>
             </div>
-            <div class="ring-btn-group">
-              <button type="button" id="subBonusSodiumBtn" class="btn-chip btn-chip-sub" aria-label="Subtract 500mg Sodium">-500</button>
-              <button type="button" id="addBonusSodiumBtn" class="btn-chip">+500mg Na</button>
+          </div>
+          <button type="button" id="todayOpenScheduleChip" class="activity-pill-btn spring-btn" title="Open today's dance schedule">
+            <span id="todayDanceActivityBadge">📅 Today's Dance: 2.0 hrs</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Apple Health-Style Concentric Goal Rings & Daily Target Score Card -->
+      <div id="todayRingsCard" class="card rings-card">
+        <div class="rings-hero-row">
+          <div class="rings-hero-left">
+            <span id="todayRingsTitle" class="rings-kicker">My Daily Score</span>
+            <div class="rings-score-row">
+              <strong id="todayScorePct" class="rings-score-pct">0%</strong>
+              <span id="todayDailyScoreBadge" class="pill-badge badge-safe">Daily Score: 0% (0/3 Goals)</span>
+              <button type="button" class="info-btn" data-info-topic="score" aria-label="About Daily Target Score">ℹ</button>
+            </div>
+            <div class="rings-sub-chips">
+              <span id="todayCalorieTargetChip" class="chip">⚡ 0 / 2000 kcal</span>
             </div>
           </div>
 
-          <div class="ring-item">
-            <svg class="progress-ring" width="84" height="84" viewBox="0 0 84 84">
-              <circle class="ring-bg" cx="42" cy="42" r="34"></circle>
-              <circle id="waterRingProgress" class="ring-fg ring-accent" cx="42" cy="42" r="34"></circle>
+          <div class="concentric-ring-wrap" aria-label="Daily Goal Rings">
+            <svg class="ring-svg concentric-rings-svg" width="84" height="84" viewBox="0 0 84 84">
+              <!-- Outer: Sodium (r=34) -->
+              <circle class="ring-track" cx="42" cy="42" r="34" stroke="var(--primary)"></circle>
+              <circle id="sodiumRingProgress" class="ring-fg ring-sodium" cx="42" cy="42" r="34"></circle>
+              <!-- Middle: Water (r=25) -->
+              <circle class="ring-track" cx="42" cy="42" r="25" stroke="#3B82F6"></circle>
+              <circle id="waterRingProgress" class="ring-fg ring-water" cx="42" cy="42" r="25"></circle>
+              <!-- Inner: Fuel / Calories (r=16) -->
+              <circle class="ring-track" cx="42" cy="42" r="16" stroke="#10B981"></circle>
+              <circle id="fuelRingProgress" class="ring-fg ring-fuel" cx="42" cy="42" r="16"></circle>
             </svg>
-            <div class="ring-text">
-              <strong id="waterRingValue">0</strong>
-              <span id="waterRingTarget" class="muted-text">/ 85 oz</span>
-              <span class="ring-label">
-                Hydration
-                <button type="button" id="infoWaterBtn" class="info-btn" data-info-topic="water" aria-label="About Hydration Target">ℹ</button>
-              </span>
-            </div>
-            <div class="ring-btn-group">
-              <button type="button" id="subBonusWaterBtn" class="btn-chip btn-chip-sub" aria-label="Subtract 8oz Water">-8oz</button>
-              <button type="button" id="addBonusWaterBtn" class="btn-chip">+8oz Water</button>
-            </div>
           </div>
         </div>
+
+        <!-- 3 Stat Pills (Sodium, Water, Fuel) -->
+        <div class="stat-pills-grid">
+          <div class="stat-pill">
+            <div class="stat-pill-head">
+              <span class="stat-dot" style="background: var(--primary);"></span>
+              <span class="stat-label">Sodium</span>
+              <button type="button" id="infoSodiumBtn" class="info-btn" data-info-topic="sodium" aria-label="About Sodium Target">ℹ</button>
+            </div>
+            <div class="stat-pill-val">
+              <strong id="sodiumRingValue">0</strong>
+              <span id="sodiumRingTarget" class="muted-text">/ 3600 mg</span>
+            </div>
+            <div class="ring-btn-group">
+              <button type="button" id="subBonusSodiumBtn" class="btn-chip btn-chip-sub spring-btn" aria-label="Subtract 500mg Sodium">-500</button>
+              <button type="button" id="addBonusSodiumBtn" class="btn-chip spring-btn">+500mg</button>
+            </div>
+          </div>
+
+          <div class="stat-pill">
+            <div class="stat-pill-head">
+              <span class="stat-dot" style="background: #3B82F6;"></span>
+              <span class="stat-label">Water</span>
+              <button type="button" id="infoWaterBtn" class="info-btn" data-info-topic="water" aria-label="About Hydration Target">ℹ</button>
+            </div>
+            <div class="stat-pill-val">
+              <strong id="waterRingValue">0</strong>
+              <span id="waterRingTarget" class="muted-text">/ 85 oz</span>
+            </div>
+            <div class="ring-btn-group">
+              <button type="button" id="subBonusWaterBtn" class="btn-chip btn-chip-sub spring-btn" aria-label="Subtract 8oz Water">-8oz</button>
+              <button type="button" id="addBonusWaterBtn" class="btn-chip spring-btn">+8oz</button>
+            </div>
+          </div>
+
+          <div class="stat-pill">
+            <div class="stat-pill-head">
+              <span class="stat-dot" style="background: #10B981;"></span>
+              <span class="stat-label">Fuel</span>
+              <button type="button" id="infoGbBtn" class="info-btn" data-info-topic="gb" aria-label="About Stomach &amp; Gallbladder Safety">ℹ</button>
+            </div>
+            <div class="stat-pill-val">
+              <strong id="fuelRingValue">0</strong>
+              <span id="fuelRingTarget" class="muted-text">/ 2000 kcal</span>
+            </div>
+            <span id="todayGbStatus" class="pill-badge badge-safe stat-gb-badge">✓ Safe</span>
+          </div>
+        </div>
+
         <div class="rings-footer">
-          <span id="todayGbStatus" class="pill-badge badge-safe">✓ GB-Safe (≤ 5.5g/meal)</span>
-          <button type="button" id="infoGbBtn" class="info-btn" data-info-topic="gb" aria-label="About Gallbladder Safety">ℹ</button>
+          <span class="muted-text">Tap +500mg, +8oz, or Quick Add below</span>
+          <button type="button" id="todayOpenSourcesBtn" class="btn-text btn-xs">📚 Sources</button>
+        </div>
+      </div>
+
+      <!-- 1-Tap Quick Add Pills -->
+      <div class="quick-add-row" role="group" aria-label="1-Tap Quick Add">
+        <button type="button" id="quickAddWaterBtn" class="quick-btn spring-btn">
+          <span class="quick-btn-icon">💧</span>
+          <span class="quick-btn-label">+8 oz Water</span>
+        </button>
+        <button type="button" id="quickAddSaltBtn" class="quick-btn spring-btn">
+          <span class="quick-btn-icon">🧂</span>
+          <span class="quick-btn-label">+Salt Packet</span>
+        </button>
+        <button type="button" id="quickAddSnackBtn" class="quick-btn spring-btn">
+          <span class="quick-btn-icon">🥨</span>
+          <span class="quick-btn-label">+Light Snack</span>
+        </button>
+      </div>
+
+      <!-- Next Dance Class + Carpool Summary Card -->
+      <div id="todayNextClassCard" class="card next-class-card">
+        <div class="next-class-main">
+          <div>
+            <span id="todayNextClassKicker" class="next-class-kicker">Today's Dance • 2.0 hrs</span>
+            <strong id="todayNextClassTitle" class="next-class-title">Ballet &amp; Pointe • 4:30 PM</strong>
+            <p id="todayNextClassCarpool" class="muted-text next-class-carpool">Carpool: Add pickup &amp; driver in Schedule</p>
+          </div>
+          <button type="button" id="todayBandPill" class="band-pill spring-btn" title="Open Schedule &amp; BAND Sync">BAND</button>
         </div>
       </div>
 
@@ -106,12 +195,16 @@
       <div class="card history-overview-card">
         <div class="card-head">
           <div>
-            <h3>7-Day History Overview</h3>
+            <h3 id="todayHistoryOverviewTitle">7-Day Score &amp; History Overview</h3>
             <div id="history7Dots" class="history-dots-row"></div>
           </div>
-          <button type="button" id="openFullHistoryBtn" class="btn-text">View Full History →</button>
+          <div class="history-overview-actions">
+            <button type="button" id="todayLogMissedDayBtn" class="btn-secondary btn-xs">+ Log Missed Day</button>
+            <button type="button" id="openFullHistoryBtn" class="btn-text">Full History →</button>
+          </div>
         </div>
-        <div class="overview-metrics">
+        <div class="overview-metrics overview-metrics-4">
+          <div><span class="muted-text">Avg Score</span><strong id="history7AvgScore">0%</strong></div>
           <div><span class="muted-text">Avg Na</span><strong id="history7AvgNa">0 mg</strong></div>
           <div><span class="muted-text">Avg Water</span><strong id="history7AvgWater">0 oz</strong></div>
           <div><span class="muted-text">Steady</span><strong id="history7Steady">0/0</strong></div>
@@ -120,7 +213,7 @@
 
       <!-- Chronological Schedule Slots -->
       <div class="section-header">
-        <h3>Today's Fuel &amp; Studio Plan</h3>
+        <h3 id="todayPlanHeading">Today's Fuel &amp; Studio Plan</h3>
         <button type="button" id="quickAddSlotBtn" class="btn-primary btn-sm">+ Quick Log</button>
       </div>
       <div id="todaySlotsList" class="slots-list"></div>
@@ -128,7 +221,7 @@
       <!-- Collapsible Night-Before Dance Bag Checklist -->
       <div id="todayBagCard" class="card collapsible-card">
         <button type="button" id="toggleTodayBagBtn" class="collapsible-header" aria-expanded="false">
-          <span class="collapsible-title">🎒 Dance Bag Checklist <span id="todayBagProgress" class="pill-badge badge-safe">0/8 packed</span></span>
+          <span class="collapsible-title"><span id="todayBagHeadingText">🎒 Dance Bag Checklist</span> <span id="todayBagProgress" class="pill-badge badge-safe">0/8 packed</span></span>
           <span class="collapsible-chevron">▼</span>
         </button>
         <div id="todayBagBody" class="collapsible-body hidden">
@@ -138,7 +231,7 @@
 
       <!-- Daily Notes & Quick Symptom Tags -->
       <div class="card">
-        <label for="dailyNotesInput" class="field-label">Daily Symptom &amp; Rehearsal Notes</label>
+        <label id="dailyNotesLabel" for="dailyNotesInput" class="field-label">Daily Symptom &amp; Rehearsal Notes</label>
         <div id="symptomQuickTags" class="symptom-tag-chips" aria-label="Quick symptom tags"></div>
         <textarea id="dailyNotesInput" class="input-field" rows="2" placeholder="Optional notes for today (e.g., studio temp, energy during pointe)..."></textarea>
       </div>
@@ -159,45 +252,139 @@
             <button type="button" class="pill-btn" data-food-filter="restaurant">Restaurant</button>
             <button type="button" class="pill-btn" data-food-filter="avoid">Avoid</button>
           </div>
-          <button type="button" id="openAddCustomFoodBtn" class="btn-secondary btn-sm">+ Custom Food</button>
+          <div class="food-toolbar-btns">
+            <button type="button" id="openSourcesBtn" class="btn-secondary btn-sm">📚 Sources</button>
+            <button type="button" id="openAddCustomFoodBtn" class="btn-secondary btn-sm">+ Custom Food</button>
+          </div>
         </div>
       </div>
 
       <div id="instantAnalysisCard" class="card analysis-card hidden"></div>
       <div id="foodLibraryList" class="food-list"></div>
+
+      <!-- Inline Summary Banner for Nutritional & Recommendation Sources -->
+      <div class="card sources-preview-card">
+        <div class="card-head">
+          <div>
+            <h3>📚 Nutritional &amp; Recommendation Sources</h3>
+            <p class="muted-text">All food values and daily goals come from trusted clinical POTS, stomach-safe, dancer nutrition, and USDA databases.</p>
+          </div>
+          <button type="button" id="openSourcesCardBtn" class="btn-primary btn-sm">View All Sources</button>
+        </div>
+      </div>
     </section>
 
-    <!-- TAB 3: CARPOOL -->
-    <section id="view-carpool" class="view-section hidden">
-      <div class="day-mode-bar" role="group" aria-label="Day of Week">
-        <button type="button" class="mode-pill" data-carpool-day="Mon">Mon</button>
-        <button type="button" class="mode-pill" data-carpool-day="Tue">Tue</button>
-        <button type="button" class="mode-pill" data-carpool-day="Wed">Wed</button>
-        <button type="button" class="mode-pill" data-carpool-day="Thu">Thu</button>
-        <button type="button" class="mode-pill" data-carpool-day="Fri">Fri</button>
-        <button type="button" class="mode-pill" data-carpool-day="Sat">Sat</button>
-        <button type="button" class="mode-pill" data-carpool-day="Sun">Sun</button>
-      </div>
-
-      <div id="carpoolDayCard" class="card"></div>
-
-      <div class="carpool-actions">
-        <button type="button" id="toggleCarpoolEditBtn" class="btn-secondary">Edit Day Drivers</button>
-        <button type="button" id="shareCarpoolBtn" class="btn-secondary">Share / Copy Ride</button>
-        <button type="button" id="exportIcsBtn" class="btn-primary">Calendar (.ics)</button>
-      </div>
-
-      <div id="carpoolEditForm" class="card hidden">
-        <h4>Update Carpool for Selected Day</h4>
-        <div class="form-grid">
-          <label>To Studio Driver <input type="text" id="editToDriver" class="input-field"></label>
-          <label>To Studio Time <input type="text" id="editToTime" class="input-field" placeholder="3:30 PM"></label>
-          <label>To Studio Note <input type="text" id="editToNote" class="input-field"></label>
-          <label>Home Driver <input type="text" id="editHomeDriver" class="input-field"></label>
-          <label>Home Time <input type="text" id="editHomeTime" class="input-field" placeholder="9:15 PM"></label>
-          <label>Home Note <input type="text" id="editHomeNote" class="input-field"></label>
+    <!-- TAB 3: SCHEDULE (CALENDAR + DAILY DANCE SCHEDULE + BAND SYNC + CARPOOL SUBSECTION) -->
+    <section id="view-carpool" class="view-section hidden" data-schedule-view="true">
+      <!-- Calendar View Header & Switcher (Month | Week | Day) -->
+      <div class="card schedule-calendar-card">
+        <div class="calendar-top-bar">
+          <div>
+            <h3 id="scheduleMainHeading">📅 Dance, School &amp; Carpool Schedule</h3>
+            <p id="scheduleSubHeading" class="muted-text">Each day's dance classes automatically adjust recommended food &amp; water targets.</p>
+          </div>
+          <div class="calendar-view-switcher" role="group" aria-label="Calendar View Mode">
+            <button type="button" class="pill-btn active" data-cal-view="month">Month</button>
+            <button type="button" class="pill-btn" data-cal-view="week">Week</button>
+            <button type="button" class="pill-btn" data-cal-view="day">Day</button>
+          </div>
         </div>
-        <button type="button" id="saveCarpoolBtn" class="btn-primary">Save Carpool</button>
+
+        <div class="calendar-nav-bar">
+          <div class="calendar-nav-btns">
+            <button type="button" id="calPrevBtn" class="btn-chip" aria-label="Previous Period">◀ Prev</button>
+            <button type="button" id="calTodayBtn" class="btn-chip">Today</button>
+            <button type="button" id="calNextBtn" class="btn-chip" aria-label="Next Period">Next ▶</button>
+          </div>
+          <strong id="calCurrentPeriodLabel" class="calendar-period-label">Month YYYY</strong>
+          <div class="calendar-quick-actions">
+            <button type="button" id="openAddClassModalBtn" class="btn-primary btn-sm">+ Add Class / Event</button>
+            <button type="button" id="openBandSyncModalBtn" class="btn-secondary btn-sm">🔄 BAND Sync</button>
+          </div>
+        </div>
+
+        <!-- Quick Weekday Selector Pills (Mon-Sun) synchronized with selected date -->
+        <div class="day-mode-bar weekday-bar" role="group" aria-label="Day of Week">
+          <button type="button" class="mode-pill" data-carpool-day="Mon">Mon</button>
+          <button type="button" class="mode-pill" data-carpool-day="Tue">Tue</button>
+          <button type="button" class="mode-pill" data-carpool-day="Wed">Wed</button>
+          <button type="button" class="mode-pill" data-carpool-day="Thu">Thu</button>
+          <button type="button" class="mode-pill" data-carpool-day="Fri">Fri</button>
+          <button type="button" class="mode-pill" data-carpool-day="Sat">Sat</button>
+          <button type="button" class="mode-pill" data-carpool-day="Sun">Sun</button>
+        </div>
+
+        <!-- 1. MONTH VIEW: Calendar Grid + Selected Day's Full Schedule Underneath -->
+        <div id="calMonthContainer" class="cal-mode-container">
+          <div class="cal-weekday-headers">
+            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+          </div>
+          <div id="calMonthGrid" class="cal-month-grid"></div>
+        </div>
+
+        <!-- 2. WEEK VIEW: Google Calendar-Style 7-Day Vertical Hourly Timeline -->
+        <div id="calWeekContainer" class="cal-mode-container hidden">
+          <div id="calWeekGrid" class="gcal-week-wrapper"></div>
+        </div>
+
+        <!-- 3. DAY VIEW: Google Calendar-Style Single-Day Vertical Hourly Timeline -->
+        <div id="calDayContainer" class="cal-mode-container hidden">
+          <div id="calDayTimeline" class="gcal-day-wrapper"></div>
+        </div>
+      </div>
+
+      <!-- Selected Day's Detailed Schedule (Shown directly under Month Calendar and in Schedule view) -->
+      <div id="selectedDayScheduleCard" class="card">
+        <div class="card-head">
+          <div>
+            <h3 id="selectedDayScheduleTitle">Selected Day Schedule</h3>
+            <p id="selectedDayActivitySummary" class="muted-text">Dance Activity: 0.0 hrs • Recommended Intake Adjusted</p>
+          </div>
+          <button type="button" id="selectedDayAddEventBtn" class="btn-secondary btn-sm">+ Customize Day</button>
+        </div>
+        <div id="selectedDayEventsList" class="day-events-list"></div>
+      </div>
+
+      <!-- SUBSECTION 1a: CARPOOL (School & Dance Carpool Subsection inside Schedule) -->
+      <div id="scheduleCarpoolSubsection" class="card">
+        <div class="card-head">
+          <div>
+            <h3 id="carpoolSubsectionTitle">🚗 Carpool — School &amp; Dance Rides</h3>
+            <p id="carpoolSubsectionSub" class="muted-text">Coordinate school drop-off/pick-up and studio rides in one place.</p>
+          </div>
+          <span id="carpoolSelectedDayBadge" class="pill-badge badge-safe">Mon</span>
+        </div>
+
+        <div id="carpoolDayCard"></div>
+
+        <div class="carpool-actions" style="margin-top: 12px;">
+          <button type="button" id="toggleCarpoolEditBtn" class="btn-secondary">Edit Rides &amp; Drivers</button>
+          <button type="button" id="shareCarpoolBtn" class="btn-secondary">Share / Copy Rides</button>
+          <button type="button" id="exportIcsBtn" class="btn-primary">Calendar (.ics)</button>
+        </div>
+
+        <div id="carpoolEditForm" class="carpool-edit-panel hidden">
+          <h4>Update School &amp; Dance Carpool for Selected Day</h4>
+          <p class="muted-text">School Carpool</p>
+          <div class="form-grid">
+            <label>To School Driver <input type="text" id="editSchoolToDriver" class="input-field" placeholder="e.g. Mom / Bus"></label>
+            <label>To School Time <input type="text" id="editSchoolToTime" class="input-field" placeholder="7:35 AM"></label>
+            <label class="grid-span-2">To School Note <input type="text" id="editSchoolToNote" class="input-field" placeholder="Front drop-off lane"></label>
+            <label>From School Driver <input type="text" id="editSchoolHomeDriver" class="input-field" placeholder="e.g. Mom / Carpool"></label>
+            <label>From School Time <input type="text" id="editSchoolHomeTime" class="input-field" placeholder="2:55 PM"></label>
+            <label class="grid-span-2">From School Note <input type="text" id="editSchoolHomeNote" class="input-field" placeholder="Pick up by gym doors"></label>
+          </div>
+          <p class="muted-text" style="margin-top: 10px;">Dance Studio Carpool</p>
+          <div class="form-grid">
+            <label>To Studio Driver <input type="text" id="editToDriver" class="input-field" placeholder="Driver name"></label>
+            <label>To Studio Time <input type="text" id="editToTime" class="input-field" placeholder="3:45 PM"></label>
+            <label class="grid-span-2">To Studio Note <input type="text" id="editToNote" class="input-field" placeholder="Studio side entrance"></label>
+            <label>Home from Studio Driver <input type="text" id="editHomeDriver" class="input-field" placeholder="Driver name"></label>
+            <label>Home from Studio Time <input type="text" id="editHomeTime" class="input-field" placeholder="9:00 PM"></label>
+            <label class="grid-span-2">Home from Studio Note <input type="text" id="editHomeNote" class="input-field" placeholder="Bring warm recovery snack"></label>
+          </div>
+          <button type="button" id="saveCarpoolBtn" class="btn-primary full-width">Save School &amp; Dance Carpool</button>
+        </div>
       </div>
     </section>
 
@@ -205,13 +392,21 @@
     <section id="view-history" class="view-section hidden">
       <div class="section-header">
         <button type="button" id="historyBackBtn" class="btn-text">← Back to Today</button>
-        <h3>History &amp; Doctor Report</h3>
+        <h3 id="historyMainHeading">History, Scores &amp; Doctor Report</h3>
+        <button type="button" id="openPastLogBtn" class="btn-primary btn-sm">+ Log Past / Missed Day</button>
       </div>
 
       <div class="day-mode-bar" role="group" aria-label="History Range">
         <button type="button" class="mode-pill active" data-history-range="7d">7 Days</button>
         <button type="button" class="mode-pill" data-history-range="30d">30 Days</button>
         <button type="button" class="mode-pill" data-history-range="all">All Time</button>
+      </div>
+
+      <!-- Color Legend for Daily Target Scores -->
+      <div class="score-legend-bar">
+        <span class="pill-badge badge-safe">🟢 80–100% Most Goals Hit</span>
+        <span class="pill-badge badge-caution">🟡 50–79% Partial Goals</span>
+        <span class="pill-badge badge-avoid">🔴 &lt;50% Needs Fuel</span>
       </div>
 
       <div id="historySummaryGrid" class="stats-grid"></div>
@@ -226,96 +421,204 @@
     </section>
   </main>
 
-  <!-- Bottom Navigation (3 Simple Tabs) -->
-  <nav class="bottom-nav no-print" aria-label="Primary Navigation">
-    <button type="button" class="nav-tab active" data-nav-tab="today">
-      <span class="nav-icon">☀️</span>
+  <!-- Sticky Frosted-Glass Bottom Navigation (4 Tabs: Today, Food, Schedule, History) -->
+  <nav class="bottom-nav glass-bar no-print" aria-label="Primary Navigation">
+    <button type="button" class="nav-tab spring-btn active" data-nav-tab="today">
+      <span class="nav-icon">🏠</span>
       <span>Today</span>
     </button>
-    <button type="button" class="nav-tab" data-nav-tab="food">
-      <span class="nav-icon">🥗</span>
+    <button type="button" class="nav-tab spring-btn" data-nav-tab="food">
+      <span class="nav-icon">🍽️</span>
       <span>Food</span>
     </button>
-    <button type="button" class="nav-tab" data-nav-tab="carpool">
-      <span class="nav-icon">🚗</span>
-      <span>Carpool</span>
+    <button type="button" class="nav-tab spring-btn" data-nav-tab="carpool">
+      <span class="nav-icon">📅</span>
+      <span>Schedule</span>
+    </button>
+    <button type="button" class="nav-tab spring-btn" data-nav-tab="history">
+      <span class="nav-icon">📊</span>
+      <span>History</span>
     </button>
   </nav>
 
-  <!-- Gear (⚙) Settings Modal -->
-  <div id="gearModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-label="Settings">
-    <div class="modal-sheet">
+  <!-- Dedicated Settings Modal (⚙️): Independent Per-Role Appearance & Personalization -->
+  <div id="settingsModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-label="Appearance Settings">
+    <div class="modal-sheet modal-sheet-settings">
       <div class="modal-head">
-        <h3>Settings &amp; Profile</h3>
-        <button type="button" id="closeGearBtn" class="icon-btn" aria-label="Close Settings">✕</button>
+        <h3 id="settingsModalTitle">⚙️ Daughter's Settings</h3>
+        <button type="button" id="closeSettingsBtn" class="icon-btn spring-btn" aria-label="Close Settings">✕</button>
       </div>
 
       <div class="modal-body">
         <div class="setting-block">
-          <span class="field-label">Viewer Role</span>
+          <span class="field-label">Active Role View (Settings are saved independently per role)</span>
           <div class="day-mode-bar">
-            <button type="button" class="mode-pill active" data-role-btn="Dancer">Dancer</button>
-            <button type="button" class="mode-pill" data-role-btn="Mom">Mom</button>
+            <button type="button" class="mode-pill spring-btn active" data-role-btn="Dancer">🩰 Daughter's View</button>
+            <button type="button" class="mode-pill spring-btn" data-role-btn="Mom">👩 Mom's View</button>
+          </div>
+          <p id="settingsRoleIsolationNote" class="muted-text" style="margin-top: 6px;">
+            Each role keeps its own Lighting, Auto Rule, Color Palette, and Avatar.
+          </p>
+        </div>
+
+        <div class="setting-block">
+          <h4>🌓 Appearance (Lighting)</h4>
+          <div class="lighting-grid" role="group" aria-label="Lighting Mode">
+            <button type="button" class="setting-choice-btn spring-btn" data-setting-lighting="day">☀️ Day</button>
+            <button type="button" class="setting-choice-btn spring-btn" data-setting-lighting="night">🌙 Night</button>
+            <button type="button" class="setting-choice-btn spring-btn" data-setting-lighting="auto">🌓 Auto</button>
+          </div>
+
+          <div id="settingAutoRuleBox" class="auto-rule-box hidden">
+            <span class="field-label">Auto Mode Rule</span>
+            <div class="auto-rule-grid" role="group" aria-label="Auto Mode Rule">
+              <button type="button" class="setting-choice-btn spring-btn" data-setting-autorule="system">📱 Phone Dark Mode</button>
+              <button type="button" class="setting-choice-btn spring-btn" data-setting-autorule="time">🕖 7 PM – 7 AM</button>
+            </div>
           </div>
         </div>
 
         <div class="setting-block">
-          <button type="button" id="gearOpenHistoryBtn" class="btn-secondary full-width">Open Full History &amp; Doctor Report →</button>
+          <h4>🎨 Color Palette</h4>
+          <div class="palette-grid" role="group" aria-label="Color Palette">
+            <button type="button" class="palette-choice-btn spring-btn" data-setting-palette="blush">
+              <span class="palette-dot" style="background: #E11D74;"></span>
+              <span>Blush Rose</span>
+            </button>
+            <button type="button" class="palette-choice-btn spring-btn" data-setting-palette="sage">
+              <span class="palette-dot" style="background: #059669;"></span>
+              <span>Sage Mint</span>
+            </button>
+            <button type="button" class="palette-choice-btn spring-btn" data-setting-palette="lavender">
+              <span class="palette-dot" style="background: #7C3AED;"></span>
+              <span>Lavender Mist</span>
+            </button>
+            <button type="button" class="palette-choice-btn spring-btn" data-setting-palette="teal">
+              <span class="palette-dot" style="background: #0D9488;"></span>
+              <span>Ocean Teal</span>
+            </button>
+          </div>
         </div>
 
         <div class="setting-block">
-          <h4>Dancer Profile &amp; Targets</h4>
+          <h4>✨ Avatar &amp; Smart Motto</h4>
           <div class="form-grid">
-            <label>Name <input type="text" id="profName" class="input-field"></label>
+            <label>Avatar / Emoji
+              <select id="settingAvatar" class="input-field">
+                <option value="🩰">🩰 Pointe Shoes</option>
+                <option value="🌸">🌸 Studio Blossom</option>
+                <option value="✨">✨ Stage Sparkle</option>
+                <option value="🦋">🦋 Graceful Butterfly</option>
+                <option value="👩">👩 Mom Avatar</option>
+                <option value="💜">💜 Lavender Heart</option>
+                <option value="🦢">🦢 Ballet Swan</option>
+                <option value="👑">👑 Soloist Crown</option>
+              </select>
+            </label>
+            <label>Studio / Team Name
+              <input type="text" id="settingStudioName" class="input-field" placeholder="e.g. Calm Studio Plan">
+            </label>
+          </div>
+
+          <div class="motto-settings-card">
+            <div class="motto-settings-head">
+              <span class="field-label">Smart Motto (Feels + Past + Schedule)</span>
+              <button type="button" id="settingShuffleMottoBtn" class="btn-chip spring-btn">↻ Shuffle</button>
+            </div>
+            <p id="settingMottoPreview" class="muted-text" style="margin: 4px 0 0;">Steady salt, gentle fuel, strong turns.</p>
+          </div>
+        </div>
+
+        <button type="button" id="closeSettingsDoneBtn" class="btn-primary full-width spring-btn">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Modal (👤): Dancer Profile, Targets, Family Sync & PIN (No Appearance Controls Here) -->
+  <div id="gearModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-label="Dancer Profile">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <h3>👤 Dancer Profile</h3>
+        <button type="button" id="closeGearBtn" class="icon-btn spring-btn" aria-label="Close Profile">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="setting-block">
+          <span class="field-label">Who is using the app right now?</span>
+          <div class="day-mode-bar">
+            <button type="button" class="mode-pill spring-btn active" data-role-btn="Dancer">🩰 Dancer</button>
+            <button type="button" class="mode-pill spring-btn" data-role-btn="Mom">💛 Mom (for Dancer)</button>
+          </div>
+        </div>
+
+        <div class="setting-block">
+          <button type="button" id="gearOpenHistoryBtn" class="btn-secondary full-width spring-btn">Open History, Scores &amp; Doctor Summary →</button>
+        </div>
+
+        <div class="setting-block">
+          <h4>Dancer Profile &amp; Daily Goals</h4>
+          <div class="form-grid">
+            <label>Dancer Name <input type="text" id="profName" class="input-field"></label>
+            <label>Gender (for nutrition math)
+              <select id="profGender" class="input-field">
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+              </select>
+            </label>
             <label>Age <input type="number" id="profAge" class="input-field"></label>
             <label>Weight (lbs) <input type="number" id="profWeight" class="input-field"></label>
             <label>Height (ft) <input type="number" id="profHeightFt" class="input-field"></label>
             <label>Height (in) <input type="number" id="profHeightIn" class="input-field"></label>
-            <label>Dance Hrs/Day <input type="number" step="0.5" id="profDanceHours" class="input-field"></label>
-            <label>POTS Sodium Level
+            <label>POTS Salt Level
               <select id="profPotsLevel" class="input-field">
-                <option value="mild">Mild (3000mg base)</option>
+                <option value="mild">Gentle (3000mg base)</option>
                 <option value="standard">Standard (3600mg base)</option>
-                <option value="high">High (4500mg base)</option>
+                <option value="high">Extra Salt (4500mg base)</option>
               </select>
             </label>
-            <label>Gallbladder Fat Cap
+            <label>Stomach / Meal Fat Limit
               <select id="profGbLevel" class="input-field">
-                <option value="flare">Flare (2.5g/meal)</option>
-                <option value="strict">Strict (4.0g/meal)</option>
-                <option value="moderate">Moderate (5.5g/meal)</option>
+                <option value="flare">Extra Gentle (2.5g/meal)</option>
+                <option value="strict">Careful (4.0g/meal)</option>
+                <option value="moderate">Everyday Safe (5.5g/meal)</option>
               </select>
             </label>
           </div>
 
+          <!-- Dynamic Daily Dance Activity Info (Replaces static profile dance hours assumption) -->
+          <div class="dynamic-activity-callout">
+            <div>
+              <strong id="profDynamicDanceSummary">Today's Scheduled Dance Activity: 2.0 hrs</strong>
+              <p class="muted-text">Daily food, salt, and water recommendations automatically adjust every day based on that day's classes in the 📅 Schedule tab (including 0 hrs on rest days).</p>
+            </div>
+            <input type="hidden" id="profDanceHours" value="2.0">
+          </div>
+
           <label class="checkbox-row">
             <input type="checkbox" id="profDoctorOverride">
-            <span>Use Doctor Override Targets</span>
-            <button type="button" id="infoDoctorOverrideBtn" class="info-btn" data-info-topic="doctorOverride" aria-label="About Doctor Override">ℹ</button>
+            <span>Use Custom Doctor Goals</span>
+            <button type="button" id="infoDoctorOverrideBtn" class="info-btn" data-info-topic="doctorOverride" aria-label="About Custom Doctor Goals">ℹ</button>
           </label>
 
           <div id="doctorOverrideFields" class="form-grid hidden">
-            <label>Custom Sodium (mg) <input type="number" id="profCustomSodium" class="input-field"></label>
+            <label>Custom Salt (mg) <input type="number" id="profCustomSodium" class="input-field"></label>
             <label>Custom Water (oz) <input type="number" id="profCustomWater" class="input-field"></label>
-            <label>Custom Max Meal Fat (g) <input type="number" step="0.5" id="profCustomMealFat" class="input-field"></label>
-            <label>Custom Calories <input type="number" id="profCustomCalories" class="input-field"></label>
+            <label>Custom Meal Fat Limit (g) <input type="number" step="0.5" id="profCustomMealFat" class="input-field"></label>
+            <label>Custom Daily Calories <input type="number" id="profCustomCalories" class="input-field"></label>
           </div>
         </div>
 
         <div class="setting-block">
           <h4 class="heading-with-info">
-            Cloud Sync &amp; Family PIN
-            <button type="button" id="infoSyncBtn" class="info-btn" data-info-topic="sync" aria-label="About Zero-PII Cloud Sync">ℹ</button>
+            Family Phones &amp; Privacy PIN
+            <button type="button" id="infoSyncBtn" class="info-btn" data-info-topic="sync" aria-label="About Family Sharing">ℹ</button>
           </h4>
-          <label>Apps Script Sync URL
-            <input type="url" id="gearSyncUrlInput" class="input-field" placeholder="https://script.google.com/macros/s/.../exec">
-          </label>
           <div class="carpool-actions">
             <button type="button" id="saveProfileBtn" class="btn-primary">Save Settings</button>
-            <button type="button" id="gearSyncNowBtn" class="btn-secondary">Sync Now</button>
+            <button type="button" id="gearSyncNowBtn" class="btn-secondary">Refresh Family Sync</button>
           </div>
           <div class="carpool-actions">
-            <button type="button" id="openPairDeviceBtn" class="btn-secondary">Pair Another Device</button>
+            <button type="button" id="openPairDeviceBtn" class="btn-secondary">Share App With Family</button>
             <button type="button" id="openChangePinBtn" class="btn-secondary">Change Family PIN</button>
           </div>
           <button type="button" id="lockAppBtn" class="btn-danger full-width">Lock App</button>
@@ -325,6 +628,360 @@
           <h4>Night-Before Dance Bag Checklist</h4>
           <div id="gearBagChecklist" class="bag-list"></div>
         </div>
+
+        <!-- Discreet Admin Access Footer (Hidden from casual view, PIN-protected) -->
+        <div class="admin-discreet-footer">
+          <button type="button" id="openAdminPinGateBtn" class="admin-discreet-link" aria-label="Admin Setup">🔒 Family Admin Setup</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Requirement 6: Daughter's View App-Open "I feel:" Tap Check-In Popup Modal -->
+  <div id="dancerCheckinModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-label="Quick Feeling Check-In">
+    <div class="modal-sheet modal-sheet-compact checkin-popup-card">
+      <div class="checkin-popup-head">
+        <span id="checkinPopupAvatar" class="checkin-avatar">🩰</span>
+        <h3 id="checkinPopupGreeting">Hi Dancer! Quick Check-In</h3>
+        <p class="checkin-prompt-label">I feel:</p>
+      </div>
+      <div class="checkin-grid">
+        <button type="button" class="checkin-option-btn checkin-steady" data-checkin-symptom="steady">
+          <span class="checkin-emoji">✨</span>
+          <strong>Steady</strong>
+          <span class="muted-text">Energized, balanced &amp; ready</span>
+        </button>
+        <button type="button" class="checkin-option-btn checkin-dizzy" data-checkin-symptom="dizzy">
+          <span class="checkin-emoji">💫</span>
+          <strong>Dizzy</strong>
+          <span class="muted-text">Lightheaded — show quick salt &amp; water rescue</span>
+        </button>
+        <button type="button" class="checkin-option-btn checkin-tired" data-checkin-symptom="tired">
+          <span class="checkin-emoji">🔋</span>
+          <strong>Tired</strong>
+          <span class="muted-text">Low energy — show quick dance fuel tips</span>
+        </button>
+        <button type="button" class="checkin-option-btn checkin-stomach" data-checkin-symptom="stomach">
+          <span class="checkin-emoji">🍵</span>
+          <strong>Stomach</strong>
+          <span class="muted-text">Tummy sensitive — show gentle soothing tips</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Requirement 1: Add / Customize Dance Class or School Event Modal -->
+  <div id="scheduleEventModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-label="Customize Schedule Event">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <h3 id="scheduleEventModalTitle">Add Dance Class / Schedule Event</h3>
+        <button type="button" id="closeScheduleEventBtn" class="icon-btn" aria-label="Close Schedule Event">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="scheduleEventForm">
+          <input type="hidden" id="schedEventId" value="">
+          <div class="form-grid">
+            <label class="grid-span-2">Class or Event Name
+              <input type="text" id="schedEventTitle" class="input-field" placeholder="e.g. Ballet &amp; Pointe, Contemporary, School" required>
+            </label>
+            <label>Category
+              <select id="schedEventCategory" class="input-field">
+                <option value="dance">🩰 Dance Class</option>
+                <option value="rehearsal">🎭 Rehearsal</option>
+                <option value="competition">🏆 Competition / Stage</option>
+                <option value="school">🎒 School Hours</option>
+              </select>
+            </label>
+            <label>Applies To
+              <select id="schedEventScope" class="input-field">
+                <option value="weekly">Every Week on This Day</option>
+                <option value="date">Only This Specific Date</option>
+              </select>
+            </label>
+            <label>Day of Week
+              <select id="schedEventDayOfWeek" class="input-field">
+                <option value="Mon">Monday</option>
+                <option value="Tue">Tuesday</option>
+                <option value="Wed">Wednesday</option>
+                <option value="Thu">Thursday</option>
+                <option value="Fri">Friday</option>
+                <option value="Sat">Saturday</option>
+                <option value="Sun">Sunday</option>
+              </select>
+            </label>
+            <label>Specific Date (if single date)
+              <input type="date" id="schedEventDate" class="input-field">
+            </label>
+            <label>Start Time
+              <input type="time" id="schedEventStart" class="input-field" value="16:00" required>
+            </label>
+            <label>End Time
+              <input type="time" id="schedEventEnd" class="input-field" value="18:00" required>
+            </label>
+            <label>Activity Intensity
+              <select id="schedEventIntensity" class="input-field">
+                <option value="high">High (Pointe / Jumps / Full Run)</option>
+                <option value="moderate">Moderate (Technique / Barre)</option>
+                <option value="light">Light (Stretch / Marking / School)</option>
+              </select>
+            </label>
+            <label>Location / Studio Room
+              <input type="text" id="schedEventLocation" class="input-field" placeholder="e.g. Studio A">
+            </label>
+            <label class="grid-span-2">Notes (optional)
+              <input type="text" id="schedEventNotes" class="input-field" placeholder="e.g. Bring pointe shoes &amp; extra electrolyte bottle">
+            </label>
+          </div>
+          <div class="carpool-actions">
+            <button type="button" id="cancelScheduleEventBtn" class="btn-secondary">Cancel</button>
+            <button type="submit" class="btn-primary">Save to Schedule</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Requirement 1: BAND Schedule Sync & Import Modal -->
+  <div id="bandSyncModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-label="Sync with BAND Schedule">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <h3>🔄 Sync Dance Schedule with BAND</h3>
+        <button type="button" id="closeBandSyncBtn" class="icon-btn" aria-label="Close BAND Sync">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="muted-text">Automatically import studio classes and rehearsals from the BAND app. You can upload a BAND calendar file, sync a BAND calendar link, or paste a schedule post from BAND.</p>
+
+        <div class="setting-block">
+          <h4>Option 1: Upload BAND Calendar File (.ics)</h4>
+          <input type="file" id="bandIcsFileInput" accept=".ics,text/calendar" class="input-field">
+        </div>
+
+        <div class="setting-block">
+          <h4>Option 2: Sync from BAND Calendar Link</h4>
+          <div class="search-row">
+            <input type="url" id="bandIcsUrlInput" class="input-field" placeholder="Paste BAND calendar link (https://... or webcal://...)">
+            <button type="button" id="syncBandUrlNowBtn" class="btn-primary btn-sm">Sync Link</button>
+          </div>
+          <p id="bandSyncStatusMsg" class="muted-text"></p>
+        </div>
+
+        <div class="setting-block">
+          <h4>Option 3: Paste Schedule Text from BAND</h4>
+          <textarea id="bandPasteTextInput" class="input-field" rows="4" placeholder="Paste weekly class times from BAND, e.g.:&#10;Mon 4:00 PM - 6:00 PM Ballet &amp; Pointe&#10;Tue 4:30 PM - 7:30 PM Contemporary &amp; Jazz&#10;Thu 4:00 PM - 6:00 PM Technique"></textarea>
+          <button type="button" id="parseBandTextBtn" class="btn-secondary full-width" style="margin-top: 8px;">Import Pasted Schedule</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Requirement 2a: SMS Help Button Form Modal -->
+  <div id="helpModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-label="Text for Help">
+    <div class="modal-sheet modal-sheet-compact">
+      <div class="modal-head">
+        <h3>💬 Need Help? Send a Quick Text</h3>
+        <button type="button" id="closeHelpModalBtn" class="icon-btn" aria-label="Close Help">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="muted-text">Write what you need help with below. When you tap Send, your phone's text message app will open with your message ready to send to your family helper.</p>
+        <form id="helpSmsForm">
+          <div class="form-stack">
+            <label>What do you need help with?
+              <select id="helpTopicSelect" class="input-field">
+                <option value="Schedule or Dance Classes">Schedule or Dance Classes</option>
+                <option value="Food, Salt or Water Goals">Food, Salt or Water Goals</option>
+                <option value="Carpool Rides">Carpool Rides</option>
+                <option value="Syncing Phones or PIN">Syncing Phones or PIN</option>
+                <option value="Something Else">Something Else</option>
+              </select>
+            </label>
+            <label>Your Message
+              <textarea id="helpMessageInput" class="input-field" rows="4" placeholder="Write your question or what you'd like help with..." required></textarea>
+            </label>
+          </div>
+          <div class="carpool-actions">
+            <button type="button" id="cancelHelpModalBtn" class="btn-secondary">Cancel</button>
+            <button type="submit" class="btn-primary">Send in Text App 💬</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Requirement 2b & 2c: Hidden PIN-Secured Admin Dashboard Modal -->
+  <div id="adminModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-label="Admin Dashboard">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <h3>🛡️ Admin Backend Dashboard</h3>
+        <button type="button" id="closeAdminModalBtn" class="icon-btn" aria-label="Close Admin Dashboard">✕</button>
+      </div>
+      <div class="modal-body">
+        <!-- Step 1: Admin PIN Gate -->
+        <div id="adminPinGateSection">
+          <p class="muted-text">Enter the Admin PIN to manage the Google Apps Script backend connection, BAND calendar feed, family support number, and future Google Sign-In settings.</p>
+          <form id="adminPinForm">
+            <div class="form-stack">
+              <label>Admin PIN
+                <input type="password" id="adminPinInput" class="input-field" placeholder="Enter Admin PIN" required>
+              </label>
+            </div>
+            <p id="adminPinError" class="error-text"></p>
+            <button type="submit" class="btn-primary full-width">Unlock Admin Dashboard</button>
+          </form>
+        </div>
+
+        <!-- Step 2: Unlocked Admin Controls Linked to Script URL -->
+        <div id="adminDashboardContent" class="hidden">
+          <div class="setting-block">
+            <h4>1. Google Apps Script Backend URL</h4>
+            <p class="muted-text">Linked directly to <code>Cloud_Sync_Store</code>. Regular family pages never display this technical field.</p>
+            <label class="field-label" for="adminScriptUrlInput">Apps Script Web App URL</label>
+            <input type="url" id="adminScriptUrlInput" class="input-field" placeholder="https://script.google.com/macros/s/.../exec">
+            <div id="adminSyncDiagnostics" class="admin-diag-box">Status: Ready</div>
+            <div class="carpool-actions" style="margin-top: 8px;">
+              <button type="button" id="adminSaveScriptUrlBtn" class="btn-primary btn-sm">Save &amp; Test URL</button>
+              <button type="button" id="adminForcePushBtn" class="btn-secondary btn-sm">Force Push to Cloud</button>
+              <button type="button" id="adminForcePullBtn" class="btn-secondary btn-sm">Force Pull from Cloud</button>
+            </div>
+          </div>
+
+          <div class="setting-block">
+            <h4>2. 1-Tap Family Pairing Link</h4>
+            <p class="muted-text">Generate a 1-tap setup link for Dancer or Mom so they never touch backend URLs.</p>
+            <button type="button" id="adminOpenPairModalBtn" class="btn-secondary full-width">Open 1-Tap Family Pairing Link Generator</button>
+          </div>
+
+          <div class="setting-block">
+            <h4>3. BAND Calendar Feed Auto-Sync</h4>
+            <label class="field-label" for="adminBandIcsUrlInput">Studio BAND iCal (.ics) Feed URL</label>
+            <input type="url" id="adminBandIcsUrlInput" class="input-field" placeholder="https://band.us/... or webcal://...">
+          </div>
+
+          <div class="setting-block">
+            <h4>4. Family Help SMS Support Phone</h4>
+            <p class="muted-text">Preloaded securely via family cipher when Dancer or Mom uses the 💬 Help form.</p>
+            <label class="field-label" for="adminSupportPhoneInput">Support Phone Number (10 digits)</label>
+            <input type="tel" id="adminSupportPhoneInput" class="input-field" placeholder="Preloaded from family cipher">
+          </div>
+
+          <div class="setting-block">
+            <h4>5. Admin PIN Management</h4>
+            <div class="form-grid">
+              <label>New Admin PIN
+                <input type="password" id="adminNewPinInput" class="input-field" placeholder="Leave blank to keep current">
+              </label>
+              <label>Confirm New Admin PIN
+                <input type="password" id="adminConfirmPinInput" class="input-field" placeholder="Confirm new Admin PIN">
+              </label>
+            </div>
+          </div>
+
+          <!-- Requirement 2c: Dormant Google Sign-In Preparation Panel -->
+          <div id="adminGoogleAuthSection" class="setting-block">
+            <h4>6. Future Google Sign-In Prep (Dormant / Not Deployed Yet)</h4>
+            <p class="muted-text">Pre-wired for Google Identity Services (GIS). Kept disabled (`enabled: false`) until you ask to deploy Google Sign-In in a future update.</p>
+            <div class="form-grid">
+              <label class="grid-span-2">Google OAuth 2.0 Web Client ID (Prep)
+                <input type="text" id="adminGoogleClientIdInput" class="input-field" placeholder="xxxx.apps.googleusercontent.com (dormant)">
+              </label>
+              <label class="grid-span-2">Allowed Family Google Emails (comma-separated, prep)
+                <input type="text" id="adminGoogleEmailsInput" class="input-field" placeholder="dancer@gmail.com, mom@gmail.com">
+              </label>
+            </div>
+            <span class="pill-badge badge-caution">Status: Prepped &amp; Dormant (PIN Auth Active)</span>
+          </div>
+
+          <button type="button" id="adminSaveAllBtn" class="btn-primary full-width">Save All Admin Settings</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Requirement 3: Dedicated Nutritional & Recommendation Sources Modal -->
+  <div id="sourcesModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-label="Nutritional &amp; Recommendation Sources">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <h3>📚 Nutritional &amp; Goal Sources</h3>
+        <button type="button" id="closeSourcesModalBtn" class="icon-btn" aria-label="Close Sources">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="muted-text">Here are the medical, scientific, and nutritional sources used to calculate daily salt, water, stomach-safe meal limits, and food values:</p>
+        <div id="nutritionSourcesList" class="sources-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Requirement 5: Add / Edit Past or Missed Day Record Modal -->
+  <div id="pastLogModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-label="Log Past or Missed Day">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <h3 id="pastLogModalTitle">📅 Log Past or Missed Day</h3>
+        <button type="button" id="closePastLogBtn" class="icon-btn" aria-label="Close Past Day Log">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-block">
+          <span class="field-label">Quick Fill Presets</span>
+          <div class="preset-chips-scroll">
+            <button type="button" class="preset-chip" data-past-preset="full_goals">🟢 Hit Full Goals (Steady)</button>
+            <button type="button" class="preset-chip" data-past-preset="typical_dance">🩰 Typical Dance Day</button>
+            <button type="button" class="preset-chip" data-past-preset="rest_day">🛋️ Rest / No-Dance Day</button>
+          </div>
+        </div>
+
+        <form id="pastLogForm">
+          <div class="form-grid">
+            <label>Date
+              <input type="date" id="pastLogDate" class="input-field" required>
+            </label>
+            <label>Routine Type
+              <select id="pastLogDayMode" class="input-field">
+                <option value="school_dance">School + Studio</option>
+                <option value="competition">Competition</option>
+                <option value="recovery">Recovery / Rest</option>
+              </select>
+            </label>
+            <label>Dance Hours That Day
+              <input type="number" id="pastLogDanceHours" class="input-field" min="0" max="12" step="0.5" value="2.0">
+            </label>
+            <label>How Felt That Day
+              <select id="pastLogSymptom" class="input-field">
+                <option value="steady">✨ Steady</option>
+                <option value="dizzy">💫 Dizzy</option>
+                <option value="tired">🔋 Tired</option>
+                <option value="stomach">🍵 Stomach</option>
+              </select>
+            </label>
+            <label>Total Salt Logged (mg)
+              <input type="number" id="pastLogSodium" class="input-field" min="0" step="50" value="3600" required>
+            </label>
+            <label>Salt Goal That Day (mg)
+              <input type="number" id="pastLogSodiumTarget" class="input-field" min="500" step="50" value="3600" required>
+            </label>
+            <label>Total Water Logged (oz)
+              <input type="number" id="pastLogWater" class="input-field" min="0" step="1" value="85" required>
+            </label>
+            <label>Water Goal That Day (oz)
+              <input type="number" id="pastLogWaterTarget" class="input-field" min="16" step="1" value="85" required>
+            </label>
+            <label>Highest Single-Meal Fat (g)
+              <input type="number" id="pastLogMaxMealFat" class="input-field" min="0" step="0.5" value="3.5" required>
+            </label>
+            <label>Total Daily Fat (g)
+              <input type="number" id="pastLogTotalFat" class="input-field" min="0" step="0.5" value="14.0">
+            </label>
+            <label class="grid-span-2">Notes for That Day
+              <input type="text" id="pastLogNotes" class="input-field" placeholder="Optional notes for that day...">
+            </label>
+          </div>
+
+          <div class="live-safety-row">
+            <span id="pastLogScorePreview" class="pill-badge badge-safe">Preview Score: 100% (3/3 Goals Hit)</span>
+          </div>
+
+          <div class="carpool-actions">
+            <button type="button" id="cancelPastLogBtn" class="btn-secondary">Cancel</button>
+            <button type="submit" class="btn-primary">Save Past Day Record</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -359,7 +1016,7 @@
             <label>Portion / Serving
               <input type="text" id="logItemPortion" class="input-field" placeholder="16oz / 1 pack">
             </label>
-            <label>Sodium (mg)
+            <label>Salt / Sodium (mg)
               <input type="number" id="logItemSodium" class="input-field" min="0" step="10" value="0" required>
             </label>
             <label>Water (oz)
@@ -373,7 +1030,7 @@
             </label>
           </div>
           <div class="live-safety-row">
-            <span id="logGbSafetyBadge" class="pill-badge badge-safe">✓ GB-Safe</span>
+            <span id="logGbSafetyBadge" class="pill-badge badge-safe">✓ Stomach-Safe</span>
           </div>
           <div class="carpool-actions">
             <button type="button" id="cancelQuickLogBtn" class="btn-secondary">Cancel</button>
@@ -410,7 +1067,7 @@
                 <option value="Restaurant / Fast Food">Restaurant / Fast Food</option>
               </select>
             </label>
-            <label>Sodium (mg)
+            <label>Salt / Sodium (mg)
               <input type="number" id="customFoodSodium" class="input-field" min="0" value="400" required>
             </label>
             <label>Water (oz)
@@ -432,7 +1089,7 @@
     </div>
   </div>
 
-  <!-- Change Family PIN Modal -->
+  <!-- Change Family PIN Modal (Non-Technical Copy) -->
   <div id="changePinModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-label="Change Family PIN">
     <div class="modal-sheet">
       <div class="modal-head">
@@ -440,7 +1097,7 @@
         <button type="button" id="closeChangePinBtn" class="icon-btn" aria-label="Close Change PIN">✕</button>
       </div>
       <div class="modal-body">
-        <p class="muted-text">Changing your PIN re-encrypts your data with a new key and updates Cloud Sync automatically. Remember to enter the new PIN on other family devices.</p>
+        <p class="muted-text">Choose a new Family PIN (at least 4 characters). Remember to use the new PIN on your family's other phones too.</p>
         <form id="changePinForm">
           <div class="form-stack">
             <label>Current Family PIN
@@ -456,38 +1113,38 @@
           <p id="changePinError" class="error-text"></p>
           <div class="carpool-actions">
             <button type="button" id="cancelChangePinBtn" class="btn-secondary">Cancel</button>
-            <button type="submit" class="btn-primary">Update PIN &amp; Re-Encrypt</button>
+            <button type="submit" class="btn-primary">Save New PIN</button>
           </div>
         </form>
       </div>
     </div>
   </div>
 
-  <!-- Pair Another Device Modal (Eliminates Manual URL Typing) -->
-  <div id="pairDeviceModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-label="Pair Another Device">
+  <!-- Pair Another Device Modal (Simple Family Copy) -->
+  <div id="pairDeviceModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-label="Share App With Family">
     <div class="modal-sheet">
       <div class="modal-head">
-        <h3>Pair Another Family Device</h3>
-        <button type="button" id="closePairDeviceBtn" class="icon-btn" aria-label="Close Pair Device">✕</button>
+        <h3>Share App With Family Phone</h3>
+        <button type="button" id="closePairDeviceBtn" class="icon-btn" aria-label="Close Share App">✕</button>
       </div>
       <div class="modal-body">
-        <p class="muted-text">Send this 1-tap pairing link to Dancer or Mom. Opening it automatically configures Cloud Sync without typing the script URL — they only need the Family PIN.</p>
-        <label class="field-label" for="pairLinkInput">1-Tap Pairing Link</label>
+        <p class="muted-text">Text this 1-tap link to Dancer or Mom. When they tap it, their phone connects automatically—they only need to enter your Family PIN!</p>
+        <label class="field-label" for="pairLinkInput">1-Tap Family Setup Link</label>
         <input type="text" id="pairLinkInput" class="input-field" readonly>
-        <p id="pairNoUrlWarn" class="error-text hidden">Save an Apps Script Sync URL in Settings first before generating a pairing link.</p>
+        <p id="pairNoUrlWarn" class="error-text hidden">Family cloud sync hasn't been set up by your Admin yet. Tap 💬 Help if you need it turned on.</p>
         <div class="carpool-actions" style="margin-top: 12px;">
           <button type="button" id="copyPairLinkBtn" class="btn-secondary">Copy Link</button>
-          <button type="button" id="sharePairLinkBtn" class="btn-primary">Send / Share Link</button>
+          <button type="button" id="sharePairLinkBtn" class="btn-primary">Send / Text Link</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Contextual ℹ️ Info Explainer Modal -->
-  <div id="infoModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-label="Clinical & App Information">
+  <div id="infoModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-label="Helpful Explanation">
     <div class="modal-sheet modal-sheet-compact">
       <div class="modal-head">
-        <h3 id="infoModalTitle">Info</h3>
+        <h3 id="infoModalTitle">Helpful Tip</h3>
         <button type="button" id="closeInfoModalBtn" class="icon-btn" aria-label="Close Info">✕</button>
       </div>
       <div class="modal-body">
@@ -501,33 +1158,41 @@
   <div id="manualModal" class="modal-backdrop hidden no-print" role="dialog" aria-modal="true" aria-label="Quick Start Guide & Manual">
     <div class="modal-sheet">
       <div class="modal-head">
-        <h3>📖 Quick Start Guide &amp; Manual</h3>
+        <h3>📖 Simple Guide &amp; Tips</h3>
         <button type="button" id="closeManualBtn" class="icon-btn" aria-label="Close Manual">✕</button>
       </div>
       <div class="modal-body">
         <div id="manualTabs" class="filter-pills manual-tabs" role="tablist"></div>
         <div id="manualContent" class="manual-content"></div>
+        <div class="manual-footer-actions">
+          <button type="button" id="manualOpenSourcesBtn" class="btn-secondary btn-sm">📚 Nutrition Sources</button>
+          <button type="button" id="manualOpenHelpBtn" class="btn-primary btn-sm">💬 Text for Help</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- First-Visit / Remember-Device PIN Overlay -->
+  <!-- First-Visit / Remember-Device PIN Overlay (Clean & Non-Technical) -->
   <div id="pinOverlay" class="pin-overlay no-print" role="dialog" aria-modal="true" aria-label="Family PIN Unlock">
     <form id="pinUnlockForm" class="pin-card">
-      <h2>En Pointe &amp; Steady</h2>
-      <p class="muted-text">Enter your Family PIN to unlock encrypted wellness &amp; carpool data on this device.</p>
+      <div class="pin-brand-head">
+        <span class="pin-avatar">🩰</span>
+        <h2>En Pointe &amp; Steady</h2>
+      </div>
+      <p class="muted-text">Enter your Family PIN to open your daily dance plan, schedule, and carpool.</p>
       <label>Family PIN
-        <input type="password" id="pinInput" class="input-field" autocomplete="current-password" placeholder="Enter PIN" required>
+        <input type="password" id="pinInput" class="input-field" autocomplete="current-password" placeholder="Enter Family PIN" required>
       </label>
-      <label>Apps Script Sync URL (auto-filled via pairing link, or optional)
-        <input type="url" id="pinSyncUrlInput" class="input-field" placeholder="https://script.google.com/macros/s/.../exec">
-      </label>
+      <!-- Hidden input preserves 1-tap pairing link auto-fill without exposing technical backend URL to regular users -->
+      <input type="hidden" id="pinSyncUrlInput" value="">
+      <!-- Dormant Google Sign-In mount point for future activation (Requirement 2c) -->
+      <div id="googleSignInMount" class="hidden" data-google-signin-prep="ready"></div>
       <label class="checkbox-row">
         <input type="checkbox" id="pinRememberCheck" checked>
-        <span>Remember this device</span>
+        <span>Keep me signed in on this phone</span>
       </label>
       <p id="pinErrorMsg" class="error-text"></p>
-      <button type="submit" class="btn-primary full-width">Unlock &amp; Sync</button>
+      <button type="submit" class="btn-primary full-width">Open App</button>
     </form>
   </div>
 

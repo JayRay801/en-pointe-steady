@@ -214,3 +214,50 @@ export async function lookupFoodOpenFoodFacts(query, fallbackEst = null) {
   }
   return est;
 }
+
+/**
+ * Trusted clinical, scientific, and nutritional sources used for all food values and daily target recommendations.
+ */
+export const NUTRITION_SOURCES = [
+  {
+    id: "src_pots",
+    category: "POTS Salt & Hydration Guidelines",
+    title: "Dysautonomia International & Heart Rhythm Society POTS Consensus",
+    organization: "Dysautonomia International • Heart Rhythm Society (HRS) • NIH / NHLBI POTS Expert Consensus",
+    summary:
+      "Recommends 3,000–10,000 mg of daily sodium (Mild 3,000 mg, Standard 3,600 mg, High 4,500+ mg base) paired with 2.0–3.0+ liters (68–100+ oz) of daily fluid to expand plasma volume, support orthostatic blood pressure during standing and leaps, and replace studio sweat (+180–210 mg sodium and +8–9 oz fluid per hour of active dance).",
+    howUsedInApp:
+      "Drives the daily Sodium (mg) and Hydration (oz) targets, dynamically adjusting each day based on the dancer's scheduled dance class hours."
+  },
+  {
+    id: "src_gallbladder",
+    category: "Stomach & Gallbladder Low-Fat Thresholds",
+    title: "ACG / NIDDK Clinical Low-Fat Biliary & Gallbladder Dietary Guidelines",
+    organization: "National Institute of Diabetes and Digestive and Kidney Diseases (NIDDK / NIH) • American College of Gastroenterology (ACG)",
+    summary:
+      "Large boluses of dietary fat trigger strong cholecystokinin (CCK)-mediated gallbladder contractions that can cause upper-abdominal pain, cramping, or nausea during physical activity. Small, frequent meals capped at ≤ 5.5g fat per meal (Moderate), ≤ 4.0g (Strict), or ≤ 2.5g (Gentle/Flare) minimize digestive strain while delivering steady energy.",
+    howUsedInApp:
+      "Drives the per-meal Fat Cap (Safe / Caution / Avoid badges) in the Food Analyzer, Quick Log, and Daily Target Score."
+  },
+  {
+    id: "src_dancer_energy",
+    category: "Dancer Energy, BMR, Gender & Activity Scaling",
+    title: "Mifflin-St Jeor Equation, IADMS Dancer Nutrition & Compendium of Physical Activities",
+    organization: "Mifflin et al. (Am J Clin Nutr) • International Association for Dance Medicine & Science (IADMS) • Compendium of Physical Activities (Dance METs)",
+    summary:
+      "Calculates resting energy expenditure using the validated Mifflin-St Jeor equation (10 × weight_kg + 6.25 × height_cm - 5 × age - 161 for Females; + 5 for Males) with a 1.35× non-exercise baseline plus dynamic dance energy expenditure (4.2 kcal/kg/hr Female, 4.6 kcal/kg/hr Male across ballet, pointe, contemporary, and rehearsal METs).",
+    howUsedInApp:
+      "Drives the daily Calorie target and automatic Portion Multiplier (0.75x Lighter to 1.5x High-Output Portion) using that specific day's scheduled dance hours and Male/Female profile selection."
+  },
+  {
+    id: "src_food_db",
+    category: "Food & Electrolyte Nutrient Databases",
+    title: "USDA FoodData Central, OpenFoodFacts & Official Brand Nutrition Facts",
+    organization: "USDA Agricultural Research Service (FoodData Central) • OpenFoodFacts Public Database • Verified Manufacturer Labels",
+    summary:
+      "Nutrient profiles (Sodium mg, Fat g, Calories kcal, Serving size) are compiled from USDA FoodData Central standard reference entries, live OpenFoodFacts barcode/product data, and official published nutrition facts panels for LMNT, Liquid I.V., TriOral WHO ORS, SaltStick/Vitassium, Subway, Chick-fil-A, Chipotle, Panera, Panda Express, and Taco Bell.",
+    howUsedInApp:
+      "Powers the 36 curated dancer meals/snacks, 28 instant keyword rules, and live online food lookup in the Food tab."
+  }
+];
+

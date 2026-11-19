@@ -15,8 +15,22 @@ A privacy-first, mobile-first Progressive Web App (PWA) for POTS and gallbladder
 - Static PWA (`index.html`, `styles.css`, `app.js`, `crypto.js`, `foods.js`, `history.js`, `manifest.webmanifest`, `sw.js`) hosted on GitHub Pages.
 - All personal profile, schedule, carpool, and health history data remain encrypted at rest and never reside in this public repository.
 
+## Team Agents & Deployment
+
+- **Deployment & Go-Live Verification Agent (`deploy-verifier`)**: Defined in `AGENTS.md` and `.agents/skills/deploy-go-live/SKILL.md`. Enforces pre-flight checks, an explicit **Confirm to Go Live** gate before pushing to `origin/main`, and post-deploy live GitHub Pages + Service Worker (`CACHE_NAME`) + SHA-256 asset parity verification.
+
 ## Verification
 
 ```bash
+# Run application unit & DOM/E2E verification suite
 node tests/verify_app.mjs
+
+# Run deployment verifier offline dry-run self-test
+node tests/verify_deploy.mjs --dry-run
+
+# Run pre-flight readiness summary before confirming go-live
+node tests/verify_deploy.mjs --pre
+
+# Run post-push live GitHub Pages & Service Worker verification
+node tests/verify_deploy.mjs --live
 ```

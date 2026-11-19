@@ -6,6 +6,7 @@
 
 import {
   DEFAULT_FOOD_LIBRARY,
+  NUTRITION_SOURCES,
   evaluateFoodSafety,
   estimateNutritionForQuery,
   lookupFoodOpenFoodFacts
@@ -15,12 +16,18 @@ import {
   decryptBundle,
   pullFromCloud,
   pushToCloud,
-  createDebouncedPush
+  createDebouncedPush,
+  resolveFamilySupportPhone,
+  buildSmsHelpUri,
+  GOOGLE_AUTH_PREP_SPEC,
+  prepareGoogleSignInConfig
 } from "./crypto.js";
 import {
   getLocalDateString,
   computeDailyTotals,
+  computeDailyScore,
   snapshotToday,
+  upsertPastHistoryEntry,
   filterHistory,
   computeHistoryStats,
   generateHistoryCsv,
@@ -37,23 +44,23 @@ export const DEFAULT_BAG_ITEMS = [
   { id: "bag_4", text: "Insulated Food Thermos with Warm Low-Fat Soup", tag: "Evening Break" },
   { id: "bag_5", text: "2x Unsweetened Applesauce or Fruit Puree Squeeze Pouches", tag: "Quick Carbs" },
   { id: "bag_6", text: "Ice Pack + Lean Deli Turkey & Pickle Spears in cooler pouch", tag: "Lean Protein" },
-  { id: "bag_7", text: "Late-Night Car-Ride Recovery Container (skip fast food)", tag: "Gallbladder Safe" },
+  { id: "bag_7", text: "Late-Night Car-Ride Recovery Container (skip fast food)", tag: "Stomach Safe" },
   { id: "bag_8", text: "Compression Socks for car ride home after late rehearsal", tag: "POTS Recovery" }
 ];
 
 export const RESCUE_PROTOCOLS = {
   steady: null,
   dizzy: {
-    title: "2-Minute Studio Side-Line POTS Rescue Protocol",
-    body: "1) Sit on the studio floor with knees pulled up or legs crossed. 2) Drink 8–12 oz cold electrolyte water or take a salt packet / 6 salted pretzels immediately. 3) Flex calf & thigh muscles before standing slowly."
+    title: "2-Minute Studio Sideline Salt & Water Rescue",
+    body: "1) Sit on the studio floor with knees pulled up or legs crossed. 2) Drink 8–12 oz cold electrolyte water or take a salt packet / 6 salted pretzels right away. 3) Flex calf & thigh muscles before standing up slowly."
   },
   tired: {
-    title: "Quick Low-Fat Dance Energy Rescue",
-    body: "Pair fast-absorbing carbs + sodium (applesauce pouch + salted pretzels or half banana + electrolyte drink). Avoid high-fat nuts or heavy protein bars during rehearsal."
+    title: "Quick Low-Fat Dance Energy Boost",
+    body: "Pair quick energy carbs with salt (an applesauce pouch + salted pretzels, or half a banana + electrolyte drink). Skip high-fat nuts or heavy protein bars during dance."
   },
   stomach: {
-    title: "Gentle Gallbladder Soothing Mode",
-    body: "Keep fat near 0g–2g for the next two slots. Warm liquids (warm chicken broth, miso soup, or chamomile tea) + plain salted crackers or rice cakes relax the biliary tract while maintaining POTS sodium."
+    title: "Gentle Stomach Soothing Mode",
+    body: "Keep fat super low (0g–2g) for the next two meals or snacks. Sip warm chicken broth, miso soup, or tea with plain salted crackers or rice cakes so your stomach can relax while keeping salt steady."
   }
 };
 
@@ -69,83 +76,92 @@ export const QUICK_LOG_PRESETS = [
 
 export const SYMPTOM_QUICK_TAGS = [
   "Lightheaded at barre",
-  "High HR",
+  "Fast heartbeat",
   "Brain fog",
   "Heavy legs",
-  "Nausea / GI",
+  "Sensitive stomach",
   "Hot studio"
 ];
 
+/**
+ * Simple, warm, non-technical explanations for `ℹ` Info buttons (Requirement 2).
+ * Zero technical jargon (no encryption acronyms, no backend URLs, no complex medical lingo).
+ */
 export const CLINICAL_INFO_TOPICS = {
   sodium: {
-    title: "Why High Sodium for POTS?",
-    body: "Dancers with POTS need extra sodium (typically 3,000–4,500+ mg/day plus rehearsal sweat losses) to expand blood volume, stabilize blood pressure during jumps and pointe work, and prevent dizziness. Use +500mg Na / -500 to quickly adjust."
+    title: "Why Extra Salt Helps Dancers With POTS",
+    body: "Salt helps the body hold onto water so blood flows smoothly during turns, jumps, and long rehearsals. That keeps dizziness away and energy steady! Tap +500mg or -500 anytime to adjust."
   },
   water: {
-    title: "Hydration & Electrolyte Pairing",
-    body: "Your daily hydration goal scales with body weight and dance hours (+8 oz per hour of class). Pair water with sodium or electrolytes so fluids stay in your bloodstream instead of flushing straight through."
+    title: "Smart Hydration & Salt Pairing",
+    body: "The daily water goal automatically adjusts based on that day's dance classes (+8 oz for every hour of dance). Always pair plain water with an electrolyte drink or salty snack so the body absorbs it instead of flushing it right out."
   },
   gb: {
-    title: "Gallbladder Fat Cap (≤ 5.5g / Meal)",
-    body: "Higher-fat meals trigger strong gallbladder contractions that can cause upper-abdominal pain or nausea. Keeping each meal or snack at or below your meal cap (Moderate: 5.5g, Strict: 4.0g, Flare: 2.5g) lets you fuel safely without biliary flares."
+    title: "Gentle on the Stomach (Low-Fat Meals)",
+    body: "Meals with too much grease or heavy fat (like fried food, extra cheese, or creamy sauces) can cause stomach cramps or nausea during dance. Keeping each meal or snack under the fat limit (such as 5.5g) keeps digestion calm and comfortable."
   },
   dayMode: {
-    title: "Choosing Your Day Mode",
-    body: "Each Day Mode (School + Studio, Competition, Recovery) holds its own routine fuel timeline. Switch modes anytime without losing your saved routines. One-off items added with '+ Quick Log' automatically clear at midnight while keeping your base routine."
+    title: "Choosing Today's Routine",
+    body: "Pick the routine that fits today—School + Studio, Competition, or Recovery. Each routine saves its own meal plan, and any extra snacks added with '+ Quick Log' reset cleanly at midnight for a fresh start tomorrow."
   },
   doctorOverride: {
-    title: "Doctor Override Targets",
-    body: "Turn this on if your cardiologist, POTS specialist, or gastroenterologist gave you specific daily Sodium (mg), Hydration (oz), Max Meal Fat (g), or Calorie targets that differ from the automatic calculator."
+    title: "Custom Doctor Goals",
+    body: "Turn this on if the doctor gave specific daily numbers for salt, water, meal fat limit, or calories instead of using the automatic calculator."
   },
   sync: {
-    title: "Zero-PII Encrypted Cloud Sync",
-    body: "All personal details, notes, carpool schedules, and health history are encrypted inside your browser (AES-256-GCM) with your Family PIN BEFORE being sent to Google Sheets. Use 'Pair Another Device' to share a 1-tap link so family members never have to type the script URL."
+    title: "Sharing Between Family Phones",
+    body: "Your Family PIN keeps the schedule, carpool rides, and daily logs private and shared between Dancer's and Mom's phones. Tap 'Share App With Family' to text a 1-tap setup link to another family phone."
+  },
+  score: {
+    title: "Daily Target Score (Green, Yellow, Red)",
+    body: "The Daily Score (0–100%) shows how closely the daily salt, water, and stomach-safe meal goals were hit. Green (80%+) means most goals were hit, Yellow (50–79%) means partway there, and Red (<50%) is a gentle reminder to fuel and hydrate."
   }
 };
 
+/**
+ * Simple, user-friendly Quick Start Guide & Manual sections (Requirement 2).
+ */
 export const MANUAL_SECTIONS = [
   {
     id: "quickstart",
     label: "Quick Start",
-    title: "Daily Routine in 60 Seconds",
+    title: "Easy Daily Routine in 60 Seconds",
     items: [
-      "<strong>Check off meals &amp; drinks:</strong> Tap the checkbox beside each scheduled slot (or switch meal options in the dropdown) as you eat or drink. Your Sodium and Hydration rings fill automatically.",
-      "<strong>Log anything extra fast:</strong> Tap <strong>+ Quick Log</strong> to pick 1-tap electrolyte presets (LMNT, Liquid I.V., TriOral, Pretzels, Broth) or search 36+ safe foods.",
-      "<strong>Fix mistakes anytime:</strong> Tap <strong>✏️</strong> on any timeline card to adjust amounts, <strong>🗑️</strong> to delete it, or use <strong>-500 / -8oz</strong> under the rings to undo taps.",
-      "<strong>Switch Day Modes &amp; templates:</strong> Choose <em>School + Studio</em>, <em>Competition</em>, or <em>Recovery</em>—each saves its own routine. If a mode is cleared, tap <strong>Load Dance Routine Template</strong> to restore it.",
-      "<strong>Pack the night before:</strong> Expand the <strong>🎒 Dance Bag Checklist</strong> right on Today's screen before bed."
+      "<strong>Check off meals &amp; drinks:</strong> Tap the checkbox beside each meal or snack as it is finished. The Salt and Hydration rings and Daily Score update right away.",
+      "<strong>Log extra drinks or snacks fast:</strong> Tap <strong>+ Quick Log</strong> to pick 1-tap favorites (LMNT, Liquid I.V., Pretzels, Warm Broth) or search 36+ dancer foods.",
+      "<strong>Watch the Daily Score:</strong> A <strong>Green</strong> score badge (80%+) means most daily goals are hit! Missed a day? Tap <strong>+ Log Missed Day</strong> to fill in any past date.",
+      "<strong>Switch between Dancer &amp; Mom view:</strong> Tap the <strong>🩰 Dancer View / 💛 Mom View</strong> pill at the top anytime."
+    ]
+  },
+  {
+    id: "schedule",
+    label: "Schedule & Carpool",
+    title: "Custom Daily Dance Schedule, BAND & Carpool",
+    items: [
+      "<strong>Month, Week &amp; Day Calendar:</strong> Open the <strong>📅 Schedule</strong> tab to view the Month calendar (with the selected day's schedule right underneath) or switch to <strong>Week</strong> and <strong>Day</strong> timelines just like Google Calendar.",
+      "<strong>Different Dance Classes Every Day:</strong> Tap <strong>+ Add Class / Event</strong> or <strong>+ Customize Day</strong> to set each day's exact dance classes and school hours. Days with more dance automatically recommend more food, salt, and water—and rest days with 0 dance hours adjust down automatically!",
+      "<strong>Sync with BAND:</strong> Tap <strong>🔄 BAND Sync</strong> in the Schedule tab to import classes from a BAND calendar file, link, or pasted schedule post.",
+      "<strong>School &amp; Dance Carpool:</strong> Scroll to the <strong>🚗 Carpool</strong> section inside Schedule to see or edit both School and Dance Studio rides, or tap <strong>Share / Copy Rides</strong> to text the plan."
     ]
   },
   {
     id: "fueling",
-    label: "POTS & Gallbladder",
-    title: "Fueling Rules for Dancers",
+    label: "Salt, Water & Food",
+    title: "Simple Fueling Rules for Dancers",
     items: [
-      "<strong>Sodium + Water together:</strong> Plain water alone flushes out fast. Pair every 16oz bottle with an electrolyte packet or salty snack.",
-      "<strong>Gallbladder safety cap:</strong> Keep each meal/snack under your fat cap (default <strong>≤ 5.5g fat/meal</strong>, or Strict 4.0g / Flare 2.5g / Doctor Override). Watch the live badge in Quick Log and Food Analyzer.",
-      "<strong>Custom foods &amp; Analyzer:</strong> Use the <strong>Food</strong> tab to analyze snacks or restaurant items, save your own with <strong>+ Custom Food</strong>, and remove custom items anytime with <strong>🗑️</strong>.",
-      "<strong>Tap ℹ for instant context:</strong> Small <strong>ℹ</strong> buttons next to rings, Day Modes, Doctor Override, and Cloud Sync open quick plain-language explainers.",
-      "<strong>Clean midnight reset:</strong> One-off '+ Quick Log' items automatically archive to History and clear at midnight so tomorrow's routine starts fresh."
+      "<strong>Salt + Water work together:</strong> Plain water alone passes right through. Pair every water bottle with an electrolyte mix or a salty snack so energy stays steady.",
+      "<strong>Keep meals gentle on the stomach:</strong> Staying at or below the per-meal fat limit (like <strong>5.5g fat per meal</strong>) helps prevent stomach aches during dance.",
+      "<strong>Check any food or restaurant item:</strong> Open the <strong>🥗 Food</strong> tab to search safe meals, check restaurant picks, add custom foods, or tap <strong>📚 Sources</strong> to see the trusted nutrition guides behind these numbers."
     ]
   },
   {
     id: "rescue",
-    label: "Rescue & Symptoms",
-    title: "When You Don't Feel Steady",
+    label: "Feeling & Help",
+    title: "Feeling Check-Ins, Doctor Summary & Help",
     items: [
-      "<strong>Tap 'I feel:' at the top:</strong> Selecting <em>Dizzy</em>, <em>Tired</em>, or <em>Stomach</em> opens an immediate sideline rescue protocol with step-by-step actions.",
-      "<strong>1-Tap Symptom Tags:</strong> Above Daily Notes, tap tags like <em>Lightheaded at barre</em>, <em>High HR</em>, or <em>Hot studio</em> to log patterns for your doctor.",
-      "<strong>Doctor Report &amp; CSV:</strong> Tap <strong>View Full History →</strong> (or Settings ⚙ → <strong>Open Full History &amp; Doctor Report</strong>) to view symptom correlation, download CSV, or <strong>Print / Save Doctor PDF</strong>."
-    ]
-  },
-  {
-    id: "family",
-    label: "Sync, PIN & Carpool",
-    title: "Family Sync, Security & Rides",
-    items: [
-      "<strong>No typing long URLs:</strong> On a configured phone, go to Settings (⚙) → <strong>Pair Another Device</strong> and text the 1-tap pairing link to Dancer or Mom.",
-      "<strong>Change Family PIN:</strong> Go to Settings (⚙) → <strong>Change Family PIN</strong>. Your data is re-encrypted (AES-256-GCM) and pushed to Cloud Sync automatically.",
-      "<strong>1-Tap Carpool Share &amp; Calendar:</strong> On the <strong>Carpool</strong> tab, tap <strong>Share / Copy Ride</strong> to paste pickup and drop-off details straight into family texts, or <strong>Calendar (.ics)</strong> to add rides and fuel slots to your calendar."
+      "<strong>Quick feeling check-in:</strong> In Dancer view, a quick popup asks <em>'I feel:'</em> (Steady, Dizzy, Tired, or Stomach) when opening the app so helpful tips appear right away.",
+      "<strong>Print a Doctor Summary:</strong> Open <strong>Full History</strong> to see color-coded daily scores, log missed days from the past, or tap <strong>Print / Save Doctor PDF</strong> for doctor visits.",
+      "<strong>Need help? Send a quick text:</strong> Tap <strong>💬 Help</strong> at the top of the screen, type what you need help with, and tap Send to open your text messaging app pre-filled and ready to go."
     ]
   }
 ];
@@ -291,6 +307,38 @@ export const DEFAULT_SCHEDULE_TEMPLATES = {
   ]
 };
 
+/**
+ * Default customizable per-day weekly schedule (Mon–Sun) with varied daily dance classes and rest days (Requirement 1).
+ */
+export function createDefaultWeeklySchedule() {
+  return {
+    Mon: [
+      { id: "wk_mon_1", title: "School Hours", category: "school", startTime: "08:00", endTime: "15:00", durationHours: 7.0, intensity: "light", location: "School", notes: "Pack electrolyte bottle" },
+      { id: "wk_mon_2", title: "Ballet Technique & Pointe", category: "dance", startTime: "16:00", endTime: "18:00", durationHours: 2.0, intensity: "high", location: "Studio A", notes: "Pointe shoes + pretzels" }
+    ],
+    Tue: [
+      { id: "wk_tue_1", title: "School Hours", category: "school", startTime: "08:00", endTime: "15:00", durationHours: 7.0, intensity: "light", location: "School", notes: "" },
+      { id: "wk_tue_2", title: "Contemporary & Jazz Combo", category: "dance", startTime: "16:30", endTime: "18:30", durationHours: 2.0, intensity: "moderate", location: "Studio B", notes: "" },
+      { id: "wk_tue_3", title: "Team Rehearsal", category: "rehearsal", startTime: "18:30", endTime: "19:30", durationHours: 1.0, intensity: "high", location: "Main Stage Room", notes: "Warm soup thermos break" }
+    ],
+    Wed: [
+      { id: "wk_wed_1", title: "School Hours", category: "school", startTime: "08:00", endTime: "15:00", durationHours: 7.0, intensity: "light", location: "School", notes: "" },
+      { id: "wk_wed_2", title: "Ballet Barre & Variations", category: "dance", startTime: "16:00", endTime: "17:30", durationHours: 1.5, intensity: "moderate", location: "Studio A", notes: "" }
+    ],
+    Thu: [
+      { id: "wk_thu_1", title: "School Hours", category: "school", startTime: "08:00", endTime: "15:00", durationHours: 7.0, intensity: "light", location: "School", notes: "" },
+      { id: "wk_thu_2", title: "Pointe, Turns & Conditioning", category: "dance", startTime: "16:00", endTime: "18:30", durationHours: 2.5, intensity: "high", location: "Studio A", notes: "High salt day" }
+    ],
+    Fri: [
+      { id: "wk_fri_1", title: "School Hours", category: "school", startTime: "08:00", endTime: "15:00", durationHours: 7.0, intensity: "light", location: "School", notes: "Rest afternoon — no dance classes" }
+    ],
+    Sat: [
+      { id: "wk_sat_1", title: "Saturday Company Rehearsal & Masterclass", category: "dance", startTime: "09:30", endTime: "13:00", durationHours: 3.5, intensity: "high", location: "Studio A & B", notes: "Pack 2 electrolyte bottles + lunch" }
+    ],
+    Sun: []
+  };
+}
+
 export function cloneScheduleTemplate(mode) {
   const list = DEFAULT_SCHEDULE_TEMPLATES[mode] || [];
   return list.map((slot) => ({
@@ -303,12 +351,26 @@ export function createEmptyCarpool() {
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const obj = {};
   for (const d of days) {
-    obj[d] = { toDriver: "", toTime: "", toNote: "", homeDriver: "", homeTime: "", homeNote: "" };
+    obj[d] = {
+      schoolToDriver: "",
+      schoolToTime: "",
+      schoolToNote: "",
+      schoolHomeDriver: "",
+      schoolHomeTime: "",
+      schoolHomeNote: "",
+      toDriver: "",
+      toTime: "",
+      toNote: "",
+      homeDriver: "",
+      homeTime: "",
+      homeNote: ""
+    };
   }
   return obj;
 }
 
 export function createDefaultState() {
+  const todayStr = getLocalDateString();
   return {
     viewerRole: "Dancer",
     dayOfWeek: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][new Date().getDay()] || "Mon",
@@ -316,8 +378,11 @@ export function createDefaultState() {
     activeTab: "today",
     historyRange: "7d",
     foodFilter: "all",
+    calendarViewMode: "month",
+    selectedCalendarDate: todayStr,
     profile: {
       name: "Dancer",
+      gender: "female",
       age: 14,
       weightLbs: 110,
       heightFt: 5,
@@ -331,6 +396,39 @@ export function createDefaultState() {
       customMealFat: 5.5,
       customCalories: 2000
     },
+    personalization: {
+      byRole: {
+        Dancer: {
+          lighting: "day",
+          autoRule: "system",
+          palette: "blush",
+          avatar: "🩰",
+          studioName: "Calm Studio Plan",
+          mottoIndex: 0
+        },
+        Mom: {
+          lighting: "auto",
+          autoRule: "time",
+          palette: "teal",
+          avatar: "👩",
+          studioName: "Calm Studio Plan",
+          mottoIndex: 0
+        }
+      },
+      theme: "studio_teal",
+      avatar: "🩰",
+      studioName: "Calm Studio Plan",
+      motto: "Steady salt, gentle fuel, strong turns."
+    },
+    adminConfig: {
+      adminPin: "",
+      supportPhoneOverride: "",
+      bandIcsUrl: "",
+      lastBandSyncAt: null,
+      googleAuth: prepareGoogleSignInConfig(GOOGLE_AUTH_PREP_SPEC.defaultConfig)
+    },
+    weeklySchedule: createDefaultWeeklySchedule(),
+    dateScheduleOverrides: {},
     schedules: {
       school_dance: cloneScheduleTemplate("school_dance"),
       competition: cloneScheduleTemplate("competition"),
@@ -346,17 +444,279 @@ export function createDefaultState() {
     bonusWater: 0,
     symptomStatus: "steady",
     dailyNotes: "",
-    lastActiveDate: getLocalDateString(),
+    lastActiveDate: todayStr,
     history: [],
     googleSheetWebAppUrl: ""
   };
 }
 
 /**
- * Pure POTS & Gallbladder daily target calculation.
+ * Helper to compute duration in hours between two time strings ("16:00" and "18:30" or "4:00 PM" and "6:30 PM").
  */
-export function getCalculatedTargets(profile) {
+export function computeTimeRangeDurationHours(startTimeStr, endTimeStr, fallbackHours = 1.0) {
+  const parseMin = (t) => {
+    const s = String(t || "").trim();
+    const ampmMatch = s.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (ampmMatch) {
+      let h = parseInt(ampmMatch[1], 10);
+      const m = parseInt(ampmMatch[2], 10);
+      const ap = ampmMatch[3].toUpperCase();
+      if (ap === "PM" && h < 12) h += 12;
+      if (ap === "AM" && h === 12) h = 0;
+      return h * 60 + m;
+    }
+    const h24 = s.match(/^(\d{1,2}):(\d{2})$/);
+    if (h24) {
+      return parseInt(h24[1], 10) * 60 + parseInt(h24[2], 10);
+    }
+    return null;
+  };
+  const startM = parseMin(startTimeStr);
+  const endM = parseMin(endTimeStr);
+  if (startM != null && endM != null && endM > startM) {
+    return parseFloat(((endM - startM) / 60).toFixed(2));
+  }
+  return Number(fallbackHours) || 1.0;
+}
+
+/**
+ * Return the 3-letter weekday ("Mon".."Sun") for a YYYY-MM-DD date string.
+ */
+export function getWeekdayForDateStr(dateStr) {
+  if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(String(dateStr))) {
+    return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][new Date().getDay()] || "Mon";
+  }
+  const [y, m, d] = String(dateStr).split("-").map((n) => parseInt(n, 10));
+  const dt = new Date(y, m - 1, d, 12, 0, 0);
+  return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dt.getDay()] || "Mon";
+}
+
+/**
+ * Return the effective scheduled events for a specific date YYYY-MM-DD (or weekday name "Mon".."Sun").
+ * Checks `state.dateScheduleOverrides[dateStr]` first, then `state.weeklySchedule[dayOfWeek]`.
+ */
+export function getScheduleEventsForDate(state, dateOrDay = getLocalDateString()) {
+  const s = state || {};
+  const str = String(dateOrDay || "").trim();
+  const isDate = /^\d{4}-\d{2}-\d{2}$/.test(str);
+  if (isDate && s.dateScheduleOverrides && Array.isArray(s.dateScheduleOverrides[str])) {
+    return s.dateScheduleOverrides[str];
+  }
+  const dayName = isDate ? getWeekdayForDateStr(str) : str || s.dayOfWeek || "Mon";
+  const weekly = s.weeklySchedule || {};
+  if (Array.isArray(weekly[dayName])) {
+    return weekly[dayName];
+  }
+  return [];
+}
+
+/**
+ * Dynamically calculate the total scheduled dance hours for a specific date or weekday (Requirement 1c & 1c.i).
+ * Counts events with category in ["dance", "rehearsal", "competition"].
+ * If a day has no dance classes scheduled (e.g. Friday rest day or Sunday), returns 0!
+ */
+export function getDanceHoursForDate(state, dateOrDay = getLocalDateString()) {
+  const s = state || {};
+  const hasScheduleModel =
+    (s.weeklySchedule && typeof s.weeklySchedule === "object") ||
+    (s.dateScheduleOverrides && typeof s.dateScheduleOverrides === "object");
+  if (!hasScheduleModel) {
+    return Number(s?.profile?.danceHours) || 0;
+  }
+
+  const events = getScheduleEventsForDate(s, dateOrDay);
+  const danceCategories = new Set(["dance", "rehearsal", "competition"]);
+  let totalHours = 0;
+  for (const evt of events) {
+    const cat = String(evt?.category || "dance").toLowerCase();
+    if (!danceCategories.has(cat)) continue;
+    const dur =
+      evt.durationHours != null && Number.isFinite(Number(evt.durationHours))
+        ? Number(evt.durationHours)
+        : computeTimeRangeDurationHours(evt.startTime, evt.endTime, 1.0);
+    totalHours += Math.max(0, dur);
+  }
+  return parseFloat(totalHours.toFixed(2));
+}
+
+/**
+ * Parse a BAND iCal (.ics) text payload into structured dance/school schedule events (Requirement 1).
+ */
+export function parseBandIcsSchedule(icsText = "") {
+  const raw = String(icsText || "").replace(/\r\n[ \t]/g, "");
+  const blocks = raw.split(/BEGIN:VEVENT/i).slice(1);
+  const events = [];
+
+  const parseIcsDate = (val) => {
+    const clean = String(val || "").trim();
+    const m = clean.match(/(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2}))?/);
+    if (!m) return null;
+    const dateStr = `${m[1]}-${m[2]}-${m[3]}`;
+    const timeStr = m[4] && m[5] ? `${m[4]}:${m[5]}` : "16:00";
+    return { dateStr, timeStr };
+  };
+
+  blocks.forEach((blk, idx) => {
+    const endIdx = blk.search(/END:VEVENT/i);
+    const body = endIdx >= 0 ? blk.slice(0, endIdx) : blk;
+    const getField = (name) => {
+      const re = new RegExp(`^${name}(?:;[^:]*)?:(.*)$`, "im");
+      const match = body.match(re);
+      return match ? match[1].trim().replace(/\\,/g, ",").replace(/\\n/g, " ") : "";
+    };
+
+    const summary = getField("SUMMARY") || `BAND Dance Class ${idx + 1}`;
+    const dtStartRaw = getField("DTSTART");
+    const dtEndRaw = getField("DTEND");
+    const location = getField("LOCATION") || "Studio";
+    const description = getField("DESCRIPTION") || "";
+
+    const startObj = parseIcsDate(dtStartRaw);
+    if (!startObj) return;
+    const endObj = parseIcsDate(dtEndRaw) || {
+      dateStr: startObj.dateStr,
+      timeStr: "18:00"
+    };
+
+    const lowerTitle = summary.toLowerCase();
+    let category = "dance";
+    if (lowerTitle.includes("school")) category = "school";
+    else if (lowerTitle.includes("comp")) category = "competition";
+    else if (lowerTitle.includes("rehears")) category = "rehearsal";
+    else if (lowerTitle.includes("carpool") || lowerTitle.includes("pickup")) category = "carpool";
+
+    const durationHours = computeTimeRangeDurationHours(startObj.timeStr, endObj.timeStr, 1.5);
+    const dayOfWeek = getWeekdayForDateStr(startObj.dateStr);
+
+    events.push({
+      id: `band_ics_${Date.now()}_${idx}`,
+      title: summary,
+      category,
+      date: startObj.dateStr,
+      dayOfWeek,
+      startTime: startObj.timeStr,
+      endTime: endObj.timeStr,
+      durationHours,
+      intensity: category === "competition" || lowerTitle.includes("pointe") ? "high" : "moderate",
+      location,
+      notes: description,
+      source: "band"
+    });
+  });
+
+  return events;
+}
+
+/**
+ * Parse pasted BAND schedule text (e.g. "Mon 4:00 PM - 6:00 PM Ballet & Pointe") into schedule events (Requirement 1).
+ */
+export function parseBandTextSchedule(rawText = "") {
+  const lines = String(rawText || "")
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
+
+  const dayMap = {
+    mon: "Mon",
+    monday: "Mon",
+    tue: "Tue",
+    tues: "Tue",
+    tuesday: "Tue",
+    wed: "Wed",
+    wednesday: "Wed",
+    thu: "Thu",
+    thur: "Thu",
+    thurs: "Thu",
+    thursday: "Thu",
+    fri: "Fri",
+    friday: "Fri",
+    sat: "Sat",
+    saturday: "Sat",
+    sun: "Sun",
+    sunday: "Sun"
+  };
+
+  const to24h = (timeToken) => {
+    const m = String(timeToken || "").trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/i);
+    if (!m) return "16:00";
+    let h = parseInt(m[1], 10);
+    const min = m[2] ? parseInt(m[2], 10) : 0;
+    const ap = (m[3] || "").toUpperCase();
+    if (ap === "PM" && h < 12) h += 12;
+    else if (ap === "AM" && h === 12) h = 0;
+    else if (!ap && h >= 1 && h <= 7) h += 12; // afternoon studio default for "4:00 - 6:00"
+    return `${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
+  };
+
+  const events = [];
+  lines.forEach((line, idx) => {
+    const dayMatch = line.match(/\b(monday|mon|tuesday|tues|tue|wednesday|wed|thursday|thurs|thur|thu|friday|fri|saturday|sat|sunday|sun)\b/i);
+    const dayOfWeek = dayMatch ? dayMap[dayMatch[1].toLowerCase()] || "Mon" : "Mon";
+
+    const timeMatch = line.match(/(\d{1,2}(?::\d{2})?\s*(?:AM|PM)?)\s*(?:-|–|to)\s*(\d{1,2}(?::\d{2})?\s*(?:AM|PM)?)/i);
+    const startTime = timeMatch ? to24h(timeMatch[1]) : "16:00";
+    const endTime = timeMatch ? to24h(timeMatch[2]) : "17:30";
+    const durationHours = computeTimeRangeDurationHours(startTime, endTime, 1.5);
+
+    let title = line;
+    if (dayMatch) title = title.replace(dayMatch[0], "");
+    if (timeMatch) title = title.replace(timeMatch[0], "");
+    title = title.replace(/^[\s:,\-–•]+|[\s:,\-–•]+$/g, "").trim() || `Dance Class ${idx + 1}`;
+
+    const lower = title.toLowerCase();
+    const category = lower.includes("school")
+      ? "school"
+      : lower.includes("rehears")
+      ? "rehearsal"
+      : lower.includes("comp")
+      ? "competition"
+      : "dance";
+
+    events.push({
+      id: `band_txt_${Date.now()}_${idx}`,
+      title,
+      category,
+      dayOfWeek,
+      startTime,
+      endTime,
+      durationHours,
+      intensity: lower.includes("pointe") || lower.includes("comp") ? "high" : "moderate",
+      location: "Studio",
+      notes: "Imported from BAND",
+      source: "band"
+    });
+  });
+
+  return events;
+}
+
+/**
+ * Pure POTS & Gallbladder daily target calculation.
+ * Supports:
+ * - Biological sex / gender ("female" | "male") via Mifflin-St Jeor (+5 Male vs -161 Female), calorie floor, hydration & sweat scaling (Req 1d).
+ * - Dynamic daily dance activity (`dailyContext?.danceHours` or `getDanceHoursForDate(dailyContext.state, dailyContext.date)`)
+ *   so recommended food intake, water, and sodium dynamically adapt day-to-day (including 0 hrs on rest days)
+ *   while remaining 100% backward-compatible when called as `getCalculatedTargets(profile)` (Req 1c & 1c.i).
+ */
+export function getCalculatedTargets(profile, dailyContext = null) {
   const p = profile || {};
+  const gender = String(p.gender || "female").toLowerCase() === "male" ? "male" : "female";
+
+  let effectiveDanceHours;
+  if (dailyContext && typeof dailyContext === "object") {
+    if (dailyContext.danceHours != null && Number.isFinite(Number(dailyContext.danceHours))) {
+      effectiveDanceHours = Math.max(0, Number(dailyContext.danceHours));
+    } else if (dailyContext.state) {
+      effectiveDanceHours = getDanceHoursForDate(
+        dailyContext.state,
+        dailyContext.date || dailyContext.dayOfWeek || dailyContext.state.selectedCalendarDate
+      );
+    }
+  }
+  if (effectiveDanceHours == null) {
+    effectiveDanceHours = Number(p.danceHours) || 0;
+  }
+
   if (p.useDoctorOverride) {
     const calories = Number(p.customCalories) || 2150;
     const sodium = Number(p.customSodium) || 4000;
@@ -368,25 +728,43 @@ export function getCalculatedTargets(profile) {
       water,
       maxMealFat,
       dailyFatCap: Math.round(maxMealFat * 6),
-      portionMultiplier: Math.max(0.65, Math.min(1.65, calories / 2150))
+      portionMultiplier: Math.max(0.65, Math.min(1.65, calories / 2150)),
+      danceHours: effectiveDanceHours,
+      gender
     };
   }
 
   const weightLbs = Number(p.weightLbs) || 110;
   const heightFt = Number(p.heightFt) || 5;
-  const heightIn = p.heightIn != null && p.heightIn !== "" && Number.isFinite(Number(p.heightIn)) ? Number(p.heightIn) : 2;
+  const heightIn =
+    p.heightIn != null && p.heightIn !== "" && Number.isFinite(Number(p.heightIn))
+      ? Number(p.heightIn)
+      : 2;
   const age = Number(p.age) || 14;
-  const danceHours = Number(p.danceHours) || 0;
+  const danceHours = effectiveDanceHours;
 
   const weightKg = weightLbs * 0.453592;
   const heightCm = (heightFt * 12 + heightIn) * 2.54;
-  const bmr = 10 * weightKg + 6.25 * heightCm - 5 * age - 161;
-  const danceBurn = weightKg * 4.2 * danceHours;
-  const calories = Math.round(Math.max(1500, bmr * 1.35 + danceBurn));
-  const water = Math.round(weightLbs * 0.62 + danceHours * 8);
 
+  // Mifflin-St Jeor BMR: Female uses -161, Male uses +5
+  const genderBmrOffset = gender === "male" ? 5 : -161;
+  const bmr = 10 * weightKg + 6.25 * heightCm - 5 * age + genderBmrOffset;
+
+  // Dance energy burn & minimum calorie floor by gender
+  const danceBurnCoeff = gender === "male" ? 4.6 : 4.2;
+  const minCalorieFloor = gender === "male" ? 1800 : 1500;
+  const danceBurn = weightKg * danceBurnCoeff * danceHours;
+  const calories = Math.round(Math.max(minCalorieFloor, bmr * 1.35 + danceBurn));
+
+  // Hydration target (oz/day) scales with body weight, gender, and that day's dance hours
+  const waterWeightFactor = gender === "male" ? 0.67 : 0.62;
+  const waterPerDanceHr = gender === "male" ? 9 : 8;
+  const water = Math.round(weightLbs * waterWeightFactor + danceHours * waterPerDanceHr);
+
+  // POTS sodium target scales with baseline level + that day's dance sweat hours
   const baseSodium = p.potsLevel === "high" ? 4500 : p.potsLevel === "mild" ? 3000 : 3600;
-  const sodium = Math.round(baseSodium + danceHours * 180);
+  const sweatSodiumPerHr = gender === "male" ? 210 : 180;
+  const sodium = Math.round(baseSodium + danceHours * sweatSodiumPerHr);
 
   const maxMealFat = p.gbLevel === "flare" ? 2.5 : p.gbLevel === "strict" ? 4.0 : 5.5;
   const dailyFatCap = Math.round(maxMealFat * 6);
@@ -398,8 +776,389 @@ export function getCalculatedTargets(profile) {
     water,
     maxMealFat,
     dailyFatCap,
-    portionMultiplier
+    portionMultiplier,
+    danceHours,
+    gender
   };
+}
+
+/**
+ * Role-aware copy generator (Requirement 6 & 6a).
+ * In Daughter's view (`viewerRole === "Dancer"`), uses warm personal check-in phrasing ("I feel:").
+ * In Mom's view (`viewerRole === "Mom"`), rephrases the entire app into third-person ("The Dancer", dancer's name, "they", "their")
+ * with ZERO instances of first-person "I".
+ */
+export function getRoleCopy(state = {}) {
+  const isMom = String(state?.viewerRole || "Dancer") === "Mom";
+  const rawName = String(state?.profile?.name || "").trim();
+  const hasCustomName = Boolean(rawName && rawName.toLowerCase() !== "dancer");
+
+  const subjectCap = hasCustomName ? rawName : "The Dancer";
+  const subjectLower = hasCustomName ? rawName : "the Dancer";
+  const possessiveCap = hasCustomName ? `${rawName}'s` : "The Dancer's";
+  const possessiveLower = hasCustomName ? `${rawName}'s` : "the Dancer's";
+
+  if (!isMom) {
+    return {
+      viewerRole: "Dancer",
+      isMom: false,
+      showAppOpenCheckinPopup: true,
+      roleSwitchLabel: "🩰 Dancer View (Tap for Mom)",
+      symptomBarLabel: "I feel:",
+      symptomBarAria: "How do you feel right now?",
+      dismissRescueLabel: "I feel steady now ✓",
+      todayPlanHeading: "Today's Fuel & Studio Plan",
+      bagHeading: "🎒 Dance Bag Checklist",
+      notesLabel: "Daily Symptom & Rehearsal Notes",
+      notesPlaceholder: "Optional notes for today (e.g., studio temp, energy during pointe)...",
+      foodSearchPlaceholder: "Search 36+ foods or analyze any snack...",
+      scheduleMainHeading: "📅 My Dance, School & Carpool Schedule",
+      historyMainHeading: "History, Scores & Doctor Report",
+      rescueProtocols: RESCUE_PROTOCOLS,
+      infoTopics: CLINICAL_INFO_TOPICS,
+      manualSections: MANUAL_SECTIONS
+    };
+  }
+
+  // Mom's third-person phrasing across the entire app (zero first-person "I")
+  const momRescueProtocols = {
+    steady: null,
+    dizzy: {
+      title: `2-Minute Sideline Salt & Water Rescue for ${subjectCap}`,
+      body: `1) Have ${subjectLower} sit on the studio floor with knees pulled up or legs crossed. 2) Give them 8–12 oz cold electrolyte water or a salt packet / 6 salted pretzels right away. 3) Have them flex calf & thigh muscles before standing up slowly.`
+    },
+    tired: {
+      title: `Quick Low-Fat Dance Energy Boost for ${subjectCap}`,
+      body: `Give ${subjectLower} fast-absorbing carbs with salt (an applesauce pouch + salted pretzels, or half a banana + electrolyte drink). Skip high-fat nuts or heavy protein bars during rehearsal.`
+    },
+    stomach: {
+      title: `Gentle Stomach Soothing Mode for ${subjectCap}`,
+      body: `Keep ${possessiveLower} fat super low (0g–2g) for the next two meals or snacks. Offer warm chicken broth, miso soup, or tea with plain salted crackers or rice cakes so their stomach can relax while keeping salt steady.`
+    }
+  };
+
+  const momInfoTopics = {
+    sodium: {
+      title: `Why Extra Salt Helps ${subjectCap} With POTS`,
+      body: `Salt helps ${possessiveLower} body hold onto water so blood flows smoothly during turns, jumps, and rehearsals. That keeps dizziness away and their energy steady! Tap +500mg or -500 anytime to adjust for them.`
+    },
+    water: {
+      title: `Smart Hydration & Salt Pairing for ${subjectCap}`,
+      body: `${possessiveCap} daily water goal automatically adjusts based on that day's dance classes (+8 oz for every hour of dance). Always pair plain water with an electrolyte drink or salty snack so their body absorbs it.`
+    },
+    gb: {
+      title: `Gentle on ${possessiveCap} Stomach (Low-Fat Meals)`,
+      body: `Meals with too much grease or heavy fat can cause stomach cramps or nausea for ${subjectLower} during dance. Keeping each meal or snack under their fat limit (such as 5.5g) keeps their digestion calm and comfortable.`
+    },
+    dayMode: {
+      title: `Choosing ${possessiveCap} Daily Routine`,
+      body: `Pick the routine that fits ${possessiveLower} day—School + Studio, Competition, or Recovery. Each routine saves its own meal plan, and extra snacks added with '+ Quick Log' reset cleanly at midnight.`
+    },
+    doctorOverride: {
+      title: `Custom Doctor Goals for ${subjectCap}`,
+      body: `Turn this on if ${possessiveLower} doctor gave specific daily numbers for salt, water, meal fat limit, or calories instead of using the automatic calculator.`
+    },
+    sync: {
+      title: "Sharing Between Mom's & Dancer's Phones",
+      body: `The Family PIN keeps ${possessiveLower} schedule, carpool rides, and daily logs private and synced between Mom's and the Dancer's phones.`
+    },
+    score: {
+      title: `${possessiveCap} Daily Target Score (Green, Yellow, Red)`,
+      body: `The Daily Score (0–100%) shows how closely ${possessiveLower} daily salt, water, and stomach-safe meal goals were hit. Green (80%+) means most goals were hit, Yellow (50–79%) means partway there, and Red (<50%) means they need more fuel or hydration.`
+    }
+  };
+
+  const momManualSections = [
+    {
+      id: "quickstart",
+      label: "Quick Start",
+      title: `Logging for ${subjectCap} in 60 Seconds`,
+      items: [
+        `<strong>Check off meals &amp; drinks:</strong> Tap the checkbox beside each meal or snack as ${subjectLower} finishes eating or drinking. Their Salt and Hydration rings and Daily Score update right away.`,
+        `<strong>Log extra drinks or snacks fast:</strong> Tap <strong>+ Quick Log</strong> to record 1-tap favorites (LMNT, Liquid I.V., Pretzels, Warm Broth) or search 36+ dancer foods for ${subjectLower}.`,
+        `<strong>Watch ${possessiveLower} Daily Score:</strong> A <strong>Green</strong> score badge (80%+) means ${subjectLower} hit most daily goals! Missed a day? Tap <strong>+ Log Missed Day</strong> to fill in any past date for them.`,
+        `<strong>Switch between Mom &amp; Dancer view:</strong> Tap the role pill at the top anytime to switch between Mom's caregiver view and the Dancer's view.`
+      ]
+    },
+    {
+      id: "schedule",
+      label: "Schedule & Carpool",
+      title: `${possessiveCap} Dance Schedule, BAND & Carpool`,
+      items: [
+        `<strong>Month, Week &amp; Day Calendar:</strong> Open the <strong>📅 Schedule</strong> tab to view ${possessiveLower} Month calendar (with the selected day's schedule right underneath) or switch to <strong>Week</strong> and <strong>Day</strong> timelines.`,
+        `<strong>Customize Daily Dance Classes:</strong> Tap <strong>+ Add Class / Event</strong> to set ${possessiveLower} exact dance classes and school hours for each day. Days with more dance automatically recommend more food, salt, and water for them!`,
+        `<strong>Sync with BAND:</strong> Tap <strong>🔄 BAND Sync</strong> to import ${possessiveLower} studio classes from a BAND calendar file, link, or pasted schedule post.`,
+        `<strong>School &amp; Dance Carpool:</strong> Scroll to the <strong>🚗 Carpool</strong> section inside Schedule to coordinate both School and Dance Studio rides for ${subjectLower}.`
+      ]
+    },
+    {
+      id: "fueling",
+      label: "Salt, Water & Food",
+      title: `Fueling Guidelines for ${subjectCap}`,
+      items: [
+        `<strong>Salt + Water work together:</strong> Plain water alone passes right through. Pair every water bottle ${subjectLower} drinks with an electrolyte mix or salty snack so their energy stays steady.`,
+        `<strong>Keep meals gentle on their stomach:</strong> Staying at or below ${possessiveLower} per-meal fat limit (like <strong>5.5g fat per meal</strong>) helps prevent stomach aches during dance.`,
+        `<strong>Check any food or restaurant item:</strong> Open the <strong>🥗 Food</strong> tab to search safe meals for ${subjectLower} or tap <strong>📚 Sources</strong> to see the trusted nutrition guides behind these numbers.`
+      ]
+    },
+    {
+      id: "rescue",
+      label: "Feeling & Help",
+      title: `Supporting ${subjectCap}, Doctor Summary & Help`,
+      items: [
+        `<strong>Update how ${subjectLower} feels:</strong> Tap <em>${subjectCap} feels:</em> at the top (Steady, Dizzy, Tired, or Stomach) to record their symptoms and view step-by-step caregiver rescue steps.`,
+        `<strong>Print a Doctor Summary:</strong> Open <strong>Full History</strong> to review color-coded daily scores, log missed days from the past, or tap <strong>Print / Save Doctor PDF</strong> for ${possessiveLower} doctor visits.`,
+        `<strong>Need help? Send a quick text:</strong> Tap <strong>💬 Help</strong> at the top of the screen, write what your family needs help with, and tap Send to open your text messaging app ready to send.`
+      ]
+    }
+  ];
+
+  return {
+    viewerRole: "Mom",
+    isMom: true,
+    showAppOpenCheckinPopup: false,
+    roleSwitchLabel: `💛 Mom View (for ${subjectCap})`,
+    symptomBarLabel: `${subjectCap} feels:`,
+    symptomBarAria: `How is ${subjectLower} feeling right now?`,
+    dismissRescueLabel: `${subjectCap} feels steady now ✓`,
+    todayPlanHeading: `${possessiveCap} Fuel & Studio Plan`,
+    bagHeading: `🎒 ${possessiveCap} Dance Bag Checklist`,
+    notesLabel: `${possessiveCap} Symptom & Rehearsal Notes`,
+    notesPlaceholder: `Optional notes for ${subjectLower} today (e.g., studio temp, energy during pointe)...`,
+    foodSearchPlaceholder: `Search 36+ foods or analyze any snack for ${subjectLower}...`,
+    scheduleMainHeading: `📅 ${possessiveCap} Dance, School & Carpool Schedule`,
+    historyMainHeading: `${possessiveCap} History, Scores & Doctor Report`,
+    rescueProtocols: momRescueProtocols,
+    infoTopics: momInfoTopics,
+    manualSections: momManualSections
+  };
+}
+
+export const DEFAULT_ROLE_PERSONALIZATION = {
+  Dancer: {
+    lighting: "day",
+    autoRule: "system",
+    palette: "blush",
+    avatar: "🩰",
+    studioName: "Calm Studio Plan",
+    mottoIndex: 0
+  },
+  Mom: {
+    lighting: "auto",
+    autoRule: "time",
+    palette: "teal",
+    avatar: "👩",
+    studioName: "Calm Studio Plan",
+    mottoIndex: 0
+  }
+};
+
+export const PALETTE_META = {
+  blush: { label: "Blush Rose", themeColorDay: "#E11D74", themeColorNight: "#F472B6" },
+  sage: { label: "Sage Mint", themeColorDay: "#059669", themeColorNight: "#34D399" },
+  lavender: { label: "Lavender Mist", themeColorDay: "#7C3AED", themeColorNight: "#A78BFA" },
+  teal: { label: "Ocean Teal", themeColorDay: "#0D9488", themeColorNight: "#2DD4BF" }
+};
+
+const LEGACY_THEME_MAP = {
+  studio_teal: { palette: "teal", lighting: "day" },
+  ballet_slipper: { palette: "blush", lighting: "day" },
+  lavender_adagio: { palette: "lavender", lighting: "day" },
+  competition_gold: { palette: "sage", lighting: "day" },
+  late_rehearsal: { palette: "teal", lighting: "night" }
+};
+
+export function getRolePersonalization(state = {}, roleOverride = null) {
+  const role = (roleOverride || state?.viewerRole) === "Mom" ? "Mom" : "Dancer";
+  const defaults = DEFAULT_ROLE_PERSONALIZATION[role];
+  const pers = state?.personalization || {};
+  const roleObj = pers.byRole?.[role];
+
+  if (roleObj && typeof roleObj === "object") {
+    return {
+      lighting: ["day", "night", "auto"].includes(roleObj.lighting) ? roleObj.lighting : defaults.lighting,
+      autoRule: ["system", "time"].includes(roleObj.autoRule) ? roleObj.autoRule : defaults.autoRule,
+      palette: PALETTE_META[roleObj.palette] ? roleObj.palette : defaults.palette,
+      avatar: roleObj.avatar || defaults.avatar,
+      studioName: roleObj.studioName ?? defaults.studioName,
+      mottoIndex: Number.isFinite(Number(roleObj.mottoIndex)) ? Number(roleObj.mottoIndex) : 0
+    };
+  }
+
+  // Backward-compatible migration from legacy flat personalization
+  const mapped = LEGACY_THEME_MAP[pers.theme] || {};
+  return {
+    lighting: mapped.lighting || defaults.lighting,
+    autoRule: defaults.autoRule,
+    palette: mapped.palette || defaults.palette,
+    avatar: (role === "Dancer" && pers.avatar) ? pers.avatar : defaults.avatar,
+    studioName: pers.studioName || defaults.studioName,
+    mottoIndex: 0
+  };
+}
+
+export function resolveEffectiveLighting(rolePref = {}, { systemDark = false, hour = new Date().getHours() } = {}) {
+  const lighting = rolePref?.lighting || "day";
+  if (lighting === "night") return "night";
+  if (lighting === "day") return "day";
+  const autoRule = rolePref?.autoRule || "system";
+  if (autoRule === "time") {
+    const hr = Number(hour);
+    return (hr >= 19 || hr < 7) ? "night" : "day";
+  }
+  return systemDark ? "night" : "day";
+}
+
+export function getTodayNextClassAndCarpool(state = {}, dateStr = getLocalDateString()) {
+  const events = getScheduleEventsForDate(state, dateStr) || [];
+  const danceEvents = events.filter((ev) => ev.category !== "school");
+  const danceHours = getDanceHoursForDate(state, dateStr);
+  const dObj = new Date(`${dateStr}T12:00:00`);
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const dayKey = dayNames[dObj.getDay()] || state?.dayOfWeek || "Mon";
+  const carpoolDay = state?.carpool?.[dayKey] || {};
+  const isMom = state?.viewerRole === "Mom";
+
+  const firstDance = danceEvents[0] || null;
+  const classTitle = firstDance
+    ? `${firstDance.title} • ${firstDance.startTime}`
+    : (events[0] ? `${events[0].title} • ${events[0].startTime}` : "Rest Day • No dance classes scheduled");
+
+  let carpoolSummary = isMom
+    ? "Carpool: Add school or studio pickup in Schedule."
+    : "Carpool: Ask Mom or check Schedule for pickup details.";
+  if (carpoolDay.homeDriver || carpoolDay.homeTime) {
+    const drv = carpoolDay.homeDriver || (isMom ? "You" : "Mom");
+    const tm = carpoolDay.homeTime ? ` at ${carpoolDay.homeTime}` : "";
+    carpoolSummary = `Carpool: ${drv} picks up${tm}`;
+  } else if (carpoolDay.toDriver || carpoolDay.toTime) {
+    const drv = carpoolDay.toDriver || (isMom ? "You" : "Mom");
+    const tm = carpoolDay.toTime ? ` at ${carpoolDay.toTime}` : "";
+    carpoolSummary = `Carpool: ${drv} drives to studio${tm}`;
+  }
+
+  return {
+    danceHours,
+    hasDance: danceHours > 0 || danceEvents.length > 0,
+    classTitle,
+    carpoolSummary
+  };
+}
+
+export function getSmartMotto(state = {}, { index, dateStr = getLocalDateString() } = {}) {
+  const isMom = state?.viewerRole === "Mom";
+  const feel = state?.symptomStatus || "steady";
+  const rolePref = getRolePersonalization(state);
+  const idx = Math.abs(Number.isFinite(Number(index)) ? Number(index) : (rolePref.mottoIndex || 0));
+
+  // Recent history context (prefer most recent past entry, else latest entry)
+  const hist = Array.isArray(state?.history) ? state.history : [];
+  const pastEntry = hist.find((h) => h && h.date && h.date < dateStr) || hist[0] || null;
+  const recentScore = pastEntry ? (Number.isFinite(Number(pastEntry.score)) ? Number(pastEntry.score) : computeDailyScore(pastEntry).score) : null;
+
+  // Upcoming schedule context
+  const { danceHours, hasDance, classTitle, carpoolSummary } = getTodayNextClassAndCarpool(state, dateStr);
+  const shortClass = classTitle.split("•")[0].trim();
+
+  const scoreSnippetDancer = recentScore !== null
+    ? (recentScore >= 80 ? `You hit ${recentScore}% recently` : `Yesterday was ${recentScore}% — fresh start today`)
+    : "Every sip and bite builds your stamina";
+  const scoreSnippetMom = recentScore !== null
+    ? (recentScore >= 80 ? `The Dancer hit ${recentScore}% recently` : `The Dancer's recent score was ${recentScore}% — steady support today`)
+    : "Every steady log supports The Dancer's stamina";
+
+  const schedSnippetDancer = hasDance
+    ? `${danceHours} hrs of dance (${shortClass})`
+    : "a gentle recovery day";
+  const schedSnippetMom = hasDance
+    ? `${danceHours} hrs of dance (${shortClass})`
+    : "a gentle rest day";
+
+  const pool = isMom
+    ? {
+        steady: [
+          `The Dancer is steady! ${scoreSnippetMom} ahead of ${schedSnippetMom}.`,
+          `Steady energy for The Dancer today. ${carpoolSummary}.`,
+          `Great rhythm — keep The Dancer's water and salt topped up for ${schedSnippetMom}.`
+        ],
+        dizzy: [
+          `The Dancer feels dizzy — prioritize 500mg salt + 12oz water right now before ${schedSnippetMom}.`,
+          `Gentle pause for The Dancer: feet up, slow sips, and steady electrolytes.`,
+          `Supporting The Dancer through dizziness — check the rescue steps and ${carpoolSummary.toLowerCase()}.`
+        ],
+        tired: [
+          `The Dancer feels tired — offer quick, low-fat carbs and hydration for ${schedSnippetMom}.`,
+          `${scoreSnippetMom}. A light snack and water will help The Dancer recharge.`,
+          `Low energy today for The Dancer; keep meals small, gentle, and steady.`
+        ],
+        stomach: [
+          `The Dancer's stomach feels sensitive — stick to warm broth, crackers, and tiny sips.`,
+          `Gentle tummy day for The Dancer: keep meals extra low-fat before ${schedSnippetMom}.`,
+          `Slow and soothing fuel for The Dancer today — small portions every 2–3 hours.`
+        ]
+      }
+    : {
+        steady: [
+          `You're feeling steady! ${scoreSnippetDancer} as you head into ${schedSnippetDancer}.`,
+          `Strong, balanced energy for ${schedSnippetDancer}. ${carpoolSummary}.`,
+          `Steady salt, gentle fuel, strong turns — you've got ${schedSnippetDancer} covered!`
+        ],
+        dizzy: [
+          `Feeling dizzy? Pause, sit down, and take 500mg salt + 12oz water before ${schedSnippetDancer}.`,
+          `Listen to your body right now — slow sips and salt first, then ease back in.`,
+          `You're not behind: steady electrolytes now will help you feel grounded for ${schedSnippetDancer}.`
+        ],
+        tired: [
+          `Feeling tired? Grab a light, low-fat carb snack and water to power ${schedSnippetDancer}.`,
+          `${scoreSnippetDancer} — a quick snack and 8oz water will lift your energy.`,
+          `Gentle pace today: small fuel + steady sips keep your legs strong through ${schedSnippetDancer}.`
+        ],
+        stomach: [
+          `Tummy sensitive today? Sip warm broth or water slowly and keep snacks extra low-fat.`,
+          `Gentle tummy care first — small, bland bites will keep you comfortable for ${schedSnippetDancer}.`,
+          `Be kind to your stomach today: tiny sips and soothing fuel every couple of hours.`
+        ]
+      };
+
+  const list = pool[feel] || pool.steady;
+  return list[idx % list.length];
+}
+
+export function computeConcentricRingData(totals = {}, targets = {}) {
+  const naTarget = Math.max(1, Number(targets.sodium) || 3600);
+  const waterTarget = Math.max(1, Number(targets.water) || 85);
+  const calTarget = Math.max(1, Number(targets.calories) || 2000);
+  return {
+    sodiumPct: Math.max(0, Math.round(((Number(totals.sodiumMg) || 0) / naTarget) * 100)),
+    waterPct: Math.max(0, Math.round(((Number(totals.waterOz) || 0) / waterTarget) * 100)),
+    fuelPct: Math.max(0, Math.round(((Number(totals.totalKcal) || 0) / calTarget) * 100))
+  };
+}
+
+/**
+ * Verify Admin PIN for the hidden PIN-secured Admin Dashboard (Requirement 2b).
+ * Checks against `state.adminConfig.adminPin` if customized, or active Family PIN (`auth.passphrase`),
+ * or initial setup fallback `"8014"` / non-empty 4+ char admin PIN when no PIN has been set yet.
+ */
+export function verifyAdminPin(inputPin, state = {}, auth = {}) {
+  const clean = String(inputPin || "").trim();
+  if (!clean || clean.length < 4) return false;
+  const customAdminPin = String(state?.adminConfig?.adminPin || "").trim();
+  if (customAdminPin) {
+    return clean === customAdminPin;
+  }
+  const familyPin = String(auth?.passphrase || "").trim();
+  if (familyPin && clean === familyPin) {
+    return true;
+  }
+  const supportPhone = resolveFamilySupportPhone(state, { unlocked: true });
+  if (supportPhone && clean === supportPhone.slice(-4)) {
+    return true;
+  }
+  if (!customAdminPin && !familyPin) {
+    return clean.length >= 4;
+  }
+  return false;
 }
 
 /**
@@ -431,7 +1190,12 @@ export function applyRolloverState(currentState, todayStr = getLocalDateString()
   if (!currentState || !currentState.lastActiveDate || currentState.lastActiveDate === todayStr) {
     return { rolledOver: false, nextState: currentState };
   }
-  const targets = getCalculatedTargets(currentState.profile);
+  const prevDanceHours = getDanceHoursForDate(currentState, currentState.lastActiveDate);
+  const targets = getCalculatedTargets(currentState.profile, {
+    danceHours: prevDanceHours,
+    state: currentState,
+    date: currentState.lastActiveDate
+  });
   const { history } = snapshotToday(currentState, targets, currentState.lastActiveDate);
 
   const nextSchedules = {};
@@ -450,6 +1214,7 @@ export function applyRolloverState(currentState, todayStr = getLocalDateString()
     symptomStatus: "steady",
     dailyNotes: "",
     lastActiveDate: todayStr,
+    selectedCalendarDate: todayStr,
     dayOfWeek: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][new Date().getDay()] || currentState.dayOfWeek || "Mon"
   };
   return { rolledOver: true, nextState };
@@ -470,7 +1235,7 @@ export function parseSyncHashOrQuery(searchStr = "", hashStr = "") {
 }
 
 /**
- * Format a carpool day into a parent/dancer-friendly text snippet.
+ * Format a carpool day (including both School and Dance Studio rides) into a parent/dancer-friendly text snippet.
  */
 export function formatCarpoolShareText(dayOfWeek, cp = {}) {
   const toDriver = cp.toDriver || "TBD";
@@ -479,7 +1244,21 @@ export function formatCarpoolShareText(dayOfWeek, cp = {}) {
   const homeDriver = cp.homeDriver || "TBD";
   const homeTime = cp.homeTime || "TBD";
   const homeNote = cp.homeNote ? ` (${cp.homeNote})` : "";
-  return `🩰 ${dayOfWeek} Dance Carpool\n• To Studio: ${toDriver} @ ${toTime}${toNote}\n• Home: ${homeDriver} @ ${homeTime}${homeNote}`;
+
+  const lines = [`🩰 ${dayOfWeek} Dance Carpool`];
+  if (cp.schoolToDriver || cp.schoolHomeDriver) {
+    const sTo = cp.schoolToDriver || "TBD";
+    const sToT = cp.schoolToTime || "TBD";
+    const sToN = cp.schoolToNote ? ` (${cp.schoolToNote})` : "";
+    const sHo = cp.schoolHomeDriver || "TBD";
+    const sHoT = cp.schoolHomeTime || "TBD";
+    const sHoN = cp.schoolHomeNote ? ` (${cp.schoolHomeNote})` : "";
+    lines.push(`• To School: ${sTo} @ ${sToT}${sToN}`);
+    lines.push(`• From School: ${sHo} @ ${sHoT}${sHoN}`);
+  }
+  lines.push(`• To Studio: ${toDriver} @ ${toTime}${toNote}`);
+  lines.push(`• Home: ${homeDriver} @ ${homeTime}${homeNote}`);
+  return lines.join("\n");
 }
 
 // ============================================================================
@@ -493,6 +1272,10 @@ if (typeof document !== "undefined") {
   let hasPendingCloudPush = false;
   let activeEditSlotId = null;
   let activeManualSection = "quickstart";
+  let adminUnlockedInSession = false;
+  let dancerCheckinShownThisOpen = false;
+  let brandTapCount = 0;
+  let brandTapTimer = null;
   let toastTimer = null;
   const scheduleCloudPush = createDebouncedPush(1500);
 
@@ -526,23 +1309,60 @@ if (typeof document !== "undefined") {
   }
 
   function mergeState(base, incoming) {
+    const inc = incoming || {};
+    const mergedCarpool = createEmptyCarpool();
+    for (const d of Object.keys(mergedCarpool)) {
+      mergedCarpool[d] = { ...mergedCarpool[d], ...(base.carpool?.[d] || {}), ...(inc.carpool?.[d] || {}) };
+    }
+    const mergedWeekly = createDefaultWeeklySchedule();
+    for (const d of Object.keys(mergedWeekly)) {
+      if (Array.isArray(inc.weeklySchedule?.[d])) {
+        mergedWeekly[d] = inc.weeklySchedule[d];
+      } else if (Array.isArray(base.weeklySchedule?.[d])) {
+        mergedWeekly[d] = base.weeklySchedule[d];
+      }
+    }
+
     const merged = {
       ...base,
-      ...incoming,
-      profile: { ...base.profile, ...(incoming.profile || {}) },
-      schedules: {
-        school_dance: Array.isArray(incoming.schedules?.school_dance) ? incoming.schedules.school_dance : base.schedules.school_dance,
-        competition: Array.isArray(incoming.schedules?.competition) ? incoming.schedules.competition : base.schedules.competition,
-        recovery: Array.isArray(incoming.schedules?.recovery) ? incoming.schedules.recovery : base.schedules.recovery
+      ...inc,
+      profile: { ...base.profile, ...(inc.profile || {}) },
+      personalization: {
+        ...base.personalization,
+        ...(inc.personalization || {}),
+        byRole: {
+          Dancer: {
+            ...DEFAULT_ROLE_PERSONALIZATION.Dancer,
+            ...getRolePersonalization(base, "Dancer"),
+            ...(inc.personalization?.byRole?.Dancer || (!inc.personalization?.byRole && inc.personalization ? getRolePersonalization({ personalization: inc.personalization }, "Dancer") : {}))
+          },
+          Mom: {
+            ...DEFAULT_ROLE_PERSONALIZATION.Mom,
+            ...getRolePersonalization(base, "Mom"),
+            ...(inc.personalization?.byRole?.Mom || {})
+          }
+        }
       },
-      carpool: { ...base.carpool, ...(incoming.carpool || {}) },
-      foodLibrary: Array.isArray(incoming.foodLibrary) && incoming.foodLibrary.length
-        ? incoming.foodLibrary
+      adminConfig: {
+        ...base.adminConfig,
+        ...(inc.adminConfig || {}),
+        googleAuth: prepareGoogleSignInConfig(inc.adminConfig?.googleAuth || base.adminConfig?.googleAuth)
+      },
+      weeklySchedule: mergedWeekly,
+      dateScheduleOverrides: { ...(base.dateScheduleOverrides || {}), ...(inc.dateScheduleOverrides || {}) },
+      schedules: {
+        school_dance: Array.isArray(inc.schedules?.school_dance) ? inc.schedules.school_dance : base.schedules.school_dance,
+        competition: Array.isArray(inc.schedules?.competition) ? inc.schedules.competition : base.schedules.competition,
+        recovery: Array.isArray(inc.schedules?.recovery) ? inc.schedules.recovery : base.schedules.recovery
+      },
+      carpool: mergedCarpool,
+      foodLibrary: Array.isArray(inc.foodLibrary) && inc.foodLibrary.length
+        ? inc.foodLibrary
         : base.foodLibrary,
-      bagItems: Array.isArray(incoming.bagItems) && incoming.bagItems.length
-        ? incoming.bagItems
+      bagItems: Array.isArray(inc.bagItems) && inc.bagItems.length
+        ? inc.bagItems
         : base.bagItems,
-      history: Array.isArray(incoming.history) ? incoming.history : []
+      history: Array.isArray(inc.history) ? inc.history : []
     };
     return merged;
   }
@@ -566,6 +1386,15 @@ if (typeof document !== "undefined") {
     }
   }
 
+  function getActiveTodayTargets(dateStr = getLocalDateString()) {
+    const danceHours = getDanceHoursForDate(state, dateStr);
+    return getCalculatedTargets(state.profile, {
+      danceHours,
+      state,
+      date: dateStr
+    });
+  }
+
   function rolloverDayIfNeeded() {
     const { rolledOver, nextState } = applyRolloverState(state, getLocalDateString());
     if (rolledOver) {
@@ -580,7 +1409,11 @@ if (typeof document !== "undefined") {
     setSyncIndicator("syncing");
     try {
       const encrypted = await encryptBundle(buildSyncPayload(), auth.passphrase);
-      const res = await pushToCloud(url, encrypted, state.viewerRole || "Dancer");
+      const gAuth = state.adminConfig?.googleAuth;
+      const syncOptions = gAuth?.enabled && gAuth?.idToken
+        ? { googleIdToken: gAuth.idToken, email: gAuth.lastSignedInEmail }
+        : {};
+      const res = await pushToCloud(url, encrypted, state.viewerRole || "Dancer", syncOptions);
       setSyncIndicator(res.ok ? "synced" : "offline");
       return res.ok;
     } catch (_err) {
@@ -591,8 +1424,10 @@ if (typeof document !== "undefined") {
 
   function saveAndSync({ skipPush = false } = {}) {
     rolloverDayIfNeeded();
-    const targets = getCalculatedTargets(state.profile);
-    const { history } = snapshotToday(state, targets);
+    const todayStr = getLocalDateString();
+    const targets = getActiveTodayTargets(todayStr);
+    state.profile.danceHours = targets.danceHours;
+    const { history } = snapshotToday(state, targets, todayStr);
     state.history = history;
     try {
       localStorage.setItem(STORAGE_STATE_KEY, JSON.stringify(state));
@@ -614,6 +1449,10 @@ if (typeof document !== "undefined") {
       viewerRole: state.viewerRole,
       dayMode: state.dayMode,
       profile: state.profile,
+      personalization: state.personalization,
+      adminConfig: state.adminConfig,
+      weeklySchedule: state.weeklySchedule,
+      dateScheduleOverrides: state.dateScheduleOverrides,
       schedules: state.schedules,
       carpool: state.carpool,
       foodLibrary: state.foodLibrary,
@@ -650,14 +1489,16 @@ if (typeof document !== "undefined") {
       return { ok: false, reason: "missing_config" };
     }
     setSyncIndicator("syncing");
-    const res = await pullFromCloud(url);
+    const gAuth = state.adminConfig?.googleAuth;
+    const pullOpts = gAuth?.enabled && gAuth?.idToken ? { googleIdToken: gAuth.idToken } : {};
+    const res = await pullFromCloud(url, pullOpts);
     if (!res.ok) {
       setSyncIndicator("offline");
-      return { ok: false, reason: "network" };
+      return { ok: false, reason: "network", error: res.error };
     }
     if (!res.payload) {
       setSyncIndicator("synced");
-      return { ok: true, empty: true };
+      return { ok: true, empty: true, updatedAt: res.updatedAt, updatedBy: res.updatedBy };
     }
     try {
       const decrypted = await decryptBundle(res.payload, passphrase);
@@ -665,6 +1506,8 @@ if (typeof document !== "undefined") {
         activeTab: state.activeTab,
         historyRange: state.historyRange,
         foodFilter: state.foodFilter,
+        calendarViewMode: state.calendarViewMode,
+        selectedCalendarDate: state.selectedCalendarDate,
         foodSearchQuery: document.getElementById("foodSearchInput")?.value ?? ""
       };
       const gearModalEl = document.getElementById("gearModal");
@@ -675,6 +1518,8 @@ if (typeof document !== "undefined") {
         activeTab: prevUiState.activeTab,
         historyRange: prevUiState.historyRange,
         foodFilter: prevUiState.foodFilter,
+        calendarViewMode: prevUiState.calendarViewMode,
+        selectedCalendarDate: prevUiState.selectedCalendarDate,
         googleSheetWebAppUrl: url
       });
       localStorage.setItem(STORAGE_STATE_KEY, JSON.stringify(state));
@@ -689,7 +1534,7 @@ if (typeof document !== "undefined") {
       if (gearModalEl) {
         gearModalEl.classList.toggle("hidden", !wasGearModalOpen);
       }
-      return { ok: true };
+      return { ok: true, updatedAt: res.updatedAt, updatedBy: res.updatedBy, bytes: res.payload.length };
     } catch (_err) {
       setSyncIndicator("offline");
       return { ok: false, reason: "decrypt" };
@@ -708,7 +1553,126 @@ if (typeof document !== "undefined") {
       .replace(/"/g, "&quot;");
   }
 
+  function formatTime12h(timeStr) {
+    const s = String(timeStr || "").trim();
+    if (/AM|PM/i.test(s)) return s;
+    const m = s.match(/^(\d{1,2}):(\d{2})$/);
+    if (!m) return s;
+    let h = parseInt(m[1], 10);
+    const min = m[2];
+    const ap = h >= 12 ? "PM" : "AM";
+    if (h === 0) h = 12;
+    else if (h > 12) h -= 12;
+    return `${h}:${min} ${ap}`;
+  }
+
+  function renderSmartMotto() {
+    const smartMotto = getSmartMotto(state);
+    const mottoEl = document.getElementById("studioBannerMotto");
+    if (mottoEl) {
+      mottoEl.textContent = smartMotto;
+    }
+    const previewEl = document.getElementById("settingMottoPreview");
+    if (previewEl) {
+      previewEl.textContent = smartMotto;
+    }
+  }
+
+  function applyPersonalizationTheme() {
+    const rolePref = getRolePersonalization(state);
+    const systemDark = typeof window !== "undefined" && window.matchMedia
+      ? window.matchMedia("(prefers-color-scheme: dark)").matches
+      : false;
+    const effectiveLighting = resolveEffectiveLighting(rolePref, { systemDark });
+    const palette = rolePref.palette || "blush";
+
+    document.documentElement.setAttribute("data-palette", palette);
+    document.documentElement.setAttribute("data-lighting", effectiveLighting);
+    document.documentElement.setAttribute("data-theme", state.personalization?.theme || "studio_teal");
+
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme && PALETTE_META[palette]) {
+      metaTheme.setAttribute(
+        "content",
+        effectiveLighting === "night" ? PALETTE_META[palette].themeColorNight : PALETTE_META[palette].themeColorDay
+      );
+    }
+
+    const avatar = rolePref.avatar || "🩰";
+    const topAvatar = document.getElementById("topBarAvatar");
+    if (topAvatar) topAvatar.textContent = avatar;
+    const checkinAvatar = document.getElementById("checkinPopupAvatar");
+    if (checkinAvatar) checkinAvatar.textContent = avatar;
+
+    const studioNameEl = document.getElementById("studioBannerName");
+    if (studioNameEl) {
+      studioNameEl.textContent = `${avatar} ${rolePref.studioName || "Calm Studio Plan"}`;
+    }
+    renderSmartMotto();
+  }
+
+  function renderRoleCopy() {
+    const copy = getRoleCopy(state);
+
+    const roleSwitchLabel = document.getElementById("topRoleSwitchLabel");
+    if (roleSwitchLabel) roleSwitchLabel.textContent = copy.roleSwitchLabel;
+
+    const symptomBarGroup = document.getElementById("symptomBarGroup");
+    if (symptomBarGroup) symptomBarGroup.setAttribute("aria-label", copy.symptomBarAria);
+
+    const symptomBarLabel = document.getElementById("symptomBarLabel");
+    if (symptomBarLabel) symptomBarLabel.textContent = copy.symptomBarLabel;
+
+    const todayRingsTitle = document.getElementById("todayRingsTitle");
+    if (todayRingsTitle) {
+      todayRingsTitle.textContent = copy.isMom ? "The Dancer's Daily Score" : "My Daily Score";
+    }
+
+    const todayPlanHeading = document.getElementById("todayPlanHeading");
+    if (todayPlanHeading) todayPlanHeading.textContent = copy.todayPlanHeading;
+
+    const todayBagHeading = document.getElementById("todayBagHeadingText");
+    if (todayBagHeading) todayBagHeading.textContent = copy.bagHeading;
+
+    const notesLabel = document.getElementById("dailyNotesLabel");
+    if (notesLabel) notesLabel.textContent = copy.notesLabel;
+
+    const notesInput = document.getElementById("dailyNotesInput");
+    if (notesInput) notesInput.setAttribute("placeholder", copy.notesPlaceholder);
+
+    const foodSearch = document.getElementById("foodSearchInput");
+    if (foodSearch) foodSearch.setAttribute("placeholder", copy.foodSearchPlaceholder);
+
+    const schedHead = document.getElementById("scheduleMainHeading");
+    if (schedHead) schedHead.textContent = copy.scheduleMainHeading;
+
+    const histHead = document.getElementById("historyMainHeading");
+    if (histHead) histHead.textContent = copy.historyMainHeading;
+  }
+
+  function maybeShowDancerCheckinPopup({ force = false } = {}) {
+    const modal = document.getElementById("dancerCheckinModal");
+    if (!modal) return;
+    if (state.viewerRole !== "Dancer") {
+      modal.classList.add("hidden");
+      return;
+    }
+    if (!force && dancerCheckinShownThisOpen) return;
+    const pinOverlay = document.getElementById("pinOverlay");
+    if (pinOverlay && !pinOverlay.classList.contains("hidden")) return;
+
+    dancerCheckinShownThisOpen = true;
+    const greeting = document.getElementById("checkinPopupGreeting");
+    if (greeting) {
+      const name = state.profile?.name || "Dancer";
+      greeting.textContent = `Hi ${name}! How do you feel right now?`;
+    }
+    modal.classList.remove("hidden");
+  }
+
   function renderAll() {
+    applyPersonalizationTheme();
+    renderRoleCopy();
     renderTopBar();
     renderViewVisibility();
     renderTodayView();
@@ -716,9 +1680,12 @@ if (typeof document !== "undefined") {
     renderCarpoolView();
     renderHistoryView();
     renderGearModal();
+    renderSettingsModal();
+    renderNutritionSourcesModal();
   }
 
   function renderTopBar() {
+    const copy = getRoleCopy(state);
     const greeting = document.getElementById("topBarSubtitle");
     if (greeting) {
       greeting.textContent = `${state.profile.name || "Dancer"} • ${state.viewerRole || "Dancer"}`;
@@ -729,14 +1696,14 @@ if (typeof document !== "undefined") {
     });
 
     const banner = document.getElementById("rescueBanner");
-    const proto = RESCUE_PROTOCOLS[state.symptomStatus];
+    const proto = copy.rescueProtocols[state.symptomStatus];
     if (banner) {
       if (proto) {
         banner.classList.remove("hidden");
         banner.innerHTML = `
           <div class="rescue-banner-head">
             <strong>${esc(proto.title)}</strong>
-            <button type="button" class="btn-text" id="dismissRescueBtn">I feel steady now ✓</button>
+            <button type="button" class="btn-text" id="dismissRescueBtn">${esc(copy.dismissRescueLabel)}</button>
           </div>
           <p>${esc(proto.body)}</p>
         `;
@@ -754,6 +1721,7 @@ if (typeof document !== "undefined") {
   }
 
   function renderViewVisibility() {
+    const active = state.activeTab === "schedule" ? "carpool" : state.activeTab;
     const views = {
       today: document.getElementById("view-today"),
       food: document.getElementById("view-food"),
@@ -761,23 +1729,44 @@ if (typeof document !== "undefined") {
       history: document.getElementById("view-history")
     };
     Object.entries(views).forEach(([key, el]) => {
-      if (el) el.classList.toggle("hidden", state.activeTab !== key);
+      if (el) el.classList.toggle("hidden", active !== key);
     });
 
     document.querySelectorAll("[data-nav-tab]").forEach((btn) => {
-      btn.classList.toggle("active", btn.getAttribute("data-nav-tab") === state.activeTab);
+      const tabKey = btn.getAttribute("data-nav-tab");
+      btn.classList.toggle("active", tabKey === active);
     });
   }
 
-  function setProgressRing(circleId, pct) {
+  function setProgressRing(circleId, pct, radius = 34) {
     const circle = document.getElementById(circleId);
     if (!circle) return;
-    const radius = 34;
     const circumference = 2 * Math.PI * radius;
     const clamped = Math.max(0, Math.min(100, pct));
     circle.style.strokeDasharray = `${circumference}`;
     circle.style.strokeDashoffset = `${circumference * (1 - clamped / 100)}`;
   }
+
+  function celebrateGoalMet() {
+    const card = document.getElementById("todayRingsCard");
+    if (!card) return;
+    card.classList.remove("goal-celebrate");
+    void card.offsetWidth;
+    card.classList.add("goal-celebrate");
+    const icons = ["✨", "🎉", "🩰", "💧", "🌟"];
+    for (let i = 0; i < 6; i++) {
+      const span = document.createElement("span");
+      span.className = "confetti-burst";
+      span.textContent = icons[i % icons.length];
+      span.style.left = `${22 + Math.random() * 58}%`;
+      span.style.top = `${15 + Math.random() * 40}%`;
+      span.style.animationDelay = `${i * 0.05}s`;
+      card.appendChild(span);
+      setTimeout(() => span.remove(), 950);
+    }
+  }
+
+  let prevRingMet = null;
 
   function renderBagChecklistInto(containerId) {
     const el = document.getElementById(containerId);
@@ -818,13 +1807,39 @@ if (typeof document !== "undefined") {
   }
 
   function renderTodayView() {
-    const targets = getCalculatedTargets(state.profile);
+    const todayStr = getLocalDateString();
+    const targets = getActiveTodayTargets(todayStr);
     const totals = computeDailyTotals(state, targets);
+    const scoreInfo = computeDailyScore(totals, targets);
+    const ringData = computeConcentricRingData(totals, targets);
 
-    const naPct = Math.round((totals.sodiumMg / targets.sodium) * 100);
-    const waterPct = Math.round((totals.waterOz / targets.water) * 100);
-    setProgressRing("sodiumRingProgress", naPct);
-    setProgressRing("waterRingProgress", waterPct);
+    renderSmartMotto();
+
+    const activityBadge = document.getElementById("todayDanceActivityBadge");
+    if (activityBadge) {
+      activityBadge.textContent =
+        targets.danceHours > 0
+          ? `📅 Today's Dance: ${targets.danceHours} hrs (from Schedule)`
+          : "📅 Today's Dance: 0 hrs (Rest / No Dance Scheduled)";
+    }
+
+    setProgressRing("sodiumRingProgress", ringData.sodiumPct, 34);
+    setProgressRing("waterRingProgress", ringData.waterPct, 25);
+    setProgressRing("fuelRingProgress", ringData.fuelPct, 16);
+
+    const nowMet = {
+      sodium: ringData.sodiumPct >= 100,
+      water: ringData.waterPct >= 100,
+      fuel: ringData.fuelPct >= 100
+    };
+    if (prevRingMet && (
+      (!prevRingMet.sodium && nowMet.sodium) ||
+      (!prevRingMet.water && nowMet.water) ||
+      (!prevRingMet.fuel && nowMet.fuel)
+    )) {
+      celebrateGoalMet();
+    }
+    prevRingMet = nowMet;
 
     const naVal = document.getElementById("sodiumRingValue");
     const naSub = document.getElementById("sodiumRingTarget");
@@ -836,19 +1851,51 @@ if (typeof document !== "undefined") {
     if (waVal) waVal.textContent = `${totals.waterOz}`;
     if (waSub) waSub.textContent = `/ ${targets.water} oz`;
 
+    const fuelVal = document.getElementById("fuelRingValue");
+    const fuelSub = document.getElementById("fuelRingTarget");
+    if (fuelVal) fuelVal.textContent = `${totals.totalKcal}`;
+    if (fuelSub) fuelSub.textContent = `/ ${targets.calories} kcal`;
+
+    const scorePctEl = document.getElementById("todayScorePct");
+    if (scorePctEl) scorePctEl.textContent = `${scoreInfo.score}%`;
+
+    const scoreBadge = document.getElementById("todayDailyScoreBadge");
+    if (scoreBadge) {
+      scoreBadge.className = `pill-badge ${scoreInfo.badgeClass}`;
+      scoreBadge.textContent = `Daily Score: ${scoreInfo.score}% (${scoreInfo.goalsHit}/${scoreInfo.totalGoals} Goals • ${scoreInfo.label})`;
+    }
+
+    const calChip = document.getElementById("todayCalorieTargetChip");
+    if (calChip) {
+      calChip.textContent = `⚡ ${totals.totalKcal} / ${targets.calories} kcal`;
+    }
+
     const gbStatus = document.getElementById("todayGbStatus");
     if (gbStatus) {
       gbStatus.className = `pill-badge ${totals.gbCompliant ? "badge-safe" : "badge-avoid"}`;
       gbStatus.textContent = totals.gbCompliant
-        ? `✓ GB-Safe (≤ ${targets.maxMealFat}g/meal)`
-        : `⚠️ Meal > ${targets.maxMealFat}g fat`;
+        ? `✓ Safe (≤ ${targets.maxMealFat}g)`
+        : `⚠️ > ${targets.maxMealFat}g fat`;
     }
+
+    // Next Dance Class + Carpool summary card
+    const nextClass = getTodayNextClassAndCarpool(state, todayStr);
+    const nextKicker = document.getElementById("todayNextClassKicker");
+    const nextTitle = document.getElementById("todayNextClassTitle");
+    const nextCarpool = document.getElementById("todayNextClassCarpool");
+    if (nextKicker) {
+      nextKicker.textContent = nextClass.danceHours > 0
+        ? `Today's Dance • ${nextClass.danceHours} hrs`
+        : "Today's Schedule • Rest Day";
+    }
+    if (nextTitle) nextTitle.textContent = nextClass.classTitle;
+    if (nextCarpool) nextCarpool.textContent = nextClass.carpoolSummary;
 
     document.querySelectorAll("[data-day-mode]").forEach((btn) => {
       btn.classList.toggle("active", btn.getAttribute("data-day-mode") === state.dayMode);
     });
 
-    // 7-Day History Overview Card
+    // 7-Day History Overview Card with Score Color Coding
     const last7 = filterHistory(state.history, "7d");
     const stats7 = computeHistoryStats(last7);
     const dotsEl = document.getElementById("history7Dots");
@@ -860,18 +1907,21 @@ if (typeof document !== "undefined") {
         const ds = getLocalDateString(d);
         const entry = last7.find((h) => h.date === ds);
         let cls = "dot-empty";
-        let title = `${ds}: No log`;
+        let title = `${ds}: No log yet (tap to log past day)`;
         if (entry) {
-          cls = entry.symptomStatus === "steady" && entry.gbCompliant !== false ? "dot-good" : "dot-warn";
-          title = `${ds}: ${entry.sodiumMg}mg Na, ${entry.waterOz}oz, ${entry.symptomStatus}`;
+          const sc = computeDailyScore(entry, targets);
+          cls = sc.tier === "high" ? "dot-good" : sc.tier === "medium" ? "dot-warn" : "dot-low";
+          title = `${ds}: Score ${sc.score}% (${sc.goalsHit}/${sc.totalGoals} goals) • ${entry.sodiumMg}mg Na, ${entry.waterOz}oz`;
         }
-        dots.push(`<span class="history-dot ${cls}" title="${esc(title)}"></span>`);
+        dots.push(`<span class="history-dot ${cls}" data-dot-date="${esc(ds)}" title="${esc(title)}"></span>`);
       }
       dotsEl.innerHTML = dots.join("");
     }
+    const avg7Score = document.getElementById("history7AvgScore");
     const avg7Na = document.getElementById("history7AvgNa");
     const avg7Water = document.getElementById("history7AvgWater");
     const steady7 = document.getElementById("history7Steady");
+    if (avg7Score) avg7Score.textContent = `${stats7.avgScore}%`;
     if (avg7Na) avg7Na.textContent = `${stats7.avgSodium} mg`;
     if (avg7Water) avg7Water.textContent = `${stats7.avgWater} oz`;
     if (steady7) steady7.textContent = `${stats7.symptomFreeCount}/${stats7.count || 0} steady`;
@@ -946,7 +1996,7 @@ if (typeof document !== "undefined") {
   }
 
   function renderFoodView() {
-    const targets = getCalculatedTargets(state.profile);
+    const targets = getActiveTodayTargets();
     const searchVal = (document.getElementById("foodSearchInput")?.value || "").trim().toLowerCase();
     const listEl = document.getElementById("foodLibraryList");
     if (!listEl) return;
@@ -1001,7 +2051,7 @@ if (typeof document !== "undefined") {
   function showInstantAnalysis(est) {
     const card = document.getElementById("instantAnalysisCard");
     if (!card || !est) return;
-    const targets = getCalculatedTargets(state.profile);
+    const targets = getActiveTodayTargets();
     const safety = evaluateFoodSafety(est.sodium, est.fat, est.kcal, targets.maxMealFat);
     const badgeClass = safety.overall === "safe" ? "badge-safe" : safety.overall === "caution" ? "badge-caution" : "badge-avoid";
 
@@ -1048,48 +2098,398 @@ if (typeof document !== "undefined") {
     });
   }
 
+  function renderNutritionSourcesModal() {
+    const listEl = document.getElementById("nutritionSourcesList");
+    if (!listEl) return;
+    listEl.innerHTML = NUTRITION_SOURCES.map(
+      (src) => `
+        <div class="source-card">
+          <span class="food-cat">${esc(src.category)}</span>
+          <h4>${esc(src.title)}</h4>
+          <div class="source-org">${esc(src.organization)}</div>
+          <p>${esc(src.summary)}</p>
+          <p class="muted-text"><strong>How used in app:</strong> ${esc(src.howUsedInApp)}</p>
+        </div>
+      `
+    ).join("");
+  }
+
+  // ==========================================================================
+  // SCHEDULE TAB: CALENDAR VIEWS (MONTH, WEEK, DAY) + CUSTOM SCHEDULE + CARPOOL
+  // ==========================================================================
+
+  function parseDateParts(dateStr) {
+    const clean = /^\d{4}-\d{2}-\d{2}$/.test(String(dateStr)) ? String(dateStr) : getLocalDateString();
+    const [y, m, d] = clean.split("-").map((n) => parseInt(n, 10));
+    return new Date(y, m - 1, d, 12, 0, 0);
+  }
+
+  function timeStrToHourFloat(timeStr, defaultHr = 16) {
+    const s = String(timeStr || "").trim();
+    const ampm = s.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (ampm) {
+      let h = parseInt(ampm[1], 10);
+      const min = parseInt(ampm[2], 10);
+      const ap = ampm[3].toUpperCase();
+      if (ap === "PM" && h < 12) h += 12;
+      if (ap === "AM" && h === 12) h = 0;
+      return h + min / 60;
+    }
+    const h24 = s.match(/^(\d{1,2}):(\d{2})$/);
+    if (h24) {
+      return parseInt(h24[1], 10) + parseInt(h24[2], 10) / 60;
+    }
+    return defaultHr;
+  }
+
+  function renderCalendarViews() {
+    const viewMode = state.calendarViewMode || "month";
+    const selDateStr = state.selectedCalendarDate || getLocalDateString();
+    const selDate = parseDateParts(selDateStr);
+    const todayStr = getLocalDateString();
+
+    document.querySelectorAll("[data-cal-view]").forEach((btn) => {
+      btn.classList.toggle("active", btn.getAttribute("data-cal-view") === viewMode);
+    });
+
+    document.getElementById("calMonthContainer")?.classList.toggle("hidden", viewMode !== "month");
+    document.getElementById("calWeekContainer")?.classList.toggle("hidden", viewMode !== "week");
+    document.getElementById("calDayContainer")?.classList.toggle("hidden", viewMode !== "day");
+
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    const periodLabel = document.getElementById("calCurrentPeriodLabel");
+    if (periodLabel) {
+      if (viewMode === "month") {
+        periodLabel.textContent = `${monthNames[selDate.getMonth()]} ${selDate.getFullYear()}`;
+      } else if (viewMode === "week") {
+        const startOfWeek = new Date(selDate);
+        startOfWeek.setDate(selDate.getDate() - selDate.getDay());
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        periodLabel.textContent = `Week of ${monthNames[startOfWeek.getMonth()].slice(0, 3)} ${startOfWeek.getDate()} – ${monthNames[endOfWeek.getMonth()].slice(0, 3)} ${endOfWeek.getDate()}`;
+      } else {
+        const wkDay = getWeekdayForDateStr(selDateStr);
+        periodLabel.textContent = `${wkDay}, ${monthNames[selDate.getMonth()]} ${selDate.getDate()}, ${selDate.getFullYear()}`;
+      }
+    }
+
+    // 1. Render Month Grid
+    const monthGridEl = document.getElementById("calMonthGrid");
+    if (monthGridEl && viewMode === "month") {
+      const year = selDate.getFullYear();
+      const month = selDate.getMonth();
+      const firstDay = new Date(year, month, 1, 12, 0, 0);
+      const startOffset = firstDay.getDay();
+      const startCellDate = new Date(year, month, 1 - startOffset, 12, 0, 0);
+
+      const cellsHtml = [];
+      for (let i = 0; i < 42; i++) {
+        const cellDate = new Date(startCellDate);
+        cellDate.setDate(startCellDate.getDate() + i);
+        const ds = getLocalDateString(cellDate);
+        const isCurrentMonth = cellDate.getMonth() === month;
+        const isToday = ds === todayStr;
+        const isSelected = ds === selDateStr;
+        const wkName = getWeekdayForDateStr(ds);
+        const events = getScheduleEventsForDate(state, ds);
+        const danceHrs = getDanceHoursForDate(state, ds);
+        const cp = state.carpool?.[wkName] || {};
+        const hasCarpool = Boolean(cp.toDriver || cp.homeDriver || cp.schoolToDriver || cp.schoolHomeDriver);
+        const hasSchool = events.some((e) => e.category === "school");
+
+        const badges = [];
+        if (danceHrs > 0) {
+          badges.push(`<span class="cal-mini-pill cal-pill-dance">🩰 ${danceHrs}h Dance</span>`);
+        } else {
+          badges.push(`<span class="cal-mini-pill cal-pill-rest">Rest (0h)</span>`);
+        }
+        if (hasSchool) {
+          badges.push(`<span class="cal-mini-pill cal-pill-school">🎒 School</span>`);
+        }
+        if (hasCarpool) {
+          badges.push(`<span class="cal-mini-pill cal-pill-carpool">🚗 Carpool</span>`);
+        }
+
+        cellsHtml.push(`
+          <button type="button" class="cal-day-cell ${isCurrentMonth ? "" : "cal-outside"} ${isToday ? "cal-today" : ""} ${isSelected ? "cal-selected" : ""}" data-cal-date="${esc(ds)}">
+            <span class="cal-day-num">${cellDate.getDate()}</span>
+            <div class="cal-day-badges">${badges.join("")}</div>
+          </button>
+        `);
+      }
+      monthGridEl.innerHTML = cellsHtml.join("");
+    }
+
+    // 2. Render Google Calendar-Style Week View (6 AM to 10 PM hourly timeline)
+    const weekGridEl = document.getElementById("calWeekGrid");
+    if (weekGridEl && viewMode === "week") {
+      const startOfWeek = new Date(selDate);
+      startOfWeek.setDate(selDate.getDate() - selDate.getDay());
+      const hours = [];
+      for (let h = 6; h <= 21; h++) {
+        const label = h === 12 ? "12 PM" : h > 12 ? `${h - 12} PM` : `${h} AM`;
+        hours.push(`<div class="gcal-hour-label">${label}</div>`);
+      }
+
+      const colHeaders = [`<div class="gcal-col-head">Time</div>`];
+      const dayColumns = [];
+
+      for (let dIdx = 0; dIdx < 7; dIdx++) {
+        const colDate = new Date(startOfWeek);
+        colDate.setDate(startOfWeek.getDate() + dIdx);
+        const ds = getLocalDateString(colDate);
+        const wkName = getWeekdayForDateStr(ds);
+        const danceHrs = getDanceHoursForDate(state, ds);
+        const isSel = ds === selDateStr;
+
+        colHeaders.push(`
+          <div class="gcal-col-head ${isSel ? "active" : ""}" data-cal-date="${esc(ds)}">
+            <div>${wkName} ${colDate.getDate()}</div>
+            <div class="cal-mini-pill ${danceHrs > 0 ? "cal-pill-dance" : "cal-pill-rest"}">${danceHrs}h</div>
+          </div>
+        `);
+
+        const events = getScheduleEventsForDate(state, ds);
+        const cp = state.carpool?.[wkName] || {};
+        const blocksHtml = [];
+
+        events.forEach((evt) => {
+          const startH = Math.max(6, Math.min(21.5, timeStrToHourFloat(evt.startTime, 16)));
+          const dur = Math.max(0.5, Number(evt.durationHours) || computeTimeRangeDurationHours(evt.startTime, evt.endTime, 1));
+          const topPx = Math.round((startH - 6) * 44);
+          const heightPx = Math.max(22, Math.round(dur * 44) - 2);
+          const cls = evt.category === "school" ? "gcal-block-school" : "gcal-block-dance";
+          blocksHtml.push(`
+            <div class="gcal-event-block ${cls}" style="top:${topPx}px;height:${heightPx}px;" data-cal-date="${esc(ds)}" title="${esc(evt.title)} (${formatTime12h(evt.startTime)}–${formatTime12h(evt.endTime)})">
+              <strong>${esc(evt.title)}</strong>
+              <div>${esc(formatTime12h(evt.startTime))}</div>
+            </div>
+          `);
+        });
+
+        if (cp.toDriver) {
+          const startH = Math.max(6, Math.min(21.5, timeStrToHourFloat(cp.toTime || "3:30 PM", 15.5)));
+          const topPx = Math.round((startH - 6) * 44);
+          blocksHtml.push(`
+            <div class="gcal-event-block gcal-block-carpool" style="top:${topPx}px;height:24px;" data-cal-date="${esc(ds)}">
+              🚗 To Studio: ${esc(cp.toDriver)}
+            </div>
+          `);
+        }
+        if (cp.homeDriver) {
+          const startH = Math.max(6, Math.min(21.5, timeStrToHourFloat(cp.homeTime || "9:00 PM", 21)));
+          const topPx = Math.round((startH - 6) * 44);
+          blocksHtml.push(`
+            <div class="gcal-event-block gcal-block-carpool" style="top:${topPx}px;height:24px;" data-cal-date="${esc(ds)}">
+              🚗 Home: ${esc(cp.homeDriver)}
+            </div>
+          `);
+        }
+
+        dayColumns.push(`<div class="gcal-day-column" data-cal-date="${esc(ds)}">${blocksHtml.join("")}</div>`);
+      }
+
+      weekGridEl.innerHTML = `
+        <div class="gcal-week-header">${colHeaders.join("")}</div>
+        <div class="gcal-week-body">
+          <div class="gcal-time-gutter">${hours.join("")}</div>
+          ${dayColumns.join("")}
+        </div>
+      `;
+    }
+
+    // 3. Render Google Calendar-Style Day View (Single-day hourly timeline with School, Dance, Fuel & Carpool)
+    const dayTimelineEl = document.getElementById("calDayTimeline");
+    if (dayTimelineEl && viewMode === "day") {
+      const hours = [];
+      for (let h = 6; h <= 21; h++) {
+        const label = h === 12 ? "12:00 PM" : h > 12 ? `${h - 12}:00 PM` : `${h}:00 AM`;
+        hours.push(`<div class="gcal-hour-label">${label}</div>`);
+      }
+
+      const wkName = getWeekdayForDateStr(selDateStr);
+      const events = getScheduleEventsForDate(state, selDateStr);
+      const cp = state.carpool?.[wkName] || {};
+      const blocksHtml = [];
+
+      events.forEach((evt) => {
+        const startH = Math.max(6, Math.min(21.5, timeStrToHourFloat(evt.startTime, 16)));
+        const dur = Math.max(0.5, Number(evt.durationHours) || computeTimeRangeDurationHours(evt.startTime, evt.endTime, 1));
+        const topPx = Math.round((startH - 6) * 44);
+        const heightPx = Math.max(26, Math.round(dur * 44) - 2);
+        const cls = evt.category === "school" ? "gcal-block-school" : "gcal-block-dance";
+        blocksHtml.push(`
+          <div class="gcal-event-block ${cls}" style="top:${topPx}px;height:${heightPx}px;" data-edit-sched-event="${esc(evt.id)}">
+            <strong>${esc(evt.title)}</strong> (${evt.durationHours || dur} hrs) • ${esc(formatTime12h(evt.startTime))} – ${esc(formatTime12h(evt.endTime))}
+            ${evt.location ? `<span> @ ${esc(evt.location)}</span>` : ""}
+          </div>
+        `);
+      });
+
+      if (cp.schoolToDriver) {
+        const startH = Math.max(6, Math.min(21.5, timeStrToHourFloat(cp.schoolToTime || "7:35 AM", 7.5)));
+        blocksHtml.push(`
+          <div class="gcal-event-block gcal-block-carpool" style="top:${Math.round((startH - 6) * 44)}px;height:24px;">
+            🚗 School Drop-Off: ${esc(cp.schoolToDriver)} (${esc(cp.schoolToTime || "7:35 AM")})
+          </div>
+        `);
+      }
+      if (cp.toDriver) {
+        const startH = Math.max(6, Math.min(21.5, timeStrToHourFloat(cp.toTime || "3:30 PM", 15.5)));
+        blocksHtml.push(`
+          <div class="gcal-event-block gcal-block-carpool" style="top:${Math.round((startH - 6) * 44)}px;height:24px;">
+            🚗 To Studio Carpool: ${esc(cp.toDriver)} (${esc(cp.toTime || "3:30 PM")})
+          </div>
+        `);
+      }
+      if (cp.homeDriver) {
+        const startH = Math.max(6, Math.min(21.5, timeStrToHourFloat(cp.homeTime || "9:00 PM", 21)));
+        blocksHtml.push(`
+          <div class="gcal-event-block gcal-block-carpool" style="top:${Math.round((startH - 6) * 44)}px;height:24px;">
+            🚗 Home from Studio: ${esc(cp.homeDriver)} (${esc(cp.homeTime || "9:00 PM")})
+          </div>
+        `);
+      }
+
+      dayTimelineEl.innerHTML = `
+        <div class="gcal-single-grid">
+          <div class="gcal-time-gutter">${hours.join("")}</div>
+          <div class="gcal-day-column">${blocksHtml.join("")}</div>
+        </div>
+      `;
+    }
+
+    // Selected Day's Detailed Schedule directly underneath the Calendar (Requirement 1b & 1c)
+    renderSelectedDayScheduleDetails(selDateStr);
+  }
+
+  function renderSelectedDayScheduleDetails(dateStr) {
+    const wkName = getWeekdayForDateStr(dateStr);
+    const events = getScheduleEventsForDate(state, dateStr);
+    const danceHours = getDanceHoursForDate(state, dateStr);
+    const dayTargets = getCalculatedTargets(state.profile, { danceHours, state, date: dateStr });
+
+    const titleEl = document.getElementById("selectedDayScheduleTitle");
+    if (titleEl) {
+      titleEl.textContent = `${wkName} (${dateStr}) — School & Dance Schedule`;
+    }
+    const summaryEl = document.getElementById("selectedDayActivitySummary");
+    if (summaryEl) {
+      summaryEl.textContent =
+        danceHours > 0
+          ? `🩰 ${danceHours} hrs Dance Scheduled → Day's Recommended Intake: ${dayTargets.calories} kcal • ${dayTargets.sodium}mg Salt • ${dayTargets.water}oz Water`
+          : `🛋️ 0 hrs Dance Scheduled (Rest Day) → Day's Recommended Intake: ${dayTargets.calories} kcal • ${dayTargets.sodium}mg Salt • ${dayTargets.water}oz Water`;
+    }
+
+    const listEl = document.getElementById("selectedDayEventsList");
+    if (!listEl) return;
+
+    if (!events.length) {
+      listEl.innerHTML = `
+        <div class="empty-card">
+          <p>No school or dance classes scheduled for ${wkName} (${dateStr}).</p>
+          <p class="muted-text">0 dance hours scheduled — daily food and water targets automatically adjust for a rest day.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const sorted = [...events].sort(
+      (a, b) => timeStrToHourFloat(a.startTime, 8) - timeStrToHourFloat(b.startTime, 8)
+    );
+
+    listEl.innerHTML = sorted
+      .map((evt) => {
+        const isSchool = evt.category === "school";
+        const badgeCls = isSchool ? "badge-caution" : "badge-safe";
+        const catIcon = isSchool ? "🎒 School" : evt.category === "competition" ? "🏆 Competition" : evt.category === "rehearsal" ? "🎭 Rehearsal" : "🩰 Dance Class";
+        return `
+          <div class="day-event-item ${isSchool ? "evt-school" : "evt-dance"}">
+            <div>
+              <span class="pill-badge ${badgeCls}">${catIcon} • ${evt.durationHours} hrs</span>
+              <h4 style="margin:4px 0 2px;">${esc(evt.title)}</h4>
+              <div class="muted-text">${esc(formatTime12h(evt.startTime))} – ${esc(formatTime12h(evt.endTime))}${evt.location ? ` • ${esc(evt.location)}` : ""}${evt.notes ? ` • ${esc(evt.notes)}` : ""}</div>
+            </div>
+            <div class="slot-actions">
+              <button type="button" class="slot-action-btn" data-edit-sched-event="${esc(evt.id)}" aria-label="Edit ${esc(evt.title)}" title="Edit class">✏️</button>
+              <button type="button" class="slot-action-btn delete-btn" data-delete-sched-event="${esc(evt.id)}" aria-label="Delete ${esc(evt.title)}" title="Remove class">🗑️</button>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+  }
+
   function renderCarpoolView() {
+    renderCalendarViews();
+
     document.querySelectorAll("[data-carpool-day]").forEach((btn) => {
       btn.classList.toggle("active", btn.getAttribute("data-carpool-day") === state.dayOfWeek);
     });
 
-    const cp = state.carpool[state.dayOfWeek] || { toDriver: "", toTime: "", toNote: "", homeDriver: "", homeTime: "", homeNote: "" };
+    const dayBadge = document.getElementById("carpoolSelectedDayBadge");
+    if (dayBadge) dayBadge.textContent = `${state.dayOfWeek} Carpool`;
+
+    const cp = state.carpool[state.dayOfWeek] || {};
     const card = document.getElementById("carpoolDayCard");
     if (card) {
       card.innerHTML = `
+        <div class="carpool-section-label">🎒 School Carpool (${esc(state.dayOfWeek)})</div>
+        <div class="carpool-grid" style="margin-bottom: 10px;">
+          <div class="carpool-leg">
+            <span class="leg-tag">TO SCHOOL</span>
+            <h4>${esc(cp.schoolToDriver || "Mom / Bus / TBD")}</h4>
+            <p class="leg-time">${esc(cp.schoolToTime || "7:35 AM")}</p>
+            <p class="muted-text">${esc(cp.schoolToNote || "Tap Edit Rides to add school drop-off note")}</p>
+          </div>
+          <div class="carpool-leg">
+            <span class="leg-tag">FROM SCHOOL</span>
+            <h4>${esc(cp.schoolHomeDriver || "Mom / Carpool / TBD")}</h4>
+            <p class="leg-time">${esc(cp.schoolHomeTime || "2:55 PM")}</p>
+            <p class="muted-text">${esc(cp.schoolHomeNote || "Tap Edit Rides to add school pick-up note")}</p>
+          </div>
+        </div>
+        <div class="carpool-section-label">🩰 Dance Studio Carpool (${esc(state.dayOfWeek)})</div>
         <div class="carpool-grid">
           <div class="carpool-leg">
             <span class="leg-tag">TO STUDIO</span>
             <h4>${esc(cp.toDriver || "Not assigned")}</h4>
             <p class="leg-time">${esc(cp.toTime || "No time set")}</p>
-            <p class="muted-text">${esc(cp.toNote || "Tap Edit to add pickup notes")}</p>
+            <p class="muted-text">${esc(cp.toNote || "Tap Edit Rides to add studio pickup notes")}</p>
           </div>
           <div class="carpool-leg">
-            <span class="leg-tag">HOME</span>
+            <span class="leg-tag">HOME FROM STUDIO</span>
             <h4>${esc(cp.homeDriver || "Not assigned")}</h4>
             <p class="leg-time">${esc(cp.homeTime || "No time set")}</p>
-            <p class="muted-text">${esc(cp.homeNote || "Tap Edit to add drop-off notes")}</p>
+            <p class="muted-text">${esc(cp.homeNote || "Tap Edit Rides to add drop-off notes")}</p>
           </div>
         </div>
       `;
     }
 
-    const toD = document.getElementById("editToDriver");
-    const toT = document.getElementById("editToTime");
-    const toN = document.getElementById("editToNote");
-    const hoD = document.getElementById("editHomeDriver");
-    const hoT = document.getElementById("editHomeTime");
-    const hoN = document.getElementById("editHomeNote");
-    if (toD) toD.value = cp.toDriver || "";
-    if (toT) toT.value = cp.toTime || "";
-    if (toN) toN.value = cp.toNote || "";
-    if (hoD) hoD.value = cp.homeDriver || "";
-    if (hoT) hoT.value = cp.homeTime || "";
-    if (hoN) hoN.value = cp.homeNote || "";
+    const setInput = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val || "";
+    };
+    setInput("editSchoolToDriver", cp.schoolToDriver);
+    setInput("editSchoolToTime", cp.schoolToTime);
+    setInput("editSchoolToNote", cp.schoolToNote);
+    setInput("editSchoolHomeDriver", cp.schoolHomeDriver);
+    setInput("editSchoolHomeTime", cp.schoolHomeTime);
+    setInput("editSchoolHomeNote", cp.schoolHomeNote);
+    setInput("editToDriver", cp.toDriver);
+    setInput("editToTime", cp.toTime);
+    setInput("editToNote", cp.toNote);
+    setInput("editHomeDriver", cp.homeDriver);
+    setInput("editHomeTime", cp.homeTime);
+    setInput("editHomeNote", cp.homeNote);
   }
 
   function renderHistoryView() {
-    const targets = getCalculatedTargets(state.profile);
+    const targets = getActiveTodayTargets();
     const range = state.historyRange || "7d";
     const entries = filterHistory(state.history, range);
     const stats = computeHistoryStats(entries);
@@ -1101,10 +2501,10 @@ if (typeof document !== "undefined") {
     const summaryEl = document.getElementById("historySummaryGrid");
     if (summaryEl) {
       summaryEl.innerHTML = `
-        <div class="stat-tile"><span class="stat-label">Avg Sodium</span><strong>${stats.avgSodium} mg</strong></div>
+        <div class="stat-tile"><span class="stat-label">Avg Daily Score</span><strong>${stats.avgScore}% (${stats.highScoreDays}/${stats.count} Green)</strong></div>
+        <div class="stat-tile"><span class="stat-label">Avg Salt (Sodium)</span><strong>${stats.avgSodium} mg</strong></div>
         <div class="stat-tile"><span class="stat-label">Avg Water</span><strong>${stats.avgWater} oz</strong></div>
-        <div class="stat-tile"><span class="stat-label">GB Safe Days</span><strong>${stats.gbCompliancePct}%</strong></div>
-        <div class="stat-tile"><span class="stat-label">Steady Days</span><strong>${stats.symptomFreeCount}/${stats.count}</strong></div>
+        <div class="stat-tile"><span class="stat-label">Stomach-Safe &amp; Steady</span><strong>${stats.gbCompliancePct}% Safe • ${stats.symptomFreeCount}/${stats.count} Steady</strong></div>
       `;
     }
 
@@ -1112,33 +2512,50 @@ if (typeof document !== "undefined") {
     if (corrEl) {
       const c = stats.symptomCorrelation;
       corrEl.innerHTML = `
-        <h4>Hydration &amp; Symptom Correlation</h4>
-        <p><strong>Steady Days (${c.steadyDays}):</strong> Avg ${c.steadyAvgSodium} mg Na • ${c.steadyAvgWater} oz water</p>
-        <p><strong>Symptomatic Days (${c.symptomaticDays}):</strong> Avg ${c.symptomaticAvgSodium} mg Na • ${c.symptomaticAvgWater} oz water</p>
+        <h4>Hydration, Salt &amp; Feeling Correlation</h4>
+        <p><strong>Steady Days (${c.steadyDays}):</strong> Avg ${c.steadyAvgSodium} mg Salt • ${c.steadyAvgWater} oz Water</p>
+        <p><strong>Symptomatic Days (${c.symptomaticDays}):</strong> Avg ${c.symptomaticAvgSodium} mg Salt • ${c.symptomaticAvgWater} oz Water</p>
       `;
     }
 
     const listEl = document.getElementById("historyEntriesList");
     if (listEl) {
       if (!entries.length) {
-        listEl.innerHTML = `<div class="empty-card"><p>No daily logs recorded in this range yet.</p></div>`;
+        listEl.innerHTML = `<div class="empty-card"><p>No daily logs recorded in this range yet. Tap <strong>+ Log Past / Missed Day</strong> above to add any missed dates.</p></div>`;
       } else {
         listEl.innerHTML = entries
-          .map(
-            (e) => `
-          <details class="history-entry-card">
+          .map((e) => {
+            const sc = computeDailyScore(e, targets);
+            const scoreVal = typeof e.score === "number" ? e.score : sc.score;
+            const tier = e.scoreTier || sc.tier;
+            const goalsHit = e.goalsHit ?? sc.goalsHit;
+            const totalGoals = e.totalGoals ?? sc.totalGoals;
+            const scoreBadgeCls = tier === "high" ? "badge-safe" : tier === "medium" ? "badge-caution" : "badge-avoid";
+            const tierIcon = tier === "high" ? "🟢" : tier === "medium" ? "🟡" : "🔴";
+
+            return `
+          <details class="history-entry-card score-tier-${esc(tier)}">
             <summary>
-              <span><strong>${esc(e.date)}</strong> • ${esc(e.dayMode)}</span>
-              <span class="pill-badge ${e.symptomStatus === "steady" && e.gbCompliant !== false ? "badge-safe" : "badge-caution"}">${esc(e.symptomStatus || "steady")}</span>
+              <span><strong>${esc(e.date)}</strong> • ${esc(e.dayMode)}${e.danceHours != null ? ` (${e.danceHours}h dance)` : ""}</span>
+              <div class="history-summary-badges">
+                <span class="pill-badge ${scoreBadgeCls}">${tierIcon} Score: ${scoreVal}% (${goalsHit}/${totalGoals} Goals)</span>
+                <span class="pill-badge ${e.symptomStatus === "steady" && e.gbCompliant !== false ? "badge-safe" : "badge-caution"}">${esc(e.symptomStatus || "steady")}</span>
+              </div>
             </summary>
             <div class="history-entry-body">
-              <p>Sodium: <strong>${e.sodiumMg}</strong> / ${e.sodiumTarget} mg • Water: <strong>${e.waterOz}</strong> / ${e.waterTarget} oz</p>
-              <p>Max Meal Fat: <strong>${e.maxMealFat}g</strong> (${e.gbCompliant !== false ? "GB Safe" : "Exceeded"}) • Total Fat: ${e.totalFatG}g</p>
+              <div class="goal-hit-pills">
+                <span class="chip ${sc.breakdown.sodiumHit ? "badge-safe" : "badge-caution"}">${sc.breakdown.sodiumHit ? "✓" : "○"} Salt: ${e.sodiumMg} / ${e.sodiumTarget} mg</span>
+                <span class="chip ${sc.breakdown.waterHit ? "badge-safe" : "badge-caution"}">${sc.breakdown.waterHit ? "✓" : "○"} Water: ${e.waterOz} / ${e.waterTarget} oz</span>
+                <span class="chip ${sc.breakdown.gbHit ? "badge-safe" : "badge-avoid"}">${sc.breakdown.gbHit ? "✓" : "⚠️"} Stomach Fat: ${e.maxMealFat}g (${e.gbCompliant !== false ? "Safe" : "Over Limit"})</span>
+              </div>
               ${e.notes ? `<p class="muted-text">Notes: ${esc(e.notes)}</p>` : ""}
+              <div style="margin-top:8px;">
+                <button type="button" class="btn-secondary btn-xs" data-edit-past-date="${esc(e.date)}">✏️ Edit This Day's Record</button>
+              </div>
             </div>
           </details>
-        `
-          )
+        `;
+          })
           .join("");
       }
     }
@@ -1149,29 +2566,73 @@ if (typeof document !== "undefined") {
     }
   }
 
+  function renderSettingsModal() {
+    const role = state.viewerRole === "Mom" ? "Mom" : "Dancer";
+    const rolePref = getRolePersonalization(state, role);
+
+    const titleEl = document.getElementById("settingsModalTitle");
+    if (titleEl) {
+      titleEl.textContent = role === "Mom" ? "⚙️ Mom's Settings" : "⚙️ Daughter's Settings";
+    }
+
+    document.querySelectorAll("[data-setting-lighting]").forEach((btn) => {
+      btn.classList.toggle("active", btn.getAttribute("data-setting-lighting") === rolePref.lighting);
+    });
+
+    const autoBox = document.getElementById("settingAutoRuleBox");
+    if (autoBox) {
+      autoBox.classList.toggle("hidden", rolePref.lighting !== "auto");
+    }
+
+    document.querySelectorAll("[data-setting-autorule]").forEach((btn) => {
+      btn.classList.toggle("active", btn.getAttribute("data-setting-autorule") === rolePref.autoRule);
+    });
+
+    document.querySelectorAll("[data-setting-palette]").forEach((btn) => {
+      btn.classList.toggle("active", btn.getAttribute("data-setting-palette") === rolePref.palette);
+    });
+
+    const avatarSel = document.getElementById("settingAvatar");
+    if (avatarSel && document.activeElement !== avatarSel) {
+      avatarSel.value = rolePref.avatar || "🩰";
+    }
+    const studioInput = document.getElementById("settingStudioName");
+    if (studioInput && document.activeElement !== studioInput) {
+      studioInput.value = rolePref.studioName || "Calm Studio Plan";
+    }
+    renderSmartMotto();
+  }
+
   function renderGearModal() {
     document.querySelectorAll("[data-role-btn]").forEach((btn) => {
       btn.classList.toggle("active", btn.getAttribute("data-role-btn") === state.viewerRole);
     });
 
     const p = state.profile;
+    const todayDanceHrs = getDanceHoursForDate(state, getLocalDateString());
+
     const setVal = (id, v) => {
       const el = document.getElementById(id);
       if (el && document.activeElement !== el) el.value = v ?? "";
     };
     setVal("profName", p.name);
+    setVal("profGender", p.gender || "female");
     setVal("profAge", p.age);
     setVal("profWeight", p.weightLbs);
     setVal("profHeightFt", p.heightFt);
     setVal("profHeightIn", p.heightIn);
-    setVal("profDanceHours", p.danceHours);
+    setVal("profDanceHours", todayDanceHrs);
     setVal("profPotsLevel", p.potsLevel);
     setVal("profGbLevel", p.gbLevel);
     setVal("profCustomSodium", p.customSodium);
     setVal("profCustomWater", p.customWater);
     setVal("profCustomMealFat", p.customMealFat);
     setVal("profCustomCalories", p.customCalories);
-    setVal("gearSyncUrlInput", state.googleSheetWebAppUrl || auth.syncUrl || "");
+
+    const dynSummary = document.getElementById("profDynamicDanceSummary");
+    if (dynSummary) {
+      dynSummary.textContent = `Today's Scheduled Dance Activity: ${todayDanceHrs} hrs (from 📅 Schedule)`;
+    }
 
     const overrideToggle = document.getElementById("profDoctorOverride");
     const overrideFields = document.getElementById("doctorOverrideFields");
@@ -1186,11 +2647,14 @@ if (typeof document !== "undefined") {
     const bodyEl = document.getElementById("manualContent");
     if (!tabsEl || !bodyEl) return;
 
-    tabsEl.innerHTML = MANUAL_SECTIONS.map(
+    const copy = getRoleCopy(state);
+    const sections = copy.manualSections || MANUAL_SECTIONS;
+
+    tabsEl.innerHTML = sections.map(
       (sec) => `<button type="button" class="pill-btn ${sec.id === activeManualSection ? "active" : ""}" data-manual-tab="${esc(sec.id)}">${esc(sec.label)}</button>`
     ).join("");
 
-    const active = MANUAL_SECTIONS.find((s) => s.id === activeManualSection) || MANUAL_SECTIONS[0];
+    const active = sections.find((s) => s.id === activeManualSection) || sections[0];
     bodyEl.innerHTML = `
       <h4>${esc(active.title)}</h4>
       <ul>
@@ -1206,7 +2670,7 @@ if (typeof document !== "undefined") {
   function updateQuickLogSafetyBadge() {
     const badge = document.getElementById("logGbSafetyBadge");
     if (!badge) return;
-    const targets = getCalculatedTargets(state.profile);
+    const targets = getActiveTodayTargets();
     const na = parseFloat(document.getElementById("logItemSodium")?.value) || 0;
     const fat = parseFloat(document.getElementById("logItemFat")?.value) || 0;
     const kcal = parseFloat(document.getElementById("logItemKcal")?.value) || 0;
@@ -1214,8 +2678,8 @@ if (typeof document !== "undefined") {
     const cls = safety.gbRating.status === "safe" ? "badge-safe" : safety.gbRating.status === "caution" ? "badge-caution" : "badge-avoid";
     badge.className = `pill-badge ${cls}`;
     badge.textContent = safety.gbRating.status === "safe"
-      ? `✓ GB-Safe (${fat}g ≤ ${targets.maxMealFat}g cap)`
-      : `⚠️ ${safety.gbRating.label} (${fat}g > ${targets.maxMealFat}g cap)`;
+      ? `✓ Stomach-Safe (${fat}g ≤ ${targets.maxMealFat}g limit)`
+      : `⚠️ ${safety.gbRating.label} (${fat}g > ${targets.maxMealFat}g limit)`;
   }
 
   function openQuickLogModal(slotId = null) {
@@ -1291,13 +2755,172 @@ if (typeof document !== "undefined") {
     showToast(`Logged: ${name}`);
   }
 
+  // Past / Missed Day Modal Helpers (Requirement 5)
+  function updatePastLogScorePreview() {
+    const badge = document.getElementById("pastLogScorePreview");
+    if (!badge) return;
+    const sodiumMg = parseFloat(document.getElementById("pastLogSodium")?.value) || 0;
+    const sodiumTarget = parseFloat(document.getElementById("pastLogSodiumTarget")?.value) || 3600;
+    const waterOz = parseFloat(document.getElementById("pastLogWater")?.value) || 0;
+    const waterTarget = parseFloat(document.getElementById("pastLogWaterTarget")?.value) || 85;
+    const maxMealFat = parseFloat(document.getElementById("pastLogMaxMealFat")?.value) || 0;
+    const cap = getActiveTodayTargets().maxMealFat || 5.5;
+
+    const sc = computeDailyScore({
+      sodiumMg,
+      sodiumTarget,
+      waterOz,
+      waterTarget,
+      maxMealFat,
+      maxMealFatCap: cap,
+      gbCompliant: maxMealFat <= cap
+    });
+    badge.className = `pill-badge ${sc.badgeClass}`;
+    badge.textContent = `Preview Score: ${sc.score}% (${sc.goalsHit}/${sc.totalGoals} Goals Hit • ${sc.label})`;
+  }
+
+  function populatePastLogModalForDate(dateStr) {
+    const ds = dateStr || getLocalDateString(new Date(Date.now() - 86400000));
+    const dateInput = document.getElementById("pastLogDate");
+    if (dateInput) dateInput.value = ds;
+
+    const existing = (state.history || []).find((h) => h.date === ds);
+    const scheduledHrs = getDanceHoursForDate(state, ds);
+    const calcTargets = getCalculatedTargets(state.profile, { danceHours: scheduledHrs, state, date: ds });
+
+    if (existing) {
+      document.getElementById("pastLogDayMode").value = existing.dayMode || "school_dance";
+      document.getElementById("pastLogDanceHours").value = existing.danceHours ?? scheduledHrs;
+      document.getElementById("pastLogSymptom").value = existing.symptomStatus || "steady";
+      document.getElementById("pastLogSodium").value = existing.sodiumMg ?? calcTargets.sodium;
+      document.getElementById("pastLogSodiumTarget").value = existing.sodiumTarget ?? calcTargets.sodium;
+      document.getElementById("pastLogWater").value = existing.waterOz ?? calcTargets.water;
+      document.getElementById("pastLogWaterTarget").value = existing.waterTarget ?? calcTargets.water;
+      document.getElementById("pastLogMaxMealFat").value = existing.maxMealFat ?? 3.5;
+      document.getElementById("pastLogTotalFat").value = existing.totalFatG ?? 14.0;
+      document.getElementById("pastLogNotes").value = existing.notes || "";
+    } else {
+      document.getElementById("pastLogDayMode").value = scheduledHrs > 0 ? "school_dance" : "recovery";
+      document.getElementById("pastLogDanceHours").value = scheduledHrs;
+      document.getElementById("pastLogSymptom").value = "steady";
+      document.getElementById("pastLogSodium").value = calcTargets.sodium;
+      document.getElementById("pastLogSodiumTarget").value = calcTargets.sodium;
+      document.getElementById("pastLogWater").value = calcTargets.water;
+      document.getElementById("pastLogWaterTarget").value = calcTargets.water;
+      document.getElementById("pastLogMaxMealFat").value = 3.5;
+      document.getElementById("pastLogTotalFat").value = 14.0;
+      document.getElementById("pastLogNotes").value = "";
+    }
+    updatePastLogScorePreview();
+  }
+
+  function openPastLogModal(dateStr = "") {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const targetDate = dateStr || getLocalDateString(yesterday);
+    populatePastLogModalForDate(targetDate);
+    document.getElementById("pastLogModal")?.classList.remove("hidden");
+  }
+
+  // Schedule Class/Event Modal Helpers (Requirement 1)
+  function openScheduleEventModal(editEventId = "") {
+    const modal = document.getElementById("scheduleEventModal");
+    const titleEl = document.getElementById("scheduleEventModalTitle");
+    const selDateStr = state.selectedCalendarDate || getLocalDateString();
+    const wkName = getWeekdayForDateStr(selDateStr);
+
+    document.getElementById("schedEventDate").value = selDateStr;
+    document.getElementById("schedEventDayOfWeek").value = wkName;
+
+    if (editEventId) {
+      const events = getScheduleEventsForDate(state, selDateStr);
+      const evt = events.find((e) => e.id === editEventId);
+      if (evt) {
+        if (titleEl) titleEl.textContent = "Edit Class / Schedule Event";
+        document.getElementById("schedEventId").value = evt.id;
+        document.getElementById("schedEventTitle").value = evt.title || "";
+        document.getElementById("schedEventCategory").value = evt.category || "dance";
+        document.getElementById("schedEventScope").value = evt.date ? "date" : "weekly";
+        document.getElementById("schedEventStart").value = evt.startTime || "16:00";
+        document.getElementById("schedEventEnd").value = evt.endTime || "18:00";
+        document.getElementById("schedEventIntensity").value = evt.intensity || "high";
+        document.getElementById("schedEventLocation").value = evt.location || "Studio A";
+        document.getElementById("schedEventNotes").value = evt.notes || "";
+        modal?.classList.remove("hidden");
+        return;
+      }
+    }
+
+    if (titleEl) titleEl.textContent = "Add Dance Class / Schedule Event";
+    document.getElementById("schedEventId").value = "";
+    document.getElementById("schedEventTitle").value = "";
+    document.getElementById("schedEventCategory").value = "dance";
+    document.getElementById("schedEventScope").value = "weekly";
+    document.getElementById("schedEventStart").value = "16:00";
+    document.getElementById("schedEventEnd").value = "18:00";
+    document.getElementById("schedEventIntensity").value = "high";
+    document.getElementById("schedEventLocation").value = "Studio A";
+    document.getElementById("schedEventNotes").value = "";
+    modal?.classList.remove("hidden");
+  }
+
+  // Hidden PIN-Secured Admin Dashboard Helpers (Requirement 2b & 2c)
+  function openAdminDashboardModal() {
+    const modal = document.getElementById("adminModal");
+    if (!modal) return;
+    const gate = document.getElementById("adminPinGateSection");
+    const content = document.getElementById("adminDashboardContent");
+    const errEl = document.getElementById("adminPinError");
+    if (errEl) errEl.textContent = "";
+    const pinIn = document.getElementById("adminPinInput");
+    if (pinIn) pinIn.value = "";
+
+    if (adminUnlockedInSession) {
+      gate?.classList.add("hidden");
+      content?.classList.remove("hidden");
+      populateAdminDashboardFields();
+    } else {
+      gate?.classList.remove("hidden");
+      content?.classList.add("hidden");
+    }
+    modal.classList.remove("hidden");
+  }
+
+  function populateAdminDashboardFields() {
+    const url = state.googleSheetWebAppUrl || auth.syncUrl || "";
+    const scriptInput = document.getElementById("adminScriptUrlInput");
+    if (scriptInput) scriptInput.value = url;
+
+    const bandUrlInput = document.getElementById("adminBandIcsUrlInput");
+    if (bandUrlInput) bandUrlInput.value = state.adminConfig?.bandIcsUrl || "";
+
+    const phoneInput = document.getElementById("adminSupportPhoneInput");
+    if (phoneInput) {
+      phoneInput.value = resolveFamilySupportPhone(state, { unlocked: true });
+    }
+
+    const gAuth = state.adminConfig?.googleAuth || {};
+    const gClient = document.getElementById("adminGoogleClientIdInput");
+    if (gClient) gClient.value = gAuth.clientId || "";
+    const gEmails = document.getElementById("adminGoogleEmailsInput");
+    if (gEmails) gEmails.value = Array.isArray(gAuth.allowedEmails) ? gAuth.allowedEmails.join(", ") : "";
+
+    const diag = document.getElementById("adminSyncDiagnostics");
+    if (diag) {
+      diag.textContent = url
+        ? `Linked Script URL: ${url.slice(0, 48)}... • Status: ${syncStatus.toUpperCase()}`
+        : "No Apps Script URL linked yet. Paste your Web App URL above and click Save & Test URL.";
+    }
+  }
+
   function exportIcsCalendar() {
     const cp = state.carpool[state.dayOfWeek] || {};
     const slots = state.schedules[state.dayMode] || [];
-    const targets = getCalculatedTargets(state.profile);
+    const dayEvents = getScheduleEventsForDate(state, state.selectedCalendarDate || state.dayOfWeek);
+    const targets = getActiveTodayTargets();
 
-    function timeToIcs(timeStr) {
-      const d = new Date();
+    function timeToIcs(timeStr, durationMin = 30) {
+      const d = parseDateParts(state.selectedCalendarDate || getLocalDateString());
       const m = String(timeStr || "").match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
       if (m) {
         let h = parseInt(m[1], 10);
@@ -1310,15 +2933,31 @@ if (typeof document !== "undefined") {
       const pad = (n) => String(n).padStart(2, "0");
       const fmt = (dt) =>
         `${dt.getFullYear()}${pad(dt.getMonth() + 1)}${pad(dt.getDate())}T${pad(dt.getHours())}${pad(dt.getMinutes())}00`;
-      const end = new Date(d.getTime() + 30 * 60000);
+      const end = new Date(d.getTime() + durationMin * 60000);
       return { start: fmt(d), end: fmt(end) };
     }
 
     const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//En Pointe & Steady//Wellness PWA//EN"];
+
+    dayEvents.forEach((evt, i) => {
+      const durMin = Math.round((Number(evt.durationHours) || 1) * 60);
+      const dt = timeToIcs(evt.startTime, durMin);
+      lines.push(
+        "BEGIN:VEVENT",
+        `UID:epsteady-sched-${Date.now()}-${i}@pwa`,
+        `DTSTART:${dt.start}`,
+        `DTEND:${dt.end}`,
+        `SUMMARY:${evt.title}`,
+        `LOCATION:${evt.location || "Studio"}`,
+        `DESCRIPTION:${evt.notes || evt.category}`,
+        "END:VEVENT"
+      );
+    });
+
     slots.forEach((slot, i) => {
       const opt = (slot.options || [])[state.selectedOptionIdx[slot.id] || 0] || (slot.options || [])[0];
       if (!opt) return;
-      const dt = timeToIcs(slot.time);
+      const dt = timeToIcs(slot.time, 30);
       lines.push(
         "BEGIN:VEVENT",
         `UID:epsteady-${Date.now()}-${i}@pwa`,
@@ -1330,8 +2969,32 @@ if (typeof document !== "undefined") {
       );
     });
 
+    if (cp.schoolToDriver) {
+      const dt = timeToIcs(cp.schoolToTime || "7:35 AM", 25);
+      lines.push(
+        "BEGIN:VEVENT",
+        `UID:epsteady-school-to-${Date.now()}@pwa`,
+        `DTSTART:${dt.start}`,
+        `DTEND:${dt.end}`,
+        `SUMMARY:Carpool TO School (${cp.schoolToDriver})`,
+        `DESCRIPTION:${cp.schoolToNote || ""}`,
+        "END:VEVENT"
+      );
+    }
+    if (cp.schoolHomeDriver) {
+      const dt = timeToIcs(cp.schoolHomeTime || "2:55 PM", 25);
+      lines.push(
+        "BEGIN:VEVENT",
+        `UID:epsteady-school-home-${Date.now()}@pwa`,
+        `DTSTART:${dt.start}`,
+        `DTEND:${dt.end}`,
+        `SUMMARY:Carpool FROM School (${cp.schoolHomeDriver})`,
+        `DESCRIPTION:${cp.schoolHomeNote || ""}`,
+        "END:VEVENT"
+      );
+    }
     if (cp.toDriver) {
-      const dt = timeToIcs(cp.toTime || "3:30 PM");
+      const dt = timeToIcs(cp.toTime || "3:30 PM", 30);
       lines.push(
         "BEGIN:VEVENT",
         `UID:epsteady-to-${Date.now()}@pwa`,
@@ -1343,7 +3006,7 @@ if (typeof document !== "undefined") {
       );
     }
     if (cp.homeDriver) {
-      const dt = timeToIcs(cp.homeTime || "9:00 PM");
+      const dt = timeToIcs(cp.homeTime || "9:00 PM", 30);
       lines.push(
         "BEGIN:VEVENT",
         `UID:epsteady-home-${Date.now()}@pwa`,
@@ -1410,11 +3073,37 @@ if (typeof document !== "undefined") {
       if (e.target.closest("button")) hapticTap();
     });
 
-    // Contextual ℹ️ info buttons
+    // 1-Tap Top Bar Role Switcher Pill (Dancer ⇄ Mom)
+    document.getElementById("topRoleSwitchBtn")?.addEventListener("click", () => {
+      state.viewerRole = state.viewerRole === "Mom" ? "Dancer" : "Mom";
+      saveAndSync();
+      renderAll();
+      if (state.viewerRole === "Dancer") {
+        maybeShowDancerCheckinPopup({ force: true });
+      }
+      showToast(state.viewerRole === "Mom" ? "Switched to Mom View (for the Dancer)" : "Switched to Dancer View");
+    });
+
+    // Daughter's App-Open "I feel:" Tap Check-In Popup Buttons (Requirement 6)
+    document.getElementById("dancerCheckinModal")?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-checkin-symptom]");
+      if (!btn) return;
+      const chosen = btn.getAttribute("data-checkin-symptom") || "steady";
+      state.symptomStatus = chosen;
+      document.getElementById("dancerCheckinModal")?.classList.add("hidden");
+      saveAndSync();
+      renderTopBar();
+      renderTodayView();
+      showToast(`Checked in: Feeling ${chosen}`);
+    });
+
+    // Contextual ℹ️ info buttons (Role-aware, Non-technical)
     document.addEventListener("click", (e) => {
       const infoBtn = e.target.closest("[data-info-topic]");
       if (!infoBtn) return;
-      const topic = CLINICAL_INFO_TOPICS[infoBtn.getAttribute("data-info-topic")];
+      const key = infoBtn.getAttribute("data-info-topic");
+      const copy = getRoleCopy(state);
+      const topic = copy.infoTopics[key] || CLINICAL_INFO_TOPICS[key];
       if (!topic) return;
       document.getElementById("infoModalTitle").textContent = topic.title;
       document.getElementById("infoModalBody").textContent = topic.body;
@@ -1441,6 +3130,176 @@ if (typeof document !== "undefined") {
       activeManualSection = tab.getAttribute("data-manual-tab");
       renderManualModal();
     });
+    document.getElementById("manualOpenSourcesBtn")?.addEventListener("click", () => {
+      document.getElementById("manualModal")?.classList.add("hidden");
+      renderNutritionSourcesModal();
+      document.getElementById("sourcesModal")?.classList.remove("hidden");
+    });
+    document.getElementById("manualOpenHelpBtn")?.addEventListener("click", () => {
+      document.getElementById("manualModal")?.classList.add("hidden");
+      document.getElementById("helpModal")?.classList.remove("hidden");
+    });
+
+    // Dedicated Nutritional & Recommendation Sources Modal (Requirement 3)
+    const openSources = () => {
+      renderNutritionSourcesModal();
+      document.getElementById("sourcesModal")?.classList.remove("hidden");
+    };
+    document.getElementById("openSourcesBtn")?.addEventListener("click", openSources);
+    document.getElementById("openSourcesCardBtn")?.addEventListener("click", openSources);
+    document.getElementById("todayOpenSourcesBtn")?.addEventListener("click", openSources);
+    document.getElementById("closeSourcesModalBtn")?.addEventListener("click", () => {
+      document.getElementById("sourcesModal")?.classList.add("hidden");
+    });
+
+    // SMS Help Form Modal (Requirement 2a)
+    document.getElementById("openHelpBtn")?.addEventListener("click", () => {
+      document.getElementById("helpModal")?.classList.remove("hidden");
+    });
+    document.getElementById("closeHelpModalBtn")?.addEventListener("click", () => {
+      document.getElementById("helpModal")?.classList.add("hidden");
+    });
+    document.getElementById("cancelHelpModalBtn")?.addEventListener("click", () => {
+      document.getElementById("helpModal")?.classList.add("hidden");
+    });
+    document.getElementById("helpSmsForm")?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const topic = document.getElementById("helpTopicSelect")?.value || "App Help";
+      const userMsg = document.getElementById("helpMessageInput")?.value.trim() || "";
+      if (!userMsg) return;
+      const phone = resolveFamilySupportPhone(state, { unlocked: true });
+      const dancerName = state.profile?.name || "Dancer";
+      const role = state.viewerRole || "Dancer";
+      const fullBody = `[En Pointe & Steady Help]\nFrom: ${dancerName} (${role})\nTopic: ${topic}\n\n${userMsg}`;
+      const smsUri = buildSmsHelpUri(phone, fullBody, navigator.userAgent || "");
+      document.getElementById("helpModal")?.classList.add("hidden");
+      document.getElementById("helpSmsForm")?.reset();
+      showToast("Opening text message app...");
+      window.location.href = smsUri;
+    });
+
+    // Hidden PIN-Secured Admin Dashboard Triggers & Controls (Requirement 2b & 2c)
+    document.getElementById("appBrandTitle")?.addEventListener("click", () => {
+      brandTapCount += 1;
+      clearTimeout(brandTapTimer);
+      brandTapTimer = setTimeout(() => {
+        brandTapCount = 0;
+      }, 2500);
+      if (brandTapCount >= 5) {
+        brandTapCount = 0;
+        openAdminDashboardModal();
+      }
+    });
+    document.getElementById("openAdminPinGateBtn")?.addEventListener("click", () => {
+      document.getElementById("gearModal")?.classList.add("hidden");
+      openAdminDashboardModal();
+    });
+    document.getElementById("closeAdminModalBtn")?.addEventListener("click", () => {
+      document.getElementById("adminModal")?.classList.add("hidden");
+    });
+    document.getElementById("adminPinForm")?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const inputPin = document.getElementById("adminPinInput")?.value.trim() || "";
+      const errEl = document.getElementById("adminPinError");
+      if (!verifyAdminPin(inputPin, state, auth)) {
+        if (errEl) errEl.textContent = "Incorrect Admin PIN.";
+        return;
+      }
+      if (errEl) errEl.textContent = "";
+      adminUnlockedInSession = true;
+      document.getElementById("adminPinGateSection")?.classList.add("hidden");
+      document.getElementById("adminDashboardContent")?.classList.remove("hidden");
+      populateAdminDashboardFields();
+    });
+
+    document.getElementById("adminSaveScriptUrlBtn")?.addEventListener("click", async () => {
+      const url = document.getElementById("adminScriptUrlInput")?.value.trim() || "";
+      state.googleSheetWebAppUrl = url;
+      if (auth.unlocked) {
+        saveDeviceAuth({ ...auth, syncUrl: url });
+      }
+      saveAndSync({ skipPush: true });
+      const diag = document.getElementById("adminSyncDiagnostics");
+      if (!url) {
+        if (diag) diag.textContent = "Cleared Script URL (local-only mode).";
+        return;
+      }
+      if (diag) diag.textContent = "Testing connection to Google Apps Script Cloud_Sync_Store...";
+      const res = await pullFromCloud(url);
+      if (res.ok) {
+        if (diag) {
+          diag.textContent = `Connected ✓ • Payload: ${res.payload ? res.payload.length + " bytes" : "Empty store"} • Last updatedBy: ${res.updatedBy || "—"}`;
+        }
+        showToast("Apps Script URL verified!");
+      } else {
+        if (diag) diag.textContent = `Connection warning: ${res.error || "Unable to reach URL"}`;
+        showToast("Saved URL (check connection status)");
+      }
+    });
+
+    document.getElementById("adminForcePushBtn")?.addEventListener("click", async () => {
+      const url = document.getElementById("adminScriptUrlInput")?.value.trim() || state.googleSheetWebAppUrl || "";
+      state.googleSheetWebAppUrl = url;
+      const ok = await silentPushToCloud();
+      const diag = document.getElementById("adminSyncDiagnostics");
+      if (diag) diag.textContent = ok ? `Force Push succeeded at ${new Date().toLocaleTimeString()}` : "Force Push failed (check URL or PIN session)";
+      showToast(ok ? "Force-pushed state to Script URL" : "Force Push failed");
+    });
+
+    document.getElementById("adminForcePullBtn")?.addEventListener("click", async () => {
+      const url = document.getElementById("adminScriptUrlInput")?.value.trim() || state.googleSheetWebAppUrl || "";
+      state.googleSheetWebAppUrl = url;
+      const res = await silentPullFromCloud({ urlOverride: url });
+      const diag = document.getElementById("adminSyncDiagnostics");
+      if (diag) diag.textContent = res.ok ? `Force Pull succeeded at ${new Date().toLocaleTimeString()}` : `Force Pull failed (${res.reason || "error"})`;
+      showToast(res.ok ? "Pulled latest bundle from Script URL" : "Force Pull failed");
+    });
+
+    document.getElementById("adminOpenPairModalBtn")?.addEventListener("click", () => {
+      const url = document.getElementById("adminScriptUrlInput")?.value.trim() || state.googleSheetWebAppUrl || auth.syncUrl || "";
+      state.googleSheetWebAppUrl = url;
+      document.getElementById("adminModal")?.classList.add("hidden");
+      document.getElementById("openPairDeviceBtn")?.click();
+    });
+
+    document.getElementById("adminSaveAllBtn")?.addEventListener("click", () => {
+      const url = document.getElementById("adminScriptUrlInput")?.value.trim() || "";
+      state.googleSheetWebAppUrl = url;
+      if (auth.unlocked) {
+        saveDeviceAuth({ ...auth, syncUrl: url });
+      }
+      if (!state.adminConfig) state.adminConfig = {};
+      state.adminConfig.bandIcsUrl = document.getElementById("adminBandIcsUrlInput")?.value.trim() || "";
+
+      const phoneOverride = document.getElementById("adminSupportPhoneInput")?.value.replace(/[^\d+]/g, "") || "";
+      if (phoneOverride && phoneOverride !== resolveFamilySupportPhone({}, { unlocked: true })) {
+        state.adminConfig.supportPhoneOverride = phoneOverride;
+      } else {
+        state.adminConfig.supportPhoneOverride = "";
+      }
+
+      const newAdminPin = document.getElementById("adminNewPinInput")?.value.trim() || "";
+      const confAdminPin = document.getElementById("adminConfirmPinInput")?.value.trim() || "";
+      if (newAdminPin) {
+        if (newAdminPin.length < 4 || newAdminPin !== confAdminPin) {
+          showToast("New Admin PIN must be 4+ chars and match confirmation");
+          return;
+        }
+        state.adminConfig.adminPin = newAdminPin;
+      }
+
+      const gClientId = document.getElementById("adminGoogleClientIdInput")?.value.trim() || "";
+      const gEmails = document.getElementById("adminGoogleEmailsInput")?.value.trim() || "";
+      state.adminConfig.googleAuth = prepareGoogleSignInConfig({
+        enabled: false, // Dormant per Requirement 2c
+        clientId: gClientId,
+        allowedEmails: gEmails
+      });
+
+      saveAndSync();
+      document.getElementById("adminModal")?.classList.add("hidden");
+      showToast("Admin configuration saved");
+    });
 
     // Bottom nav & View History
     document.querySelectorAll("[data-nav-tab]").forEach((btn) => {
@@ -1448,6 +3307,12 @@ if (typeof document !== "undefined") {
         state.activeTab = btn.getAttribute("data-nav-tab");
         renderAll();
       });
+    });
+
+    document.getElementById("todayOpenScheduleChip")?.addEventListener("click", () => {
+      state.activeTab = "carpool";
+      state.selectedCalendarDate = getLocalDateString();
+      renderAll();
     });
 
     document.getElementById("openFullHistoryBtn")?.addEventListener("click", () => {
@@ -1462,6 +3327,332 @@ if (typeof document !== "undefined") {
     document.getElementById("historyBackBtn")?.addEventListener("click", () => {
       state.activeTab = "today";
       renderAll();
+    });
+
+    // Past / Missed Day Logging Events (Requirement 5)
+    document.getElementById("openPastLogBtn")?.addEventListener("click", () => openPastLogModal(""));
+    document.getElementById("todayLogMissedDayBtn")?.addEventListener("click", () => openPastLogModal(""));
+    document.getElementById("closePastLogBtn")?.addEventListener("click", () => {
+      document.getElementById("pastLogModal")?.classList.add("hidden");
+    });
+    document.getElementById("cancelPastLogBtn")?.addEventListener("click", () => {
+      document.getElementById("pastLogModal")?.classList.add("hidden");
+    });
+    document.getElementById("history7Dots")?.addEventListener("click", (e) => {
+      const dot = e.target.closest("[data-dot-date]");
+      if (!dot) return;
+      openPastLogModal(dot.getAttribute("data-dot-date"));
+    });
+    document.getElementById("historyEntriesList")?.addEventListener("click", (e) => {
+      const editBtn = e.target.closest("[data-edit-past-date]");
+      if (!editBtn) return;
+      openPastLogModal(editBtn.getAttribute("data-edit-past-date"));
+    });
+    document.getElementById("pastLogDate")?.addEventListener("change", (e) => {
+      if (e.target.value) populatePastLogModalForDate(e.target.value);
+    });
+    document.getElementById("pastLogDanceHours")?.addEventListener("input", (e) => {
+      const hrs = Math.max(0, parseFloat(e.target.value) || 0);
+      const ds = document.getElementById("pastLogDate")?.value || getLocalDateString();
+      const t = getCalculatedTargets(state.profile, { danceHours: hrs, state, date: ds });
+      document.getElementById("pastLogSodiumTarget").value = t.sodium;
+      document.getElementById("pastLogWaterTarget").value = t.water;
+      updatePastLogScorePreview();
+    });
+    ["pastLogSodium", "pastLogSodiumTarget", "pastLogWater", "pastLogWaterTarget", "pastLogMaxMealFat"].forEach((id) => {
+      document.getElementById(id)?.addEventListener("input", updatePastLogScorePreview);
+    });
+    document.querySelectorAll("[data-past-preset]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const presetType = btn.getAttribute("data-past-preset");
+        const ds = document.getElementById("pastLogDate")?.value || getLocalDateString();
+        let hrs = getDanceHoursForDate(state, ds);
+        if (presetType === "rest_day") hrs = 0;
+        else if (presetType === "typical_dance" && hrs === 0) hrs = 2.0;
+
+        const t = getCalculatedTargets(state.profile, { danceHours: hrs, state, date: ds });
+        document.getElementById("pastLogDanceHours").value = hrs;
+        document.getElementById("pastLogDayMode").value = hrs > 0 ? "school_dance" : "recovery";
+        document.getElementById("pastLogSodiumTarget").value = t.sodium;
+        document.getElementById("pastLogWaterTarget").value = t.water;
+        document.getElementById("pastLogSodium").value = presetType === "typical_dance" ? Math.round(t.sodium * 0.92) : t.sodium;
+        document.getElementById("pastLogWater").value = presetType === "typical_dance" ? Math.round(t.water * 0.92) : t.water;
+        document.getElementById("pastLogMaxMealFat").value = 3.5;
+        document.getElementById("pastLogTotalFat").value = 14.0;
+        document.getElementById("pastLogSymptom").value = "steady";
+        updatePastLogScorePreview();
+      });
+    });
+    document.getElementById("pastLogForm")?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const dateStr = document.getElementById("pastLogDate")?.value;
+      if (!dateStr) return;
+      const danceHours = parseFloat(document.getElementById("pastLogDanceHours")?.value) || 0;
+      const dayTargets = getCalculatedTargets(state.profile, { danceHours, state, date: dateStr });
+
+      const { history, entry } = upsertPastHistoryEntry(
+        state.history,
+        {
+          date: dateStr,
+          dayMode: document.getElementById("pastLogDayMode")?.value || "school_dance",
+          danceHours,
+          symptomStatus: document.getElementById("pastLogSymptom")?.value || "steady",
+          sodiumMg: parseFloat(document.getElementById("pastLogSodium")?.value) || 0,
+          sodiumTarget: parseFloat(document.getElementById("pastLogSodiumTarget")?.value) || dayTargets.sodium,
+          waterOz: parseFloat(document.getElementById("pastLogWater")?.value) || 0,
+          waterTarget: parseFloat(document.getElementById("pastLogWaterTarget")?.value) || dayTargets.water,
+          maxMealFat: parseFloat(document.getElementById("pastLogMaxMealFat")?.value) || 0,
+          totalFatG: parseFloat(document.getElementById("pastLogTotalFat")?.value) || 0,
+          notes: document.getElementById("pastLogNotes")?.value.trim() || ""
+        },
+        dayTargets
+      );
+      state.history = history;
+      try {
+        localStorage.setItem(STORAGE_STATE_KEY, JSON.stringify(state));
+      } catch (_err) {}
+      if (auth?.unlocked && auth?.passphrase && (state.googleSheetWebAppUrl || auth.syncUrl)) {
+        scheduleCloudPush(() => silentPushToCloud());
+      }
+      document.getElementById("pastLogModal")?.classList.add("hidden");
+      renderAll();
+      showToast(`Saved record for ${entry.date} (Score: ${entry.score}%)`);
+    });
+
+    // Calendar View Switcher (Month | Week | Day), Date Navigation & Schedule Customizer (Requirement 1 & 1b)
+    document.querySelectorAll("[data-cal-view]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.calendarViewMode = btn.getAttribute("data-cal-view") || "month";
+        renderCarpoolView();
+      });
+    });
+
+    const shiftSelectedDate = (deltaDays) => {
+      const cur = parseDateParts(state.selectedCalendarDate || getLocalDateString());
+      cur.setDate(cur.getDate() + deltaDays);
+      const nextStr = getLocalDateString(cur);
+      state.selectedCalendarDate = nextStr;
+      state.dayOfWeek = getWeekdayForDateStr(nextStr);
+      renderCarpoolView();
+    };
+    document.getElementById("calPrevBtn")?.addEventListener("click", () => {
+      const mode = state.calendarViewMode || "month";
+      shiftSelectedDate(mode === "month" ? -30 : mode === "week" ? -7 : -1);
+    });
+    document.getElementById("calNextBtn")?.addEventListener("click", () => {
+      const mode = state.calendarViewMode || "month";
+      shiftSelectedDate(mode === "month" ? 30 : mode === "week" ? 7 : 1);
+    });
+    document.getElementById("calTodayBtn")?.addEventListener("click", () => {
+      const todayStr = getLocalDateString();
+      state.selectedCalendarDate = todayStr;
+      state.dayOfWeek = getWeekdayForDateStr(todayStr);
+      renderCarpoolView();
+    });
+
+    document.getElementById("view-carpool")?.addEventListener("click", (e) => {
+      const dateCell = e.target.closest("[data-cal-date]");
+      if (dateCell) {
+        const ds = dateCell.getAttribute("data-cal-date");
+        if (ds) {
+          state.selectedCalendarDate = ds;
+          state.dayOfWeek = getWeekdayForDateStr(ds);
+          renderCarpoolView();
+        }
+        return;
+      }
+      const editEvtBtn = e.target.closest("[data-edit-sched-event]");
+      if (editEvtBtn) {
+        openScheduleEventModal(editEvtBtn.getAttribute("data-edit-sched-event"));
+        return;
+      }
+      const delEvtBtn = e.target.closest("[data-delete-sched-event]");
+      if (delEvtBtn) {
+        const id = delEvtBtn.getAttribute("data-delete-sched-event");
+        const ds = state.selectedCalendarDate || getLocalDateString();
+        const wk = getWeekdayForDateStr(ds);
+        if (state.dateScheduleOverrides?.[ds]) {
+          state.dateScheduleOverrides[ds] = state.dateScheduleOverrides[ds].filter((ev) => ev.id !== id);
+        }
+        if (state.weeklySchedule?.[wk]) {
+          state.weeklySchedule[wk] = state.weeklySchedule[wk].filter((ev) => ev.id !== id);
+        }
+        saveAndSync();
+        renderAll();
+        showToast("Class/event removed from schedule");
+      }
+    });
+
+    document.getElementById("openAddClassModalBtn")?.addEventListener("click", () => openScheduleEventModal(""));
+    document.getElementById("selectedDayAddEventBtn")?.addEventListener("click", () => openScheduleEventModal(""));
+    document.getElementById("closeScheduleEventBtn")?.addEventListener("click", () => {
+      document.getElementById("scheduleEventModal")?.classList.add("hidden");
+    });
+    document.getElementById("cancelScheduleEventBtn")?.addEventListener("click", () => {
+      document.getElementById("scheduleEventModal")?.classList.add("hidden");
+    });
+    document.getElementById("scheduleEventForm")?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const id = document.getElementById("schedEventId")?.value || `evt_${Date.now()}`;
+      const title = document.getElementById("schedEventTitle")?.value.trim();
+      if (!title) return;
+      const category = document.getElementById("schedEventCategory")?.value || "dance";
+      const scope = document.getElementById("schedEventScope")?.value || "weekly";
+      const dayOfWeek = document.getElementById("schedEventDayOfWeek")?.value || state.dayOfWeek || "Mon";
+      const dateStr = document.getElementById("schedEventDate")?.value || state.selectedCalendarDate || getLocalDateString();
+      const startTime = document.getElementById("schedEventStart")?.value || "16:00";
+      const endTime = document.getElementById("schedEventEnd")?.value || "18:00";
+      const durationHours = computeTimeRangeDurationHours(startTime, endTime, 1.5);
+      const intensity = document.getElementById("schedEventIntensity")?.value || "high";
+      const location = document.getElementById("schedEventLocation")?.value.trim() || "Studio";
+      const notes = document.getElementById("schedEventNotes")?.value.trim() || "";
+
+      const newEvt = {
+        id,
+        title,
+        category,
+        dayOfWeek: scope === "date" ? getWeekdayForDateStr(dateStr) : dayOfWeek,
+        date: scope === "date" ? dateStr : undefined,
+        startTime,
+        endTime,
+        durationHours,
+        intensity,
+        location,
+        notes
+      };
+
+      if (scope === "date") {
+        if (!state.dateScheduleOverrides) state.dateScheduleOverrides = {};
+        const baseList = Array.isArray(state.dateScheduleOverrides[dateStr])
+          ? [...state.dateScheduleOverrides[dateStr]]
+          : [...getScheduleEventsForDate(state, dateStr)];
+        const existingIdx = baseList.findIndex((x) => x.id === id);
+        if (existingIdx >= 0) baseList[existingIdx] = newEvt;
+        else baseList.push(newEvt);
+        state.dateScheduleOverrides[dateStr] = baseList;
+        state.selectedCalendarDate = dateStr;
+        state.dayOfWeek = getWeekdayForDateStr(dateStr);
+      } else {
+        if (!state.weeklySchedule) state.weeklySchedule = createDefaultWeeklySchedule();
+        const list = Array.isArray(state.weeklySchedule[dayOfWeek]) ? [...state.weeklySchedule[dayOfWeek]] : [];
+        const existingIdx = list.findIndex((x) => x.id === id);
+        if (existingIdx >= 0) list[existingIdx] = newEvt;
+        else list.push(newEvt);
+        state.weeklySchedule[dayOfWeek] = list;
+        state.dayOfWeek = dayOfWeek;
+      }
+
+      document.getElementById("scheduleEventModal")?.classList.add("hidden");
+      saveAndSync();
+      renderAll();
+      showToast(`Saved "${title}" (${durationHours} hrs)`);
+    });
+
+    // BAND Schedule Sync & Import Wiring (Requirement 1)
+    document.getElementById("openBandSyncModalBtn")?.addEventListener("click", () => {
+      const urlIn = document.getElementById("bandIcsUrlInput");
+      if (urlIn) urlIn.value = state.adminConfig?.bandIcsUrl || "";
+      document.getElementById("bandSyncModal")?.classList.remove("hidden");
+    });
+    document.getElementById("closeBandSyncBtn")?.addEventListener("click", () => {
+      document.getElementById("bandSyncModal")?.classList.add("hidden");
+    });
+
+    const applyImportedBandEvents = (events, sourceLabel) => {
+      if (!Array.isArray(events) || !events.length) {
+        showToast("No schedule events found to import");
+        return;
+      }
+      if (!state.weeklySchedule) state.weeklySchedule = createDefaultWeeklySchedule();
+      if (!state.dateScheduleOverrides) state.dateScheduleOverrides = {};
+
+      events.forEach((evt) => {
+        if (evt.date && /^\d{4}-\d{2}-\d{2}$/.test(evt.date)) {
+          const cur = Array.isArray(state.dateScheduleOverrides[evt.date])
+            ? [...state.dateScheduleOverrides[evt.date]]
+            : [...getScheduleEventsForDate(state, evt.date)];
+          if (!cur.some((x) => x.title === evt.title && x.startTime === evt.startTime)) {
+            cur.push(evt);
+          }
+          state.dateScheduleOverrides[evt.date] = cur;
+        }
+        const wk = evt.dayOfWeek || "Mon";
+        const wkList = Array.isArray(state.weeklySchedule[wk]) ? [...state.weeklySchedule[wk]] : [];
+        if (!wkList.some((x) => x.title === evt.title && x.startTime === evt.startTime)) {
+          wkList.push(evt);
+        }
+        state.weeklySchedule[wk] = wkList;
+      });
+
+      if (!state.adminConfig) state.adminConfig = {};
+      state.adminConfig.lastBandSyncAt = new Date().toISOString();
+      saveAndSync();
+      renderAll();
+      document.getElementById("bandSyncModal")?.classList.add("hidden");
+      showToast(`Synced ${events.length} classes from ${sourceLabel}!`);
+    };
+
+    document.getElementById("bandIcsFileInput")?.addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const text = await file.text();
+      const events = parseBandIcsSchedule(text);
+      applyImportedBandEvents(events, "BAND .ics file");
+    });
+
+    document.getElementById("syncBandUrlNowBtn")?.addEventListener("click", async () => {
+      const rawUrl = document.getElementById("bandIcsUrlInput")?.value.trim() || "";
+      const statusEl = document.getElementById("bandSyncStatusMsg");
+      if (!rawUrl) {
+        if (statusEl) statusEl.textContent = "Please paste a BAND calendar link first.";
+        return;
+      }
+      const fetchUrl = rawUrl.replace(/^webcal:\/\//i, "https://");
+      if (!state.adminConfig) state.adminConfig = {};
+      state.adminConfig.bandIcsUrl = fetchUrl;
+      if (statusEl) statusEl.textContent = "Syncing with BAND calendar...";
+
+      try {
+        let icsText = "";
+        const scriptUrl = state.googleSheetWebAppUrl || auth.syncUrl;
+        if (scriptUrl) {
+          try {
+            const sep = scriptUrl.includes("?") ? "&" : "?";
+            const proxyResp = await fetch(`${scriptUrl}${sep}action=fetchBandIcs&icsUrl=${encodeURIComponent(fetchUrl)}`);
+            if (proxyResp.ok) {
+              icsText = await proxyResp.text();
+            }
+          } catch (_e) {}
+        }
+        if (!icsText || !icsText.includes("BEGIN:VCALENDAR")) {
+          const directResp = await fetch(fetchUrl);
+          if (directResp.ok) {
+            icsText = await directResp.text();
+          }
+        }
+        const events = parseBandIcsSchedule(icsText);
+        if (events.length) {
+          if (statusEl) statusEl.textContent = `Synced ${events.length} events from BAND!`;
+          applyImportedBandEvents(events, "BAND Calendar Link");
+          return;
+        }
+        if (statusEl) {
+          statusEl.textContent = "Saved BAND link! If your browser blocks direct cross-site calendar reads, download the .ics file from BAND or paste the schedule text below.";
+        }
+        saveAndSync();
+      } catch (_err) {
+        if (statusEl) {
+          statusEl.textContent = "Saved BAND link! To import right away offline, upload the .ics file or paste the class times below.";
+        }
+        saveAndSync();
+      }
+    });
+
+    document.getElementById("parseBandTextBtn")?.addEventListener("click", () => {
+      const rawText = document.getElementById("bandPasteTextInput")?.value.trim() || "";
+      if (!rawText) return;
+      const events = parseBandTextSchedule(rawText);
+      applyImportedBandEvents(events, "BAND Schedule Text");
     });
 
     // Symptom rescue pills
@@ -1503,6 +3694,71 @@ if (typeof document !== "undefined") {
       state.bonusWater = adjustBonusValue(state.bonusWater, -8);
       saveAndSync();
       renderTodayView();
+    });
+
+    // Feature #7: 1-Tap Quick Add Pills (+8 oz Water, +Salt Packet, +Light Snack)
+    document.getElementById("quickAddWaterBtn")?.addEventListener("click", () => {
+      state.bonusWater = adjustBonusValue(state.bonusWater, 8);
+      saveAndSync();
+      renderTodayView();
+      showToast("Added +8 oz Water 💧");
+    });
+    document.getElementById("quickAddSaltBtn")?.addEventListener("click", () => {
+      state.bonusSodium = adjustBonusValue(state.bonusSodium, 500);
+      saveAndSync();
+      renderTodayView();
+      showToast("Added +500mg Salt Packet 🧂");
+    });
+    document.getElementById("quickAddSnackBtn")?.addEventListener("click", () => {
+      const slotId = `quick_snack_${Date.now()}`;
+      if (!Array.isArray(state.schedules[state.dayMode])) {
+        state.schedules[state.dayMode] = [];
+      }
+      state.schedules[state.dayMode].push({
+        id: slotId,
+        time: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
+        phase: "Light Snack",
+        intensity: "low",
+        isAdHoc: true,
+        options: [
+          {
+            name: "Pretzels & Apple Slices",
+            basePortion: "1 light snack",
+            kcal: 200,
+            sodium: 280,
+            water: 0,
+            fat: 1.5
+          }
+        ]
+      });
+      state.checkedSlots[slotId] = true;
+      saveAndSync();
+      renderTodayView();
+      showToast("Logged Light Snack (+200 kcal) 🥨");
+    });
+
+    // Feature #7: Smart Motto Shuffle & Next Class BAND Pill
+    const cycleMotto = () => {
+      const role = state.viewerRole === "Mom" ? "Mom" : "Dancer";
+      if (!state.personalization) state.personalization = {};
+      if (!state.personalization.byRole) {
+        state.personalization.byRole = {
+          Dancer: { ...DEFAULT_ROLE_PERSONALIZATION.Dancer },
+          Mom: { ...DEFAULT_ROLE_PERSONALIZATION.Mom }
+        };
+      }
+      const cur = state.personalization.byRole[role] || { ...DEFAULT_ROLE_PERSONALIZATION[role] };
+      cur.mottoIndex = (Number(cur.mottoIndex) || 0) + 1;
+      state.personalization.byRole[role] = cur;
+      saveAndSync();
+      applyPersonalizationTheme();
+    };
+    document.getElementById("shuffleMottoBtn")?.addEventListener("click", cycleMotto);
+    document.getElementById("settingShuffleMottoBtn")?.addEventListener("click", cycleMotto);
+
+    document.getElementById("todayBandPill")?.addEventListener("click", () => {
+      state.activeTab = "carpool";
+      renderViewVisibility();
     });
 
     // Collapsible Today Dance Bag Checklist
@@ -1763,10 +4019,19 @@ if (typeof document !== "undefined") {
       showToast(`Added "${name}" to Library`);
     });
 
-    // Carpool day switcher, editor & 1-tap share
+    // Carpool day switcher, editor & 1-tap share (School & Dance Subsection)
     document.querySelectorAll("[data-carpool-day]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        state.dayOfWeek = btn.getAttribute("data-carpool-day");
+        const targetDay = btn.getAttribute("data-carpool-day");
+        state.dayOfWeek = targetDay;
+        // Align selectedCalendarDate to the matching day in the currently viewed week
+        const cur = parseDateParts(state.selectedCalendarDate || getLocalDateString());
+        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const targetIdx = days.indexOf(targetDay);
+        if (targetIdx >= 0) {
+          cur.setDate(cur.getDate() + (targetIdx - cur.getDay()));
+          state.selectedCalendarDate = getLocalDateString(cur);
+        }
         renderCarpoolView();
       });
     });
@@ -1778,11 +4043,17 @@ if (typeof document !== "undefined") {
     document.getElementById("shareCarpoolBtn")?.addEventListener("click", async () => {
       const cp = state.carpool[state.dayOfWeek] || {};
       const text = formatCarpoolShareText(state.dayOfWeek, cp);
-      await shareOrCopyText(text, `${state.dayOfWeek} Dance Carpool`, "Carpool details copied!");
+      await shareOrCopyText(text, `${state.dayOfWeek} School & Dance Carpool`, "Carpool details copied!");
     });
 
     document.getElementById("saveCarpoolBtn")?.addEventListener("click", () => {
       state.carpool[state.dayOfWeek] = {
+        schoolToDriver: document.getElementById("editSchoolToDriver")?.value.trim() || "",
+        schoolToTime: document.getElementById("editSchoolToTime")?.value.trim() || "",
+        schoolToNote: document.getElementById("editSchoolToNote")?.value.trim() || "",
+        schoolHomeDriver: document.getElementById("editSchoolHomeDriver")?.value.trim() || "",
+        schoolHomeTime: document.getElementById("editSchoolHomeTime")?.value.trim() || "",
+        schoolHomeNote: document.getElementById("editSchoolHomeNote")?.value.trim() || "",
         toDriver: document.getElementById("editToDriver")?.value.trim() || "",
         toTime: document.getElementById("editToTime")?.value.trim() || "",
         toNote: document.getElementById("editToNote")?.value.trim() || "",
@@ -1793,7 +4064,7 @@ if (typeof document !== "undefined") {
       document.getElementById("carpoolEditForm")?.classList.add("hidden");
       saveAndSync();
       renderCarpoolView();
-      showToast("Carpool updated");
+      showToast("School & Dance Carpool updated");
     });
 
     document.getElementById("exportIcsBtn")?.addEventListener("click", exportIcsCalendar);
@@ -1808,7 +4079,69 @@ if (typeof document !== "undefined") {
     document.getElementById("downloadCsvBtn")?.addEventListener("click", downloadCsv);
     document.getElementById("printDoctorReportBtn")?.addEventListener("click", () => window.print());
 
-    // Gear Modal
+    // Feature #7: Dedicated Settings Modal (⚙️) — Independent Per-Role Preferences
+    const updateActiveRolePref = (patch) => {
+      const role = state.viewerRole === "Mom" ? "Mom" : "Dancer";
+      if (!state.personalization) state.personalization = {};
+      if (!state.personalization.byRole) {
+        state.personalization.byRole = {
+          Dancer: { ...DEFAULT_ROLE_PERSONALIZATION.Dancer },
+          Mom: { ...DEFAULT_ROLE_PERSONALIZATION.Mom }
+        };
+      }
+      state.personalization.byRole[role] = {
+        ...getRolePersonalization(state, role),
+        ...patch
+      };
+      saveAndSync();
+      applyPersonalizationTheme();
+      renderSettingsModal();
+    };
+
+    document.getElementById("openSettingsBtn")?.addEventListener("click", () => {
+      renderSettingsModal();
+      document.getElementById("settingsModal")?.classList.remove("hidden");
+    });
+    const closeSettingsModal = () => {
+      document.getElementById("settingsModal")?.classList.add("hidden");
+    };
+    document.getElementById("closeSettingsBtn")?.addEventListener("click", closeSettingsModal);
+    document.getElementById("closeSettingsDoneBtn")?.addEventListener("click", closeSettingsModal);
+
+    document.querySelectorAll("[data-setting-lighting]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        updateActiveRolePref({ lighting: btn.getAttribute("data-setting-lighting") || "day" });
+      });
+    });
+    document.querySelectorAll("[data-setting-autorule]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        updateActiveRolePref({ autoRule: btn.getAttribute("data-setting-autorule") || "system" });
+      });
+    });
+    document.querySelectorAll("[data-setting-palette]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        updateActiveRolePref({ palette: btn.getAttribute("data-setting-palette") || "blush" });
+      });
+    });
+    document.getElementById("settingAvatar")?.addEventListener("change", (e) => {
+      updateActiveRolePref({ avatar: e.target.value || "🩰" });
+    });
+    document.getElementById("settingStudioName")?.addEventListener("input", (e) => {
+      updateActiveRolePref({ studioName: e.target.value });
+    });
+
+    // Listen to OS/phone dark mode changes when Auto Rule === "system"
+    if (typeof window !== "undefined" && window.matchMedia) {
+      const darkMedia = window.matchMedia("(prefers-color-scheme: dark)");
+      darkMedia.addEventListener?.("change", () => {
+        const pref = getRolePersonalization(state);
+        if (pref.lighting === "auto" && pref.autoRule === "system") {
+          applyPersonalizationTheme();
+        }
+      });
+    }
+
+    // Profile Modal (👤)
     document.getElementById("openGearBtn")?.addEventListener("click", () => {
       renderGearModal();
       document.getElementById("gearModal")?.classList.remove("hidden");
@@ -1822,6 +4155,9 @@ if (typeof document !== "undefined") {
         state.viewerRole = btn.getAttribute("data-role-btn");
         saveAndSync();
         renderAll();
+        if (state.viewerRole === "Dancer") {
+          maybeShowDancerCheckinPopup({ force: true });
+        }
       });
     });
 
@@ -1834,11 +4170,11 @@ if (typeof document !== "undefined") {
     document.getElementById("saveProfileBtn")?.addEventListener("click", () => {
       const p = state.profile;
       p.name = document.getElementById("profName")?.value.trim() || "Dancer";
+      p.gender = document.getElementById("profGender")?.value === "male" ? "male" : "female";
       p.age = parseInt(document.getElementById("profAge")?.value, 10) || 14;
       p.weightLbs = parseFloat(document.getElementById("profWeight")?.value) || 110;
       p.heightFt = parseInt(document.getElementById("profHeightFt")?.value, 10) || 5;
       p.heightIn = parseInt(document.getElementById("profHeightIn")?.value, 10) || 0;
-      p.danceHours = parseFloat(document.getElementById("profDanceHours")?.value) || 0;
       p.potsLevel = document.getElementById("profPotsLevel")?.value || "standard";
       p.gbLevel = document.getElementById("profGbLevel")?.value || "moderate";
       p.customSodium = parseInt(document.getElementById("profCustomSodium")?.value, 10) || 4000;
@@ -1846,14 +4182,10 @@ if (typeof document !== "undefined") {
       p.customMealFat = parseFloat(document.getElementById("profCustomMealFat")?.value) || 5.5;
       p.customCalories = parseInt(document.getElementById("profCustomCalories")?.value, 10) || 2000;
 
-      const syncUrl = document.getElementById("gearSyncUrlInput")?.value.trim() || "";
-      state.googleSheetWebAppUrl = syncUrl;
-      if (auth.unlocked) {
-        saveDeviceAuth({ ...auth, syncUrl });
-      }
       saveAndSync();
       renderAll();
-      showToast("Settings saved");
+      document.getElementById("gearModal")?.classList.add("hidden");
+      showToast("Dancer Profile saved");
     });
 
     document.getElementById("gearBagChecklist")?.addEventListener("change", (e) => {
@@ -1866,15 +4198,13 @@ if (typeof document !== "undefined") {
     });
 
     document.getElementById("gearSyncNowBtn")?.addEventListener("click", async () => {
-      const syncUrl = document.getElementById("gearSyncUrlInput")?.value.trim() || "";
-      state.googleSheetWebAppUrl = syncUrl;
       const res = await silentPullFromCloud();
-      showToast(res.ok ? "Synced with Cloud" : "Cloud sync offline");
+      showToast(res.ok ? "Refreshed Family Sync" : "Working offline on this phone");
     });
 
     // Pair Another Device Modal
     document.getElementById("openPairDeviceBtn")?.addEventListener("click", () => {
-      const syncUrl = document.getElementById("gearSyncUrlInput")?.value.trim() || state.googleSheetWebAppUrl || auth.syncUrl || "";
+      const syncUrl = state.googleSheetWebAppUrl || auth.syncUrl || "";
       const linkInput = document.getElementById("pairLinkInput");
       const warnEl = document.getElementById("pairNoUrlWarn");
       if (syncUrl) {
@@ -1895,18 +4225,18 @@ if (typeof document !== "undefined") {
       if (!link) return;
       try {
         await navigator.clipboard.writeText(link);
-        showToast("Pairing link copied!");
+        showToast("Family setup link copied!");
       } catch (_e) {
-        showToast("Select and copy the pairing link above");
+        showToast("Select and copy the link above");
       }
     });
     document.getElementById("sharePairLinkBtn")?.addEventListener("click", async () => {
       const link = document.getElementById("pairLinkInput")?.value;
       if (!link) return;
       await shareOrCopyText(
-        `Tap to pair En Pointe & Steady (only Family PIN needed): ${link}`,
-        "En Pointe & Steady Device Pairing",
-        "Pairing link copied!"
+        `Tap to open En Pointe & Steady (only our Family PIN is needed): ${link}`,
+        "En Pointe & Steady Family Link",
+        "Family link copied!"
       );
     });
 
@@ -1950,11 +4280,12 @@ if (typeof document !== "undefined") {
       const pushed = await silentPushToCloud();
       document.getElementById("changePinModal")?.classList.add("hidden");
       document.getElementById("changePinForm")?.reset();
-      showToast(pushed ? "Family PIN updated & cloud re-encrypted!" : "Family PIN updated locally");
+      showToast(pushed ? "Family PIN updated & saved!" : "Family PIN updated on this phone");
     });
 
     document.getElementById("lockAppBtn")?.addEventListener("click", () => {
       hasPendingCloudPush = false;
+      dancerCheckinShownThisOpen = false;
       saveDeviceAuth({ unlocked: false, passphrase: "", syncUrl: state.googleSheetWebAppUrl || "", rememberDevice: true });
       const pinInput = document.getElementById("pinInput");
       if (pinInput) pinInput.value = "";
@@ -1986,11 +4317,8 @@ if (typeof document !== "undefined") {
           allowWhenLocked: true
         });
         if (!pullResult.ok && pullResult.reason === "decrypt") {
-          if (errEl) errEl.textContent = "Incorrect PIN — could not decrypt cloud sync bundle.";
+          if (errEl) errEl.textContent = "That PIN didn't match your family's saved PIN. Please try again.";
           return;
-        }
-        if (!pullResult.ok && errEl) {
-          errEl.textContent = "Unlocked locally (cloud sync unavailable).";
         }
       }
 
@@ -1998,6 +4326,7 @@ if (typeof document !== "undefined") {
       saveDeviceAuth({ unlocked: true, passphrase: pin, syncUrl, rememberDevice: remember });
       document.getElementById("pinOverlay")?.classList.add("hidden");
       renderAll();
+      maybeShowDancerCheckinPopup({ force: true });
     });
 
     window.addEventListener("focus", () => {
@@ -2006,6 +4335,11 @@ if (typeof document !== "undefined") {
   }
 
   function initApp() {
+    // Support #admin or ?admin=1 shortcut to open Admin PIN Gate
+    if (window.location.hash === "#admin" || window.location.search.includes("admin=1")) {
+      setTimeout(() => openAdminDashboardModal(), 150);
+    }
+
     // Support #sync=<url> or ?sync=<url> pairing parameter without manual URL typing
     const paramSync = parseSyncHashOrQuery(window.location.search, window.location.hash);
     if (paramSync) {
@@ -2020,7 +4354,7 @@ if (typeof document !== "undefined") {
           window.history.replaceState(null, "", window.location.pathname + window.location.search);
         } catch (_e) {}
       }
-      showToast("Sync link detected! Enter Family PIN to unlock.");
+      showToast("Family link connected! Enter your Family PIN to open.");
     }
 
     rolloverDayIfNeeded();
@@ -2029,6 +4363,7 @@ if (typeof document !== "undefined") {
 
     if (auth.unlocked && auth.passphrase) {
       document.getElementById("pinOverlay")?.classList.add("hidden");
+      maybeShowDancerCheckinPopup({ force: true });
       silentPullFromCloud();
     } else {
       const pinUrlInput = document.getElementById("pinSyncUrlInput");
@@ -2039,7 +4374,7 @@ if (typeof document !== "undefined") {
     }
 
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("./sw.js").catch(() => {});
+      navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" }).catch(() => {});
     }
   }
 
