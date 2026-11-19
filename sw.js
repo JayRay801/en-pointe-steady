@@ -2,7 +2,7 @@
  * sw.js — Offline App-Shell Service Worker for En Pointe & Steady
  */
 
-const CACHE_NAME = "en-pointe-steady-v5";
+const CACHE_NAME = "en-pointe-steady-v6";
 const APP_SHELL = [
   "./",
   "./index.html",

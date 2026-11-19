@@ -38,14 +38,14 @@ export const STORAGE_STATE_KEY = "epsteady_state_v2";
 export const STORAGE_AUTH_KEY = "epsteady_device_auth_v2";
 
 export const DEFAULT_BAG_ITEMS = [
-  { id: "bag_1", text: "2x 24oz Insulated Bottles (pre-mixed with electrolyte packets)", tag: "POTS Essential" },
-  { id: "bag_2", text: "2 Extra Electrolyte Stick Packs in side pocket", tag: "Emergency Salt" },
-  { id: "bag_3", text: "Individual Salted Pretzel Pouches or Rice Rollers", tag: "Between Classes" },
-  { id: "bag_4", text: "Insulated Food Thermos with Warm Low-Fat Soup", tag: "Evening Break" },
-  { id: "bag_5", text: "2x Unsweetened Applesauce or Fruit Puree Squeeze Pouches", tag: "Quick Carbs" },
-  { id: "bag_6", text: "Ice Pack + Lean Deli Turkey & Pickle Spears in cooler pouch", tag: "Lean Protein" },
-  { id: "bag_7", text: "Late-Night Car-Ride Recovery Container (skip fast food)", tag: "Stomach Safe" },
-  { id: "bag_8", text: "Compression Socks for car ride home after late rehearsal", tag: "POTS Recovery" }
+  { id: "bag_1", text: "2× 24oz Electrolyte Water Bottles", tag: "POTS Essential" },
+  { id: "bag_2", text: "2 Extra Electrolyte Stick Packs", tag: "Emergency Salt" },
+  { id: "bag_3", text: "Salted Pretzel Pouches or Rice Rollers", tag: "Between Classes" },
+  { id: "bag_4", text: "Food Thermos with Warm Low-Fat Soup", tag: "Evening Break" },
+  { id: "bag_5", text: "2× Unsweetened Applesauce Pouches", tag: "Quick Carbs" },
+  { id: "bag_6", text: "Ice Pack + Lean Turkey & Pickle Spears", tag: "Lean Protein" },
+  { id: "bag_7", text: "Car-Ride Recovery Meal Container", tag: "Stomach Safe" },
+  { id: "bag_8", text: "Compression Socks for ride home", tag: "POTS Recovery" }
 ];
 
 export const RESCUE_PROTOCOLS = {
@@ -56,22 +56,22 @@ export const RESCUE_PROTOCOLS = {
   },
   tired: {
     title: "Quick Low-Fat Dance Energy Boost",
-    body: "Pair quick energy carbs with salt (an applesauce pouch + salted pretzels, or half a banana + electrolyte drink). Skip high-fat nuts or heavy protein bars during dance."
+    body: "Pair quick energy carbs with salt — like an applesauce pouch + salted pretzels, or half a banana + electrolyte drink. Skip high-fat nuts or heavy protein bars during dance."
   },
   stomach: {
     title: "Gentle Stomach Soothing Mode",
-    body: "Keep fat super low (0g–2g) for the next two meals or snacks. Sip warm chicken broth, miso soup, or tea with plain salted crackers or rice cakes so your stomach can relax while keeping salt steady."
+    body: "Keep fat super low — 0g to 2g — for the next two meals or snacks. Sip warm chicken broth, miso soup, or tea with plain salted crackers or rice cakes so your stomach can relax while keeping salt steady."
   }
 };
 
 export const QUICK_LOG_PRESETS = [
-  { id: "p_lmnt", label: "LMNT (1000mg)", name: "LMNT Electrolyte Packet", portion: "16oz water + 1 packet", sodium: 1000, water: 16, fat: 0, kcal: 5 },
-  { id: "p_liquidiv", label: "Liquid I.V. (500mg)", name: "Liquid I.V. Hydration", portion: "16oz water + 1 stick", sodium: 500, water: 16, fat: 0, kcal: 45 },
-  { id: "p_trioral", label: "TriOral (1000mg)", name: "TriOral ORS Packet", portion: "32oz water + 1 packet", sodium: 1000, water: 32, fat: 0, kcal: 40 },
-  { id: "p_pretzels", label: "Pretzels (850mg)", name: "Salted Mini Pretzels", portion: "15-20 twists (~1.5 oz)", sodium: 850, water: 0, fat: 0.5, kcal: 130 },
-  { id: "p_broth", label: "Bone Broth (580mg)", name: "Warm Chicken Bone Broth", portion: "12oz warm mug", sodium: 580, water: 12, fat: 0.5, kcal: 45 },
+  { id: "p_lmnt", label: "LMNT • 1000mg", name: "LMNT Electrolyte Packet", portion: "16oz water + 1 packet", sodium: 1000, water: 16, fat: 0, kcal: 5 },
+  { id: "p_liquidiv", label: "Liquid I.V. • 500mg", name: "Liquid I.V. Hydration", portion: "16oz water + 1 stick", sodium: 500, water: 16, fat: 0, kcal: 45 },
+  { id: "p_trioral", label: "TriOral • 1000mg", name: "TriOral ORS Packet", portion: "32oz water + 1 packet", sodium: 1000, water: 32, fat: 0, kcal: 40 },
+  { id: "p_pretzels", label: "Pretzels • 850mg", name: "Salted Mini Pretzels", portion: "15–20 twists, ~1.5 oz", sodium: 850, water: 0, fat: 0.5, kcal: 130 },
+  { id: "p_broth", label: "Bone Broth • 580mg", name: "Warm Chicken Bone Broth", portion: "12oz warm mug", sodium: 580, water: 12, fat: 0.5, kcal: 45 },
   { id: "p_applesauce", label: "Applesauce", name: "Unsweetened Applesauce Pouch", portion: "1 squeeze pouch", sodium: 0, water: 4, fat: 0, kcal: 60 },
-  { id: "p_saltstick", label: "SaltStick (215mg)", name: "SaltStick Caps / Vitassium", portion: "1 capsule + water", sodium: 215, water: 4, fat: 0, kcal: 0 }
+  { id: "p_saltstick", label: "SaltStick • 215mg", name: "SaltStick Caps / Vitassium", portion: "1 capsule + water", sodium: 215, water: 4, fat: 0, kcal: 0 }
 ];
 
 export const SYMPTOM_QUICK_TAGS = [
@@ -90,15 +90,15 @@ export const SYMPTOM_QUICK_TAGS = [
 export const CLINICAL_INFO_TOPICS = {
   sodium: {
     title: "Why Extra Salt Helps Dancers With POTS",
-    body: "Salt helps the body hold onto water so blood flows smoothly during turns, jumps, and long rehearsals. That keeps dizziness away and energy steady! Tap +500mg or -500 anytime to adjust."
+    body: "Salt helps the body hold onto water so blood flows smoothly during turns, jumps, and long rehearsals. That keeps dizziness away and energy steady! Tap +500 or -500 anytime to adjust."
   },
   water: {
     title: "Smart Hydration & Salt Pairing",
-    body: "The daily water goal automatically adjusts based on that day's dance classes (+8 oz for every hour of dance). Always pair plain water with an electrolyte drink or salty snack so the body absorbs it instead of flushing it right out."
+    body: "The daily water goal automatically adjusts based on that day's dance classes, adding 8 oz for every hour of dance. Always pair plain water with an electrolyte drink or salty snack so the body absorbs it instead of flushing it right out."
   },
   gb: {
-    title: "Gentle on the Stomach (Low-Fat Meals)",
-    body: "Meals with too much grease or heavy fat (like fried food, extra cheese, or creamy sauces) can cause stomach cramps or nausea during dance. Keeping each meal or snack under the fat limit (such as 5.5g) keeps digestion calm and comfortable."
+    title: "Gentle on the Stomach",
+    body: "Meals with too much grease or heavy fat — like fried food, extra cheese, or creamy sauces — can cause stomach cramps or nausea during dance. Keeping each meal or snack under the fat limit keeps digestion calm and comfortable."
   },
   dayMode: {
     title: "Choosing Today's Routine",
@@ -110,11 +110,11 @@ export const CLINICAL_INFO_TOPICS = {
   },
   sync: {
     title: "Sharing Between Family Phones",
-    body: "Your Family PIN keeps the schedule, carpool rides, and daily logs private and shared between Dancer's and Mom's phones. Tap 'Share App With Family' to text a 1-tap setup link to another family phone."
+    body: "Your Family PIN keeps the schedule, carpool rides, and daily logs private and shared between Dancer's and Mom's phones. Tap 'Share With Family' to text a 1-tap setup link to another family phone."
   },
   score: {
-    title: "Daily Target Score (Green, Yellow, Red)",
-    body: "The Daily Score (0–100%) shows how closely the daily salt, water, and stomach-safe meal goals were hit. Green (80%+) means most goals were hit, Yellow (50–79%) means partway there, and Red (<50%) is a gentle reminder to fuel and hydrate."
+    title: "Daily Target Score",
+    body: "The Daily Score shows how closely the daily salt, water, and stomach-safe meal goals were hit. Green 80%+ means most goals were hit, Yellow 50–79% means partway there, and Red under 50% is a gentle reminder to fuel and hydrate."
   }
 };
 
@@ -128,9 +128,9 @@ export const MANUAL_SECTIONS = [
     title: "Easy Daily Routine in 60 Seconds",
     items: [
       "<strong>Check off meals &amp; drinks:</strong> Tap the checkbox beside each meal or snack as it is finished. The Salt and Hydration rings and Daily Score update right away.",
-      "<strong>Log extra drinks or snacks fast:</strong> Tap <strong>+ Quick Log</strong> to pick 1-tap favorites (LMNT, Liquid I.V., Pretzels, Warm Broth) or search 36+ dancer foods.",
-      "<strong>Watch the Daily Score:</strong> A <strong>Green</strong> score badge (80%+) means most daily goals are hit! Missed a day? Tap <strong>+ Log Missed Day</strong> to fill in any past date.",
-      "<strong>Switch between Dancer &amp; Mom view:</strong> Tap the <strong>🩰 Dancer View / 💛 Mom View</strong> pill at the top anytime."
+      "<strong>Log extra drinks or snacks fast:</strong> Tap <strong>+ Quick Log</strong> to pick 1-tap favorites like LMNT, Liquid I.V., Pretzels, or Warm Broth, or search 36+ dancer foods.",
+      "<strong>Watch the Daily Score:</strong> A <strong>Green</strong> score badge at 80%+ means most daily goals are hit! Missed a day? Tap <strong>+ Missed Day</strong> to fill in any past date.",
+      "<strong>Switch between Dancer &amp; Mom view:</strong> Tap the <strong>🩰 Dancer ⇄</strong> pill at the top anytime."
     ]
   },
   {
@@ -138,10 +138,10 @@ export const MANUAL_SECTIONS = [
     label: "Schedule & Carpool",
     title: "Custom Daily Dance Schedule, BAND & Carpool",
     items: [
-      "<strong>Month, Week &amp; Day Calendar:</strong> Open the <strong>📅 Schedule</strong> tab to view the Month calendar (with the selected day's schedule right underneath) or switch to <strong>Week</strong> and <strong>Day</strong> timelines just like Google Calendar.",
-      "<strong>Different Dance Classes Every Day:</strong> Tap <strong>+ Add Class / Event</strong> or <strong>+ Customize Day</strong> to set each day's exact dance classes and school hours. Days with more dance automatically recommend more food, salt, and water—and rest days with 0 dance hours adjust down automatically!",
+      "<strong>Month, Week &amp; Day Calendar:</strong> Open the <strong>📅 Schedule</strong> tab to view the Month calendar or switch to <strong>Week</strong> and <strong>Day</strong> timelines just like Google Calendar.",
+      "<strong>Different Dance Classes Every Day:</strong> Tap <strong>+ Add Class</strong> to set each day's exact dance classes and school hours. Days with more dance automatically recommend more food, salt, and water—and rest days with 0 dance hours adjust down automatically!",
       "<strong>Sync with BAND:</strong> Tap <strong>🔄 BAND Sync</strong> in the Schedule tab to import classes from a BAND calendar file, link, or pasted schedule post.",
-      "<strong>School &amp; Dance Carpool:</strong> Scroll to the <strong>🚗 Carpool</strong> section inside Schedule to see or edit both School and Dance Studio rides, or tap <strong>Share / Copy Rides</strong> to text the plan."
+      "<strong>School &amp; Dance Carpool:</strong> Scroll to the <strong>🚗 Carpool</strong> section inside Schedule to see or edit both School and Dance Studio rides, or tap <strong>Share Rides</strong> to text the plan."
     ]
   },
   {
@@ -150,7 +150,7 @@ export const MANUAL_SECTIONS = [
     title: "Simple Fueling Rules for Dancers",
     items: [
       "<strong>Salt + Water work together:</strong> Plain water alone passes right through. Pair every water bottle with an electrolyte mix or a salty snack so energy stays steady.",
-      "<strong>Keep meals gentle on the stomach:</strong> Staying at or below the per-meal fat limit (like <strong>5.5g fat per meal</strong>) helps prevent stomach aches during dance.",
+      "<strong>Keep meals gentle on the stomach:</strong> Staying at or below the per-meal fat limit like <strong>5.5g fat per meal</strong> helps prevent stomach aches during dance.",
       "<strong>Check any food or restaurant item:</strong> Open the <strong>🥗 Food</strong> tab to search safe meals, check restaurant picks, add custom foods, or tap <strong>📚 Sources</strong> to see the trusted nutrition guides behind these numbers."
     ]
   },
@@ -159,9 +159,9 @@ export const MANUAL_SECTIONS = [
     label: "Feeling & Help",
     title: "Feeling Check-Ins, Doctor Summary & Help",
     items: [
-      "<strong>Quick feeling check-in:</strong> In Dancer view, a quick popup asks <em>'I feel:'</em> (Steady, Dizzy, Tired, or Stomach) when opening the app so helpful tips appear right away.",
-      "<strong>Print a Doctor Summary:</strong> Open <strong>Full History</strong> to see color-coded daily scores, log missed days from the past, or tap <strong>Print / Save Doctor PDF</strong> for doctor visits.",
-      "<strong>Need help? Send a quick text:</strong> Tap <strong>💬 Help</strong> at the top of the screen, type what you need help with, and tap Send to open your text messaging app pre-filled and ready to go."
+      "<strong>Quick feeling check-in:</strong> In Dancer view, a quick popup asks <em>'I feel:'</em> when opening the app so helpful tips appear right away.",
+      "<strong>Print a Doctor Summary:</strong> Open <strong>History</strong> to see color-coded daily scores, log missed days from the past, or tap <strong>Doctor PDF</strong> for doctor visits.",
+      "<strong>Need help? Send a quick text:</strong> Tap <strong>💬</strong> at the top of the screen, type what you need help with, and tap Send to open your text messaging app pre-filled and ready to go."
     ]
   }
 ];
@@ -803,17 +803,17 @@ export function getRoleCopy(state = {}) {
       viewerRole: "Dancer",
       isMom: false,
       showAppOpenCheckinPopup: true,
-      roleSwitchLabel: "🩰 Dancer View (Tap for Mom)",
+      roleSwitchLabel: "🩰 Dancer ⇄",
       symptomBarLabel: "I feel:",
       symptomBarAria: "How do you feel right now?",
       dismissRescueLabel: "I feel steady now ✓",
       todayPlanHeading: "Today's Fuel & Studio Plan",
       bagHeading: "🎒 Dance Bag Checklist",
       notesLabel: "Daily Symptom & Rehearsal Notes",
-      notesPlaceholder: "Optional notes for today (e.g., studio temp, energy during pointe)...",
+      notesPlaceholder: "Notes for today — studio temp, energy, symptoms...",
       foodSearchPlaceholder: "Search 36+ foods or analyze any snack...",
-      scheduleMainHeading: "📅 My Dance, School & Carpool Schedule",
-      historyMainHeading: "History, Scores & Doctor Report",
+      scheduleMainHeading: "📅 Schedule",
+      historyMainHeading: "History & Report",
       rescueProtocols: RESCUE_PROTOCOLS,
       infoTopics: CLINICAL_INFO_TOPICS,
       manualSections: MANUAL_SECTIONS
@@ -829,26 +829,26 @@ export function getRoleCopy(state = {}) {
     },
     tired: {
       title: `Quick Low-Fat Dance Energy Boost for ${subjectCap}`,
-      body: `Give ${subjectLower} fast-absorbing carbs with salt (an applesauce pouch + salted pretzels, or half a banana + electrolyte drink). Skip high-fat nuts or heavy protein bars during rehearsal.`
+      body: `Give ${subjectLower} fast-absorbing carbs with salt — an applesauce pouch + salted pretzels, or half a banana + electrolyte drink. Skip high-fat nuts or heavy protein bars during rehearsal.`
     },
     stomach: {
       title: `Gentle Stomach Soothing Mode for ${subjectCap}`,
-      body: `Keep ${possessiveLower} fat super low (0g–2g) for the next two meals or snacks. Offer warm chicken broth, miso soup, or tea with plain salted crackers or rice cakes so their stomach can relax while keeping salt steady.`
+      body: `Keep ${possessiveLower} fat super low — 0g to 2g — for the next two meals or snacks. Offer warm chicken broth, miso soup, or tea with plain salted crackers or rice cakes so their stomach can relax while keeping salt steady.`
     }
   };
 
   const momInfoTopics = {
     sodium: {
       title: `Why Extra Salt Helps ${subjectCap} With POTS`,
-      body: `Salt helps ${possessiveLower} body hold onto water so blood flows smoothly during turns, jumps, and rehearsals. That keeps dizziness away and their energy steady! Tap +500mg or -500 anytime to adjust for them.`
+      body: `Salt helps ${possessiveLower} body hold onto water so blood flows smoothly during turns, jumps, and rehearsals. That keeps dizziness away and their energy steady! Tap +500 or -500 anytime to adjust for them.`
     },
     water: {
       title: `Smart Hydration & Salt Pairing for ${subjectCap}`,
-      body: `${possessiveCap} daily water goal automatically adjusts based on that day's dance classes (+8 oz for every hour of dance). Always pair plain water with an electrolyte drink or salty snack so their body absorbs it.`
+      body: `${possessiveCap} daily water goal automatically adjusts based on that day's dance classes, adding 8 oz for every hour of dance. Always pair plain water with an electrolyte drink or salty snack so their body absorbs it.`
     },
     gb: {
-      title: `Gentle on ${possessiveCap} Stomach (Low-Fat Meals)`,
-      body: `Meals with too much grease or heavy fat can cause stomach cramps or nausea for ${subjectLower} during dance. Keeping each meal or snack under their fat limit (such as 5.5g) keeps their digestion calm and comfortable.`
+      title: `Gentle on ${possessiveCap} Stomach`,
+      body: `Meals with too much grease or heavy fat can cause stomach cramps or nausea for ${subjectLower} during dance. Keeping each meal or snack under their fat limit keeps their digestion calm and comfortable.`
     },
     dayMode: {
       title: `Choosing ${possessiveCap} Daily Routine`,
@@ -863,8 +863,8 @@ export function getRoleCopy(state = {}) {
       body: `The Family PIN keeps ${possessiveLower} schedule, carpool rides, and daily logs private and synced between Mom's and the Dancer's phones.`
     },
     score: {
-      title: `${possessiveCap} Daily Target Score (Green, Yellow, Red)`,
-      body: `The Daily Score (0–100%) shows how closely ${possessiveLower} daily salt, water, and stomach-safe meal goals were hit. Green (80%+) means most goals were hit, Yellow (50–79%) means partway there, and Red (<50%) means they need more fuel or hydration.`
+      title: `${possessiveCap} Daily Target Score`,
+      body: `The Daily Score shows how closely ${possessiveLower} daily salt, water, and stomach-safe meal goals were hit. Green 80%+ means most goals were hit, Yellow 50–79% means partway there, and Red under 50% means they need more fuel or hydration.`
     }
   };
 
@@ -875,8 +875,8 @@ export function getRoleCopy(state = {}) {
       title: `Logging for ${subjectCap} in 60 Seconds`,
       items: [
         `<strong>Check off meals &amp; drinks:</strong> Tap the checkbox beside each meal or snack as ${subjectLower} finishes eating or drinking. Their Salt and Hydration rings and Daily Score update right away.`,
-        `<strong>Log extra drinks or snacks fast:</strong> Tap <strong>+ Quick Log</strong> to record 1-tap favorites (LMNT, Liquid I.V., Pretzels, Warm Broth) or search 36+ dancer foods for ${subjectLower}.`,
-        `<strong>Watch ${possessiveLower} Daily Score:</strong> A <strong>Green</strong> score badge (80%+) means ${subjectLower} hit most daily goals! Missed a day? Tap <strong>+ Log Missed Day</strong> to fill in any past date for them.`,
+        `<strong>Log extra drinks or snacks fast:</strong> Tap <strong>+ Quick Log</strong> to record 1-tap favorites like LMNT, Liquid I.V., Pretzels, or Warm Broth, or search 36+ dancer foods for ${subjectLower}.`,
+        `<strong>Watch ${possessiveLower} Daily Score:</strong> A <strong>Green</strong> score badge at 80%+ means ${subjectLower} hit most daily goals! Missed a day? Tap <strong>+ Missed Day</strong> to fill in any past date for them.`,
         `<strong>Switch between Mom &amp; Dancer view:</strong> Tap the role pill at the top anytime to switch between Mom's caregiver view and the Dancer's view.`
       ]
     },
@@ -885,8 +885,8 @@ export function getRoleCopy(state = {}) {
       label: "Schedule & Carpool",
       title: `${possessiveCap} Dance Schedule, BAND & Carpool`,
       items: [
-        `<strong>Month, Week &amp; Day Calendar:</strong> Open the <strong>📅 Schedule</strong> tab to view ${possessiveLower} Month calendar (with the selected day's schedule right underneath) or switch to <strong>Week</strong> and <strong>Day</strong> timelines.`,
-        `<strong>Customize Daily Dance Classes:</strong> Tap <strong>+ Add Class / Event</strong> to set ${possessiveLower} exact dance classes and school hours for each day. Days with more dance automatically recommend more food, salt, and water for them!`,
+        `<strong>Month, Week &amp; Day Calendar:</strong> Open the <strong>📅 Schedule</strong> tab to view ${possessiveLower} Month calendar or switch to <strong>Week</strong> and <strong>Day</strong> timelines.`,
+        `<strong>Customize Daily Dance Classes:</strong> Tap <strong>+ Add Class</strong> to set ${possessiveLower} exact dance classes and school hours for each day. Days with more dance automatically recommend more food, salt, and water for them!`,
         `<strong>Sync with BAND:</strong> Tap <strong>🔄 BAND Sync</strong> to import ${possessiveLower} studio classes from a BAND calendar file, link, or pasted schedule post.`,
         `<strong>School &amp; Dance Carpool:</strong> Scroll to the <strong>🚗 Carpool</strong> section inside Schedule to coordinate both School and Dance Studio rides for ${subjectLower}.`
       ]
@@ -897,7 +897,7 @@ export function getRoleCopy(state = {}) {
       title: `Fueling Guidelines for ${subjectCap}`,
       items: [
         `<strong>Salt + Water work together:</strong> Plain water alone passes right through. Pair every water bottle ${subjectLower} drinks with an electrolyte mix or salty snack so their energy stays steady.`,
-        `<strong>Keep meals gentle on their stomach:</strong> Staying at or below ${possessiveLower} per-meal fat limit (like <strong>5.5g fat per meal</strong>) helps prevent stomach aches during dance.`,
+        `<strong>Keep meals gentle on their stomach:</strong> Staying at or below ${possessiveLower} per-meal fat limit like <strong>5.5g fat per meal</strong> helps prevent stomach aches during dance.`,
         `<strong>Check any food or restaurant item:</strong> Open the <strong>🥗 Food</strong> tab to search safe meals for ${subjectLower} or tap <strong>📚 Sources</strong> to see the trusted nutrition guides behind these numbers.`
       ]
     },
@@ -906,9 +906,9 @@ export function getRoleCopy(state = {}) {
       label: "Feeling & Help",
       title: `Supporting ${subjectCap}, Doctor Summary & Help`,
       items: [
-        `<strong>Update how ${subjectLower} feels:</strong> Tap <em>${subjectCap} feels:</em> at the top (Steady, Dizzy, Tired, or Stomach) to record their symptoms and view step-by-step caregiver rescue steps.`,
-        `<strong>Print a Doctor Summary:</strong> Open <strong>Full History</strong> to review color-coded daily scores, log missed days from the past, or tap <strong>Print / Save Doctor PDF</strong> for ${possessiveLower} doctor visits.`,
-        `<strong>Need help? Send a quick text:</strong> Tap <strong>💬 Help</strong> at the top of the screen, write what your family needs help with, and tap Send to open your text messaging app ready to send.`
+        `<strong>Update how ${subjectLower} feels:</strong> Tap <em>${subjectCap} feels:</em> at the top to record Steady, Dizzy, Tired, or Stomach and view step-by-step caregiver rescue steps.`,
+        `<strong>Print a Doctor Summary:</strong> Open <strong>History</strong> to review color-coded daily scores, log missed days from the past, or tap <strong>Doctor PDF</strong> for ${possessiveLower} doctor visits.`,
+        `<strong>Need help? Send a quick text:</strong> Tap <strong>💬</strong> at the top of the screen, write what your family needs help with, and tap Send to open your text messaging app ready to send.`
       ]
     }
   ];
@@ -917,17 +917,17 @@ export function getRoleCopy(state = {}) {
     viewerRole: "Mom",
     isMom: true,
     showAppOpenCheckinPopup: false,
-    roleSwitchLabel: `💛 Mom View (for ${subjectCap})`,
+    roleSwitchLabel: hasCustomName ? `👩 Mom • ${rawName} ⇄` : "👩 Mom ⇄",
     symptomBarLabel: `${subjectCap} feels:`,
     symptomBarAria: `How is ${subjectLower} feeling right now?`,
     dismissRescueLabel: `${subjectCap} feels steady now ✓`,
     todayPlanHeading: `${possessiveCap} Fuel & Studio Plan`,
     bagHeading: `🎒 ${possessiveCap} Dance Bag Checklist`,
     notesLabel: `${possessiveCap} Symptom & Rehearsal Notes`,
-    notesPlaceholder: `Optional notes for ${subjectLower} today (e.g., studio temp, energy during pointe)...`,
+    notesPlaceholder: `Notes for ${subjectLower} today — studio temp, energy, symptoms...`,
     foodSearchPlaceholder: `Search 36+ foods or analyze any snack for ${subjectLower}...`,
-    scheduleMainHeading: `📅 ${possessiveCap} Dance, School & Carpool Schedule`,
-    historyMainHeading: `${possessiveCap} History, Scores & Doctor Report`,
+    scheduleMainHeading: `📅 ${possessiveCap} Schedule`,
+    historyMainHeading: `${possessiveCap} History & Report`,
     rescueProtocols: momRescueProtocols,
     infoTopics: momInfoTopics,
     manualSections: momManualSections
@@ -1019,10 +1019,20 @@ export function getTodayNextClassAndCarpool(state = {}, dateStr = getLocalDateSt
   const carpoolDay = state?.carpool?.[dayKey] || {};
   const isMom = state?.viewerRole === "Mom";
 
+  const fmt12 = (t) => {
+    const m = String(t || "").trim().match(/^(\d{1,2}):(\d{2})$/);
+    if (!m) return String(t || "");
+    let h = parseInt(m[1], 10);
+    const ap = h >= 12 ? "PM" : "AM";
+    if (h === 0) h = 12;
+    else if (h > 12) h -= 12;
+    return `${h}:${m[2]} ${ap}`;
+  };
+
   const firstDance = danceEvents[0] || null;
   const classTitle = firstDance
-    ? `${firstDance.title} • ${firstDance.startTime}`
-    : (events[0] ? `${events[0].title} • ${events[0].startTime}` : "Rest Day • No dance classes scheduled");
+    ? `${firstDance.title} • ${fmt12(firstDance.startTime)}`
+    : (events[0] ? `${events[0].title} • ${fmt12(events[0].startTime)}` : "Rest Day • No dance classes scheduled");
 
   let carpoolSummary = isMom
     ? "Carpool: Add school or studio pickup in Schedule."
@@ -1068,10 +1078,10 @@ export function getSmartMotto(state = {}, { index, dateStr = getLocalDateString(
     : "Every steady log supports The Dancer's stamina";
 
   const schedSnippetDancer = hasDance
-    ? `${danceHours} hrs of dance (${shortClass})`
+    ? `${danceHours} hrs of ${shortClass}`
     : "a gentle recovery day";
   const schedSnippetMom = hasDance
-    ? `${danceHours} hrs of dance (${shortClass})`
+    ? `${danceHours} hrs of ${shortClass}`
     : "a gentle rest day";
 
   const pool = isMom
@@ -1819,8 +1829,8 @@ if (typeof document !== "undefined") {
     if (activityBadge) {
       activityBadge.textContent =
         targets.danceHours > 0
-          ? `📅 Today's Dance: ${targets.danceHours} hrs (from Schedule)`
-          : "📅 Today's Dance: 0 hrs (Rest / No Dance Scheduled)";
+          ? `📅 ${targets.danceHours} hrs dance`
+          : "📅 Rest day";
     }
 
     setProgressRing("sodiumRingProgress", ringData.sodiumPct, 34);
@@ -1862,20 +1872,15 @@ if (typeof document !== "undefined") {
     const scoreBadge = document.getElementById("todayDailyScoreBadge");
     if (scoreBadge) {
       scoreBadge.className = `pill-badge ${scoreInfo.badgeClass}`;
-      scoreBadge.textContent = `Daily Score: ${scoreInfo.score}% (${scoreInfo.goalsHit}/${scoreInfo.totalGoals} Goals • ${scoreInfo.label})`;
-    }
-
-    const calChip = document.getElementById("todayCalorieTargetChip");
-    if (calChip) {
-      calChip.textContent = `⚡ ${totals.totalKcal} / ${targets.calories} kcal`;
+      scoreBadge.textContent = `${scoreInfo.goalsHit}/${scoreInfo.totalGoals} Goals • ${scoreInfo.label}`;
     }
 
     const gbStatus = document.getElementById("todayGbStatus");
     if (gbStatus) {
       gbStatus.className = `pill-badge ${totals.gbCompliant ? "badge-safe" : "badge-avoid"}`;
       gbStatus.textContent = totals.gbCompliant
-        ? `✓ Safe (≤ ${targets.maxMealFat}g)`
-        : `⚠️ > ${targets.maxMealFat}g fat`;
+        ? `✓ Safe ≤${targets.maxMealFat}g`
+        : `⚠️ >${targets.maxMealFat}g fat`;
     }
 
     // Next Dance Class + Carpool summary card
@@ -1907,11 +1912,11 @@ if (typeof document !== "undefined") {
         const ds = getLocalDateString(d);
         const entry = last7.find((h) => h.date === ds);
         let cls = "dot-empty";
-        let title = `${ds}: No log yet (tap to log past day)`;
+        let title = `${ds}: No log yet — tap to log`;
         if (entry) {
           const sc = computeDailyScore(entry, targets);
           cls = sc.tier === "high" ? "dot-good" : sc.tier === "medium" ? "dot-warn" : "dot-low";
-          title = `${ds}: Score ${sc.score}% (${sc.goalsHit}/${sc.totalGoals} goals) • ${entry.sodiumMg}mg Na, ${entry.waterOz}oz`;
+          title = `${ds}: ${sc.score}% • ${sc.goalsHit}/${sc.totalGoals} goals • ${entry.sodiumMg}mg Na, ${entry.waterOz}oz`;
         }
         dots.push(`<span class="history-dot ${cls}" data-dot-date="${esc(ds)}" title="${esc(title)}"></span>`);
       }
@@ -1924,7 +1929,7 @@ if (typeof document !== "undefined") {
     if (avg7Score) avg7Score.textContent = `${stats7.avgScore}%`;
     if (avg7Na) avg7Na.textContent = `${stats7.avgSodium} mg`;
     if (avg7Water) avg7Water.textContent = `${stats7.avgWater} oz`;
-    if (steady7) steady7.textContent = `${stats7.symptomFreeCount}/${stats7.count || 0} steady`;
+    if (steady7) steady7.textContent = `${stats7.symptomFreeCount}/${stats7.count || 0}`;
 
     // Bag checklist & symptom tags & notes
     renderTodayBagCard();
@@ -2202,21 +2207,25 @@ if (typeof document !== "undefined") {
 
         const badges = [];
         if (danceHrs > 0) {
-          badges.push(`<span class="cal-mini-pill cal-pill-dance">🩰 ${danceHrs}h Dance</span>`);
+          badges.push(`<span class="cal-mini-pill cal-pill-dance"><span class="cal-pill-short">${danceHrs}h</span><span class="cal-pill-full">🩰 ${danceHrs}h Dance</span></span>`);
         } else {
-          badges.push(`<span class="cal-mini-pill cal-pill-rest">Rest (0h)</span>`);
+          badges.push(`<span class="cal-mini-pill cal-pill-rest"><span class="cal-pill-short">–</span><span class="cal-pill-full">Rest</span></span>`);
         }
+        const dots = [];
         if (hasSchool) {
-          badges.push(`<span class="cal-mini-pill cal-pill-school">🎒 School</span>`);
+          badges.push(`<span class="cal-mini-pill cal-pill-school cal-desktop-only">🎒 School</span>`);
+          dots.push(`<span class="cal-dot cal-dot-school" title="School"></span>`);
         }
         if (hasCarpool) {
-          badges.push(`<span class="cal-mini-pill cal-pill-carpool">🚗 Carpool</span>`);
+          badges.push(`<span class="cal-mini-pill cal-pill-carpool cal-desktop-only">🚗 Carpool</span>`);
+          dots.push(`<span class="cal-dot cal-dot-carpool" title="Carpool"></span>`);
         }
 
         cellsHtml.push(`
           <button type="button" class="cal-day-cell ${isCurrentMonth ? "" : "cal-outside"} ${isToday ? "cal-today" : ""} ${isSelected ? "cal-selected" : ""}" data-cal-date="${esc(ds)}">
             <span class="cal-day-num">${cellDate.getDate()}</span>
             <div class="cal-day-badges">${badges.join("")}</div>
+            ${dots.length ? `<div class="cal-mobile-dots">${dots.join("")}</div>` : ""}
           </button>
         `);
       }
@@ -2263,7 +2272,7 @@ if (typeof document !== "undefined") {
           const heightPx = Math.max(22, Math.round(dur * 44) - 2);
           const cls = evt.category === "school" ? "gcal-block-school" : "gcal-block-dance";
           blocksHtml.push(`
-            <div class="gcal-event-block ${cls}" style="top:${topPx}px;height:${heightPx}px;" data-cal-date="${esc(ds)}" title="${esc(evt.title)} (${formatTime12h(evt.startTime)}–${formatTime12h(evt.endTime)})">
+            <div class="gcal-event-block ${cls}" style="top:${topPx}px;height:${heightPx}px;" data-cal-date="${esc(ds)}" title="${esc(evt.title)} • ${formatTime12h(evt.startTime)}–${formatTime12h(evt.endTime)}">
               <strong>${esc(evt.title)}</strong>
               <div>${esc(formatTime12h(evt.startTime))}</div>
             </div>
@@ -2323,7 +2332,7 @@ if (typeof document !== "undefined") {
         const cls = evt.category === "school" ? "gcal-block-school" : "gcal-block-dance";
         blocksHtml.push(`
           <div class="gcal-event-block ${cls}" style="top:${topPx}px;height:${heightPx}px;" data-edit-sched-event="${esc(evt.id)}">
-            <strong>${esc(evt.title)}</strong> (${evt.durationHours || dur} hrs) • ${esc(formatTime12h(evt.startTime))} – ${esc(formatTime12h(evt.endTime))}
+            <strong>${esc(evt.title)}</strong> • ${esc(formatTime12h(evt.startTime))}–${esc(formatTime12h(evt.endTime))}
             ${evt.location ? `<span> @ ${esc(evt.location)}</span>` : ""}
           </div>
         `);
@@ -2333,7 +2342,7 @@ if (typeof document !== "undefined") {
         const startH = Math.max(6, Math.min(21.5, timeStrToHourFloat(cp.schoolToTime || "7:35 AM", 7.5)));
         blocksHtml.push(`
           <div class="gcal-event-block gcal-block-carpool" style="top:${Math.round((startH - 6) * 44)}px;height:24px;">
-            🚗 School Drop-Off: ${esc(cp.schoolToDriver)} (${esc(cp.schoolToTime || "7:35 AM")})
+            🚗 School Drop-Off: ${esc(cp.schoolToDriver)} • ${esc(cp.schoolToTime || "7:35 AM")}
           </div>
         `);
       }
@@ -2341,7 +2350,7 @@ if (typeof document !== "undefined") {
         const startH = Math.max(6, Math.min(21.5, timeStrToHourFloat(cp.toTime || "3:30 PM", 15.5)));
         blocksHtml.push(`
           <div class="gcal-event-block gcal-block-carpool" style="top:${Math.round((startH - 6) * 44)}px;height:24px;">
-            🚗 To Studio Carpool: ${esc(cp.toDriver)} (${esc(cp.toTime || "3:30 PM")})
+            🚗 To Studio: ${esc(cp.toDriver)} • ${esc(cp.toTime || "3:30 PM")}
           </div>
         `);
       }
@@ -2349,7 +2358,7 @@ if (typeof document !== "undefined") {
         const startH = Math.max(6, Math.min(21.5, timeStrToHourFloat(cp.homeTime || "9:00 PM", 21)));
         blocksHtml.push(`
           <div class="gcal-event-block gcal-block-carpool" style="top:${Math.round((startH - 6) * 44)}px;height:24px;">
-            🚗 Home from Studio: ${esc(cp.homeDriver)} (${esc(cp.homeTime || "9:00 PM")})
+            🚗 Home: ${esc(cp.homeDriver)} • ${esc(cp.homeTime || "9:00 PM")}
           </div>
         `);
       }
@@ -2368,20 +2377,22 @@ if (typeof document !== "undefined") {
 
   function renderSelectedDayScheduleDetails(dateStr) {
     const wkName = getWeekdayForDateStr(dateStr);
+    const parsedDate = parseDateParts(dateStr);
+    const shortMonth = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][parsedDate.getMonth()];
     const events = getScheduleEventsForDate(state, dateStr);
     const danceHours = getDanceHoursForDate(state, dateStr);
     const dayTargets = getCalculatedTargets(state.profile, { danceHours, state, date: dateStr });
 
     const titleEl = document.getElementById("selectedDayScheduleTitle");
     if (titleEl) {
-      titleEl.textContent = `${wkName} (${dateStr}) — School & Dance Schedule`;
+      titleEl.textContent = `${wkName}, ${shortMonth} ${parsedDate.getDate()}`;
     }
     const summaryEl = document.getElementById("selectedDayActivitySummary");
     if (summaryEl) {
       summaryEl.textContent =
         danceHours > 0
-          ? `🩰 ${danceHours} hrs Dance Scheduled → Day's Recommended Intake: ${dayTargets.calories} kcal • ${dayTargets.sodium}mg Salt • ${dayTargets.water}oz Water`
-          : `🛋️ 0 hrs Dance Scheduled (Rest Day) → Day's Recommended Intake: ${dayTargets.calories} kcal • ${dayTargets.sodium}mg Salt • ${dayTargets.water}oz Water`;
+          ? `🩰 ${danceHours} hrs dance • Goals: ${dayTargets.calories} kcal • ${dayTargets.sodium}mg Na • ${dayTargets.water}oz`
+          : `🛋️ Rest day • Goals: ${dayTargets.calories} kcal • ${dayTargets.sodium}mg Na • ${dayTargets.water}oz`;
     }
 
     const listEl = document.getElementById("selectedDayEventsList");
@@ -2390,8 +2401,8 @@ if (typeof document !== "undefined") {
     if (!events.length) {
       listEl.innerHTML = `
         <div class="empty-card">
-          <p>No school or dance classes scheduled for ${wkName} (${dateStr}).</p>
-          <p class="muted-text">0 dance hours scheduled — daily food and water targets automatically adjust for a rest day.</p>
+          <p>No classes scheduled for ${wkName}, ${shortMonth} ${parsedDate.getDate()}.</p>
+          <p class="muted-text">Goals are automatically adjusted for a rest day.</p>
         </div>
       `;
       return;
@@ -2405,11 +2416,11 @@ if (typeof document !== "undefined") {
       .map((evt) => {
         const isSchool = evt.category === "school";
         const badgeCls = isSchool ? "badge-caution" : "badge-safe";
-        const catIcon = isSchool ? "🎒 School" : evt.category === "competition" ? "🏆 Competition" : evt.category === "rehearsal" ? "🎭 Rehearsal" : "🩰 Dance Class";
+        const catIcon = isSchool ? "🎒 School" : evt.category === "competition" ? "🏆 Competition" : evt.category === "rehearsal" ? "🎭 Rehearsal" : "🩰 Dance";
         return `
           <div class="day-event-item ${isSchool ? "evt-school" : "evt-dance"}">
-            <div>
-              <span class="pill-badge ${badgeCls}">${catIcon} • ${evt.durationHours} hrs</span>
+            <div class="day-event-copy">
+              <span class="pill-badge ${badgeCls}">${catIcon} • ${evt.durationHours}h</span>
               <h4 style="margin:4px 0 2px;">${esc(evt.title)}</h4>
               <div class="muted-text">${esc(formatTime12h(evt.startTime))} – ${esc(formatTime12h(evt.endTime))}${evt.location ? ` • ${esc(evt.location)}` : ""}${evt.notes ? ` • ${esc(evt.notes)}` : ""}</div>
             </div>
@@ -2431,40 +2442,40 @@ if (typeof document !== "undefined") {
     });
 
     const dayBadge = document.getElementById("carpoolSelectedDayBadge");
-    if (dayBadge) dayBadge.textContent = `${state.dayOfWeek} Carpool`;
+    if (dayBadge) dayBadge.textContent = state.dayOfWeek;
 
     const cp = state.carpool[state.dayOfWeek] || {};
     const card = document.getElementById("carpoolDayCard");
     if (card) {
       card.innerHTML = `
-        <div class="carpool-section-label">🎒 School Carpool (${esc(state.dayOfWeek)})</div>
+        <div class="carpool-section-label">🎒 School</div>
         <div class="carpool-grid" style="margin-bottom: 10px;">
           <div class="carpool-leg">
             <span class="leg-tag">TO SCHOOL</span>
             <h4>${esc(cp.schoolToDriver || "Mom / Bus / TBD")}</h4>
             <p class="leg-time">${esc(cp.schoolToTime || "7:35 AM")}</p>
-            <p class="muted-text">${esc(cp.schoolToNote || "Tap Edit Rides to add school drop-off note")}</p>
+            <p class="muted-text">${esc(cp.schoolToNote || "No drop-off note")}</p>
           </div>
           <div class="carpool-leg">
             <span class="leg-tag">FROM SCHOOL</span>
             <h4>${esc(cp.schoolHomeDriver || "Mom / Carpool / TBD")}</h4>
             <p class="leg-time">${esc(cp.schoolHomeTime || "2:55 PM")}</p>
-            <p class="muted-text">${esc(cp.schoolHomeNote || "Tap Edit Rides to add school pick-up note")}</p>
+            <p class="muted-text">${esc(cp.schoolHomeNote || "No pick-up note")}</p>
           </div>
         </div>
-        <div class="carpool-section-label">🩰 Dance Studio Carpool (${esc(state.dayOfWeek)})</div>
+        <div class="carpool-section-label">🩰 Dance Studio</div>
         <div class="carpool-grid">
           <div class="carpool-leg">
             <span class="leg-tag">TO STUDIO</span>
             <h4>${esc(cp.toDriver || "Not assigned")}</h4>
             <p class="leg-time">${esc(cp.toTime || "No time set")}</p>
-            <p class="muted-text">${esc(cp.toNote || "Tap Edit Rides to add studio pickup notes")}</p>
+            <p class="muted-text">${esc(cp.toNote || "No pickup note")}</p>
           </div>
           <div class="carpool-leg">
             <span class="leg-tag">HOME FROM STUDIO</span>
             <h4>${esc(cp.homeDriver || "Not assigned")}</h4>
             <p class="leg-time">${esc(cp.homeTime || "No time set")}</p>
-            <p class="muted-text">${esc(cp.homeNote || "Tap Edit Rides to add drop-off notes")}</p>
+            <p class="muted-text">${esc(cp.homeNote || "No drop-off note")}</p>
           </div>
         </div>
       `;
@@ -2488,6 +2499,12 @@ if (typeof document !== "undefined") {
     setInput("editHomeNote", cp.homeNote);
   }
 
+  function formatDayModeLabel(mode) {
+    if (mode === "competition") return "Competition";
+    if (mode === "recovery") return "Recovery";
+    return "School + Studio";
+  }
+
   function renderHistoryView() {
     const targets = getActiveTodayTargets();
     const range = state.historyRange || "7d";
@@ -2501,10 +2518,10 @@ if (typeof document !== "undefined") {
     const summaryEl = document.getElementById("historySummaryGrid");
     if (summaryEl) {
       summaryEl.innerHTML = `
-        <div class="stat-tile"><span class="stat-label">Avg Daily Score</span><strong>${stats.avgScore}% (${stats.highScoreDays}/${stats.count} Green)</strong></div>
-        <div class="stat-tile"><span class="stat-label">Avg Salt (Sodium)</span><strong>${stats.avgSodium} mg</strong></div>
+        <div class="stat-tile"><span class="stat-label">Avg Score</span><strong>${stats.avgScore}% • ${stats.highScoreDays}/${stats.count} green</strong></div>
+        <div class="stat-tile"><span class="stat-label">Avg Salt</span><strong>${stats.avgSodium} mg</strong></div>
         <div class="stat-tile"><span class="stat-label">Avg Water</span><strong>${stats.avgWater} oz</strong></div>
-        <div class="stat-tile"><span class="stat-label">Stomach-Safe &amp; Steady</span><strong>${stats.gbCompliancePct}% Safe • ${stats.symptomFreeCount}/${stats.count} Steady</strong></div>
+        <div class="stat-tile"><span class="stat-label">Safe &amp; Steady</span><strong>${stats.gbCompliancePct}% • ${stats.symptomFreeCount}/${stats.count}</strong></div>
       `;
     }
 
@@ -2512,16 +2529,16 @@ if (typeof document !== "undefined") {
     if (corrEl) {
       const c = stats.symptomCorrelation;
       corrEl.innerHTML = `
-        <h4>Hydration, Salt &amp; Feeling Correlation</h4>
-        <p><strong>Steady Days (${c.steadyDays}):</strong> Avg ${c.steadyAvgSodium} mg Salt • ${c.steadyAvgWater} oz Water</p>
-        <p><strong>Symptomatic Days (${c.symptomaticDays}):</strong> Avg ${c.symptomaticAvgSodium} mg Salt • ${c.symptomaticAvgWater} oz Water</p>
+        <h4>Salt, Water &amp; Feeling Trends</h4>
+        <p><strong>Steady • ${c.steadyDays}d:</strong> ${c.steadyAvgSodium} mg Na • ${c.steadyAvgWater} oz Water</p>
+        <p><strong>Symptomatic • ${c.symptomaticDays}d:</strong> ${c.symptomaticAvgSodium} mg Na • ${c.symptomaticAvgWater} oz Water</p>
       `;
     }
 
     const listEl = document.getElementById("historyEntriesList");
     if (listEl) {
       if (!entries.length) {
-        listEl.innerHTML = `<div class="empty-card"><p>No daily logs recorded in this range yet. Tap <strong>+ Log Past / Missed Day</strong> above to add any missed dates.</p></div>`;
+        listEl.innerHTML = `<div class="empty-card"><p>No logs in this range yet. Tap <strong>+ Log Past Day</strong> above to add any missed dates.</p></div>`;
       } else {
         listEl.innerHTML = entries
           .map((e) => {
@@ -2536,21 +2553,21 @@ if (typeof document !== "undefined") {
             return `
           <details class="history-entry-card score-tier-${esc(tier)}">
             <summary>
-              <span><strong>${esc(e.date)}</strong> • ${esc(e.dayMode)}${e.danceHours != null ? ` (${e.danceHours}h dance)` : ""}</span>
+              <span><strong>${esc(e.date)}</strong> • ${esc(formatDayModeLabel(e.dayMode))}${e.danceHours != null ? ` • ${e.danceHours}h` : ""}</span>
               <div class="history-summary-badges">
-                <span class="pill-badge ${scoreBadgeCls}">${tierIcon} Score: ${scoreVal}% (${goalsHit}/${totalGoals} Goals)</span>
+                <span class="pill-badge ${scoreBadgeCls}">${tierIcon} ${scoreVal}% • ${goalsHit}/${totalGoals}</span>
                 <span class="pill-badge ${e.symptomStatus === "steady" && e.gbCompliant !== false ? "badge-safe" : "badge-caution"}">${esc(e.symptomStatus || "steady")}</span>
               </div>
             </summary>
             <div class="history-entry-body">
               <div class="goal-hit-pills">
-                <span class="chip ${sc.breakdown.sodiumHit ? "badge-safe" : "badge-caution"}">${sc.breakdown.sodiumHit ? "✓" : "○"} Salt: ${e.sodiumMg} / ${e.sodiumTarget} mg</span>
-                <span class="chip ${sc.breakdown.waterHit ? "badge-safe" : "badge-caution"}">${sc.breakdown.waterHit ? "✓" : "○"} Water: ${e.waterOz} / ${e.waterTarget} oz</span>
-                <span class="chip ${sc.breakdown.gbHit ? "badge-safe" : "badge-avoid"}">${sc.breakdown.gbHit ? "✓" : "⚠️"} Stomach Fat: ${e.maxMealFat}g (${e.gbCompliant !== false ? "Safe" : "Over Limit"})</span>
+                <span class="chip ${sc.breakdown.sodiumHit ? "badge-safe" : "badge-caution"}">${sc.breakdown.sodiumHit ? "✓" : "○"} Salt: ${e.sodiumMg}/${e.sodiumTarget} mg</span>
+                <span class="chip ${sc.breakdown.waterHit ? "badge-safe" : "badge-caution"}">${sc.breakdown.waterHit ? "✓" : "○"} Water: ${e.waterOz}/${e.waterTarget} oz</span>
+                <span class="chip ${sc.breakdown.gbHit ? "badge-safe" : "badge-avoid"}">${sc.breakdown.gbHit ? "✓" : "⚠️"} Fat: ${e.maxMealFat}g ${e.gbCompliant !== false ? "Safe" : "High"}</span>
               </div>
               ${e.notes ? `<p class="muted-text">Notes: ${esc(e.notes)}</p>` : ""}
               <div style="margin-top:8px;">
-                <button type="button" class="btn-secondary btn-xs" data-edit-past-date="${esc(e.date)}">✏️ Edit This Day's Record</button>
+                <button type="button" class="btn-secondary btn-xs" data-edit-past-date="${esc(e.date)}">✏️ Edit Day</button>
               </div>
             </div>
           </details>
@@ -2631,7 +2648,7 @@ if (typeof document !== "undefined") {
 
     const dynSummary = document.getElementById("profDynamicDanceSummary");
     if (dynSummary) {
-      dynSummary.textContent = `Today's Scheduled Dance Activity: ${todayDanceHrs} hrs (from 📅 Schedule)`;
+      dynSummary.textContent = `Today's Dance: ${todayDanceHrs} hrs`;
     }
 
     const overrideToggle = document.getElementById("profDoctorOverride");
@@ -2678,8 +2695,8 @@ if (typeof document !== "undefined") {
     const cls = safety.gbRating.status === "safe" ? "badge-safe" : safety.gbRating.status === "caution" ? "badge-caution" : "badge-avoid";
     badge.className = `pill-badge ${cls}`;
     badge.textContent = safety.gbRating.status === "safe"
-      ? `✓ Stomach-Safe (${fat}g ≤ ${targets.maxMealFat}g limit)`
-      : `⚠️ ${safety.gbRating.label} (${fat}g > ${targets.maxMealFat}g limit)`;
+      ? `✓ Safe • ${fat}g / ${targets.maxMealFat}g limit`
+      : `⚠️ ${safety.gbRating.label} • limit ${targets.maxMealFat}g`;
   }
 
   function openQuickLogModal(slotId = null) {
@@ -2707,7 +2724,7 @@ if (typeof document !== "undefined") {
       const slot = slots.find((s) => s.id === slotId);
       const optIdx = state.selectedOptionIdx[slotId] || 0;
       const opt = slot?.options?.[optIdx] || slot?.options?.[0];
-      if (titleEl) titleEl.textContent = "Edit Fuel / Hydration Entry";
+      if (titleEl) titleEl.textContent = "Edit Entry";
       document.getElementById("logItemName").value = opt?.name || "";
       document.getElementById("logItemTime").value = slot?.time || nowStr;
       document.getElementById("logItemPortion").value = opt?.basePortion || "";
@@ -2716,7 +2733,7 @@ if (typeof document !== "undefined") {
       document.getElementById("logItemFat").value = opt?.fat ?? 0;
       document.getElementById("logItemKcal").value = opt?.kcal ?? 0;
     } else {
-      if (titleEl) titleEl.textContent = "Quick Log Fuel & Hydration";
+      if (titleEl) titleEl.textContent = "Quick Log";
       document.getElementById("logItemName").value = "";
       document.getElementById("logItemTime").value = nowStr;
       document.getElementById("logItemPortion").value = "";
@@ -2776,7 +2793,7 @@ if (typeof document !== "undefined") {
       gbCompliant: maxMealFat <= cap
     });
     badge.className = `pill-badge ${sc.badgeClass}`;
-    badge.textContent = `Preview Score: ${sc.score}% (${sc.goalsHit}/${sc.totalGoals} Goals Hit • ${sc.label})`;
+    badge.textContent = `${sc.score}% • ${sc.goalsHit}/${sc.totalGoals} Goals • ${sc.label}`;
   }
 
   function populatePastLogModalForDate(dateStr) {

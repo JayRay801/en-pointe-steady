@@ -4,46 +4,46 @@
  */
 
 export const DEFAULT_FOOD_LIBRARY = [
-  { id: "f_1", name: "16oz Electrolyte Water (LMNT / Liquid I.V.) + Salted Pretzels", baseServing: "16oz drink + 15 mini pretzel twists", category: "Morning / Wake-Up", kcal: 130, sodium: 850, fat: 0.5, water: 16 },
-  { id: "f_2", name: "Gatorade Zero / Pedialyte Sport (16oz) + Salted Rice Cake", baseServing: "16oz bottle + 1 salted rice cake", category: "Electrolyte / Drink", kcal: 55, sodium: 590, fat: 0.0, water: 16 },
-  { id: "f_3", name: "Warm Mug of Chicken Bone Broth with Pinch of Sea Salt", baseServing: "12oz warm mug + 4 saltine crackers", category: "Electrolyte / Drink", kcal: 95, sodium: 780, fat: 1.0, water: 12 },
-  { id: "f_4", name: "Watermelon Cubes Dusted with Sea Salt / Tajín + 12oz Water", baseServing: "1.5 cups cubed watermelon + 1/4 tsp salt", category: "Between Classes", kcal: 75, sodium: 560, fat: 0.2, water: 16 },
-  { id: "f_5", name: "Egg White & 1 Egg Scramble on Salted Sourdough + Berries", baseServing: "3 egg whites + 1 egg + 1 slice toast + 1/2 cup berries", category: "Morning / School", kcal: 280, sodium: 520, fat: 4.5, water: 8 },
-  { id: "f_6", name: "Warm Oatmeal (Skim/Almond Milk) with Sea Salt, Maple & Banana", baseServing: "1 cup cooked oats + 1 banana + 1/4 tsp salt", category: "Morning / School", kcal: 290, sodium: 480, fat: 2.0, water: 8 },
-  { id: "f_7", name: "0% Fat Greek Yogurt Parfait + Honey + Salted Pretzel Crumble", baseServing: "3/4 cup 0% Greek yogurt + 1 tsp honey + 1/3 cup pretzels", category: "Morning / School", kcal: 230, sodium: 390, fat: 0.5, water: 8 },
-  { id: "f_8", name: "Plain Bagel Thin Toasted with Strawberry Jam + 3 Slices Deli Turkey", baseServing: "1 bagel thin + 1 tbsp jam + 3 oz turkey breast", category: "Morning / School", kcal: 260, sodium: 690, fat: 2.0, water: 8 },
-  { id: "f_9", name: "Starbucks Egg White & Roasted Red Pepper Egg Bites", baseServing: "1 order (2 egg bites) + 16oz iced water", category: "Morning / School", kcal: 170, sodium: 470, fat: 5.0, water: 16 },
-  { id: "f_10", name: "Deli Oven-Roasted Turkey Breast Roll-Ups + Dill Pickle Spear + Pretzels", baseServing: "4 slices lean turkey + 1 pickle spear + 12 pretzel crisps", category: "Morning / School", kcal: 240, sodium: 820, fat: 2.0, water: 12 },
-  { id: "f_11", name: "Low-Fat Cottage Cheese (1%) with Pineapple or Peach + Salted Crackers", baseServing: "1/2 cup 1% cottage cheese + 1/2 cup fruit + 5 crackers", category: "Morning / School", kcal: 190, sodium: 540, fat: 1.5, water: 8 },
-  { id: "f_12", name: "Grilled Chicken & Honey Mustard Tortilla Wrap + Baked Lay's", baseServing: "1 wrap (3.5oz grilled chicken, lettuce, pickles) + 1oz baked chips", category: "Morning / School", kcal: 370, sodium: 910, fat: 4.5, water: 16 },
-  { id: "f_13", name: "1/4 Avocado Mashed on Salted Sourdough Toast + Sliced Turkey", baseServing: "1 slice sourdough + strictly 1/4 avocado + 2 oz turkey", category: "Morning / School", kcal: 250, sodium: 580, fat: 5.5, water: 8 },
-  { id: "f_14", name: "Thermos Warm Low-Fat Chicken & Rice/Noodle Soup + Saltines", baseServing: "1.5 cups warm soup + 6 salted crackers", category: "Between Classes", kcal: 260, sodium: 890, fat: 2.5, water: 12 },
-  { id: "f_15", name: "Salted Rice Cakes + PB2 Powdered Peanut Butter + Banana Slices", baseServing: "2 salted rice cakes + 2 tbsp prepared PB2 + 1/2 banana", category: "Between Classes", kcal: 220, sodium: 450, fat: 2.0, water: 12 },
-  { id: "f_16", name: "Pickle Juice Shot (2oz) + Unsweetened Applesauce Pouch + Pretzels", baseServing: "2oz pickle brine + 1 pouch + 10 mini pretzels", category: "Between Classes", kcal: 150, sodium: 680, fat: 0.5, water: 12 },
+  { id: "f_1", name: "Electrolyte Water + Salted Pretzels", baseServing: "16oz LMNT or Liquid I.V. + 15 mini pretzels", category: "Morning / Wake-Up", kcal: 130, sodium: 850, fat: 0.5, water: 16 },
+  { id: "f_2", name: "Gatorade Zero / Pedialyte Sport + Salted Rice Cake", baseServing: "16oz bottle + 1 salted rice cake", category: "Electrolyte / Drink", kcal: 55, sodium: 590, fat: 0.0, water: 16 },
+  { id: "f_3", name: "Warm Chicken Bone Broth with Sea Salt", baseServing: "12oz warm mug + 4 saltine crackers", category: "Electrolyte / Drink", kcal: 95, sodium: 780, fat: 1.0, water: 12 },
+  { id: "f_4", name: "Watermelon Cubes with Sea Salt / Tajín + Water", baseServing: "1.5 cups watermelon + 1/4 tsp salt + 12oz water", category: "Between Classes", kcal: 75, sodium: 560, fat: 0.2, water: 16 },
+  { id: "f_5", name: "Egg White & Egg Scramble on Salted Sourdough + Berries", baseServing: "3 egg whites + 1 egg + 1 slice toast + 1/2 cup berries", category: "Morning / School", kcal: 280, sodium: 520, fat: 4.5, water: 8 },
+  { id: "f_6", name: "Warm Oatmeal with Sea Salt, Maple & Banana", baseServing: "1 cup oats in skim/almond milk + 1 banana + 1/4 tsp salt", category: "Morning / School", kcal: 290, sodium: 480, fat: 2.0, water: 8 },
+  { id: "f_7", name: "0% Greek Yogurt Parfait + Honey + Pretzel Crumble", baseServing: "3/4 cup 0% Greek yogurt + 1 tsp honey + 1/3 cup pretzels", category: "Morning / School", kcal: 230, sodium: 390, fat: 0.5, water: 8 },
+  { id: "f_8", name: "Toasted Bagel Thin with Jam + Deli Turkey", baseServing: "1 bagel thin + 1 tbsp jam + 3 oz turkey breast", category: "Morning / School", kcal: 260, sodium: 690, fat: 2.0, water: 8 },
+  { id: "f_9", name: "Starbucks Egg White & Roasted Red Pepper Bites", baseServing: "2 egg bites + 16oz iced water", category: "Morning / School", kcal: 170, sodium: 470, fat: 5.0, water: 16 },
+  { id: "f_10", name: "Deli Turkey Breast Roll-Ups + Pickle Spear + Pretzels", baseServing: "4 slices lean turkey + 1 pickle spear + 12 pretzel crisps", category: "Morning / School", kcal: 240, sodium: 820, fat: 2.0, water: 12 },
+  { id: "f_11", name: "1% Cottage Cheese with Fruit + Salted Crackers", baseServing: "1/2 cup 1% cottage cheese + 1/2 cup pineapple/peach + 5 crackers", category: "Morning / School", kcal: 190, sodium: 540, fat: 1.5, water: 8 },
+  { id: "f_12", name: "Grilled Chicken & Honey Mustard Wrap + Baked Lay's", baseServing: "1 wrap w/ 3.5oz chicken, lettuce, pickles + 1oz baked chips", category: "Morning / School", kcal: 370, sodium: 910, fat: 4.5, water: 16 },
+  { id: "f_13", name: "1/4 Avocado on Salted Sourdough + Sliced Turkey", baseServing: "1 slice sourdough + 1/4 avocado + 2 oz turkey", category: "Morning / School", kcal: 250, sodium: 580, fat: 5.5, water: 8 },
+  { id: "f_14", name: "Thermos Low-Fat Chicken & Rice/Noodle Soup + Saltines", baseServing: "1.5 cups warm soup + 6 salted crackers", category: "Between Classes", kcal: 260, sodium: 890, fat: 2.5, water: 12 },
+  { id: "f_15", name: "Salted Rice Cakes + PB2 + Banana Slices", baseServing: "2 salted rice cakes + 2 tbsp prepared PB2 + 1/2 banana", category: "Between Classes", kcal: 220, sodium: 450, fat: 2.0, water: 12 },
+  { id: "f_16", name: "Pickle Juice Shot + Applesauce Pouch + Pretzels", baseServing: "2oz pickle brine + 1 pouch + 10 mini pretzels", category: "Between Classes", kcal: 150, sodium: 680, fat: 0.5, water: 12 },
   { id: "f_17", name: "Steamed Sea-Salt Edamame Pods + Salted Rice Rollers", baseServing: "3/4 cup edamame in pods + 2 rice rollers", category: "Between Classes", kcal: 210, sodium: 540, fat: 3.5, water: 12 },
-  { id: "f_18", name: "Miso Soup Packet in Hot Thermos + Pretzel Thins", baseServing: "12oz warm miso soup + 10 pretzel thins", category: "Between Classes", kcal: 165, sodium: 840, fat: 1.5, water: 12 },
-  { id: "f_19", name: "Light Laughing Cow Cheese Wedge + 12 Salted Wheat Thins + Grapes", baseServing: "1 light wedge + 12 crackers + 1/2 cup grapes", category: "Between Classes", kcal: 215, sodium: 410, fat: 3.5, water: 8 },
-  { id: "f_20", name: "Salted Popcorn (Air-Popped / SkinnyPop Light) + Electrolyte Drink", baseServing: "2.5 cups air-popped salted popcorn + 12oz electrolyte water", category: "Between Classes", kcal: 130, sodium: 490, fat: 2.0, water: 12 },
-  { id: "f_21", name: "Pretzel Rods + 2 Tbsp Fat-Free / Oil-Free Roasted Red Pepper Hummus", baseServing: "4 salted pretzel rods + 2 tbsp low-fat hummus", category: "Between Classes", kcal: 195, sodium: 560, fat: 1.5, water: 12 },
-  { id: "f_22", name: "Warm Jasmine Rice Bowl with Grilled Teriyaki Chicken Breast & Carrots", baseServing: "1 cup cooked white rice + 3.5 oz grilled chicken breast", category: "Late-Night Recovery", kcal: 340, sodium: 640, fat: 3.0, water: 10 },
-  { id: "f_23", name: "Baked Russet/Sweet Potato with Sea Salt, 0% Greek Yogurt & Turkey Bits", baseServing: "1 medium baked potato + 2 tbsp 0% yogurt + 2 oz lean turkey", category: "Late-Night Recovery", kcal: 310, sodium: 580, fat: 2.0, water: 10 },
+  { id: "f_18", name: "Warm Miso Soup + Pretzel Thins", baseServing: "12oz miso soup + 10 pretzel thins", category: "Between Classes", kcal: 165, sodium: 840, fat: 1.5, water: 12 },
+  { id: "f_19", name: "Light Laughing Cow Wedge + Wheat Thins + Grapes", baseServing: "1 light wedge + 12 crackers + 1/2 cup grapes", category: "Between Classes", kcal: 215, sodium: 410, fat: 3.5, water: 8 },
+  { id: "f_20", name: "Air-Popped Salted Popcorn + Electrolyte Drink", baseServing: "2.5 cups light salted popcorn + 12oz electrolyte water", category: "Between Classes", kcal: 130, sodium: 490, fat: 2.0, water: 12 },
+  { id: "f_21", name: "Pretzel Rods + Fat-Free Roasted Red Pepper Hummus", baseServing: "4 salted pretzel rods + 2 tbsp low-fat hummus", category: "Between Classes", kcal: 195, sodium: 560, fat: 1.5, water: 12 },
+  { id: "f_22", name: "Jasmine Rice Bowl with Grilled Teriyaki Chicken & Carrots", baseServing: "1 cup white rice + 3.5 oz grilled chicken breast", category: "Late-Night Recovery", kcal: 340, sodium: 640, fat: 3.0, water: 10 },
+  { id: "f_23", name: "Baked Potato with Sea Salt, 0% Yogurt & Turkey", baseServing: "1 medium baked potato + 2 tbsp 0% yogurt + 2 oz lean turkey", category: "Late-Night Recovery", kcal: 310, sodium: 580, fat: 2.0, water: 10 },
   { id: "f_24", name: "Warm Egg-Drop or Won-Ton Broth Soup with White Rice", baseServing: "1.5 cups soup + 1/2 cup steamed white rice", category: "Late-Night Recovery", kcal: 250, sodium: 790, fat: 3.0, water: 12 },
-  { id: "f_25", name: "Grilled White Fish or Shrimp Soft Tacos on Corn Tortillas with Salsa", baseServing: "2 corn tortillas + 3.5 oz grilled fish/shrimp + pico de gallo", category: "Late-Night Recovery", kcal: 295, sodium: 610, fat: 3.0, water: 10 },
-  { id: "f_26", name: "Whole-Wheat Pasta with Marinara Sauce & Lean Ground Turkey Breast (99% Lean)", baseServing: "1 cup pasta + 1/2 cup marinara + 3 oz 99% lean turkey", category: "Late-Night Recovery", kcal: 350, sodium: 670, fat: 3.0, water: 10 },
-  { id: "f_27", name: "Subway 6-Inch Oven-Roasted Turkey Sub (Mustard, Pickles, No Cheese/Mayo)", baseServing: "1 6-inch sub on Italian/Wheat + Baked Lay's", category: "Restaurant / Fast Food", kcal: 380, sodium: 960, fat: 4.0, water: 16 },
-  { id: "f_28", name: "Chick-fil-A Grilled Nuggets (8 ct) + Fruit Cup + Honey Mustard", baseServing: "8 grilled nuggets + medium fruit cup + 16oz water", category: "Restaurant / Fast Food", kcal: 210, sodium: 530, fat: 3.0, water: 16 },
-  { id: "f_29", name: "Chipotle Grilled Chicken Bowl (White Rice, Black Beans, Fajita Veggies, Tomato Salsa — No Cheese/Sour Cream/Guac)", baseServing: "1/2 bowl portion (save rest for tomorrow!)", category: "Restaurant / Fast Food", kcal: 365, sodium: 890, fat: 5.0, water: 16 },
-  { id: "f_30", name: "Panera Homestyle Chicken Noodle Soup (Bowl) + Baguette Piece", baseServing: "1 bowl soup + 1/2 baguette piece", category: "Restaurant / Fast Food", kcal: 260, sodium: 1120, fat: 3.5, water: 12 },
-  { id: "f_31", name: "Panda Express Grilled Teriyaki Chicken (No Skin) + Steamed White Rice & Super Greens", baseServing: "1/2 entrée grilled chicken + 1 cup greens & rice", category: "Restaurant / Fast Food", kcal: 370, sodium: 740, fat: 5.5, water: 16 },
-  { id: "f_32", name: "Taco Bell Fresco-Style Grilled Chicken Soft Taco (No Cheese/Sauce, Pico de Gallo)", baseServing: "1 Fresco grilled chicken soft taco", category: "Restaurant / Fast Food", kcal: 160, sodium: 510, fat: 3.5, water: 12 },
-  { id: "f_33", name: "⚠️ Drive-Thru Fried Chicken Nuggets & Medium French Fries", baseServing: "8 breaded nuggets + medium fries", category: "Restaurant / Fast Food", kcal: 680, sodium: 1150, fat: 34.0, water: 0 },
-  { id: "f_34", name: "⚠️ 2 Slices Greasy Pepperoni / Extra Cheese Pizza Late at Night", baseServing: "2 regular slices", category: "Restaurant / Fast Food", kcal: 620, sodium: 1380, fat: 26.0, water: 0 },
-  { id: "f_35", name: "⚠️ Creamy Cheese-Foam Boba Milk Tea on Empty Stomach", baseServing: "16 oz cup with tapioca pearls", category: "Restaurant / Fast Food", kcal: 450, sodium: 95, fat: 14.0, water: 12 },
-  { id: "f_36", name: "⚠️ Fettuccine Alfredo or Mac & Cheese Bowl Before Rehearsal", baseServing: "1.5 cups creamy pasta", category: "Restaurant / Fast Food", kcal: 710, sodium: 990, fat: 38.0, water: 0 }
+  { id: "f_25", name: "Grilled White Fish or Shrimp Corn Tacos with Salsa", baseServing: "2 corn tortillas + 3.5 oz grilled fish/shrimp + pico de gallo", category: "Late-Night Recovery", kcal: 295, sodium: 610, fat: 3.0, water: 10 },
+  { id: "f_26", name: "Whole-Wheat Pasta with Marinara & 99% Lean Turkey", baseServing: "1 cup pasta + 1/2 cup marinara + 3 oz 99% lean turkey", category: "Late-Night Recovery", kcal: 350, sodium: 670, fat: 3.0, water: 10 },
+  { id: "f_27", name: "Subway 6-Inch Oven-Roasted Turkey Sub", baseServing: "6-inch Italian/Wheat w/ mustard & pickles, no cheese/mayo + Baked Lay's", category: "Restaurant / Fast Food", kcal: 380, sodium: 960, fat: 4.0, water: 16 },
+  { id: "f_28", name: "Chick-fil-A 8-ct Grilled Nuggets + Fruit Cup", baseServing: "8 grilled nuggets + honey mustard + medium fruit cup + 16oz water", category: "Restaurant / Fast Food", kcal: 210, sodium: 530, fat: 3.0, water: 16 },
+  { id: "f_29", name: "Chipotle Grilled Chicken Bowl, Half Portion", baseServing: "1/2 bowl w/ rice, black beans, veggies & salsa — no cheese/sour cream/guac", category: "Restaurant / Fast Food", kcal: 365, sodium: 890, fat: 5.0, water: 16 },
+  { id: "f_30", name: "Panera Homestyle Chicken Noodle Soup + Baguette", baseServing: "1 bowl soup + 1/2 baguette piece", category: "Restaurant / Fast Food", kcal: 260, sodium: 1120, fat: 3.5, water: 12 },
+  { id: "f_31", name: "Panda Express Grilled Teriyaki Chicken, Rice & Greens", baseServing: "1/2 entrée no-skin chicken + 1 cup steamed rice & super greens", category: "Restaurant / Fast Food", kcal: 370, sodium: 740, fat: 5.5, water: 16 },
+  { id: "f_32", name: "Taco Bell Fresco Grilled Chicken Soft Taco", baseServing: "1 Fresco soft taco w/ pico — no cheese or creamy sauce", category: "Restaurant / Fast Food", kcal: 160, sodium: 510, fat: 3.5, water: 12 },
+  { id: "f_33", name: "⚠️ Fried Chicken Nuggets & Medium French Fries", baseServing: "8 breaded nuggets + medium fries", category: "Restaurant / Fast Food", kcal: 680, sodium: 1150, fat: 34.0, water: 0 },
+  { id: "f_34", name: "⚠️ Greasy Pepperoni / Extra Cheese Pizza", baseServing: "2 regular slices", category: "Restaurant / Fast Food", kcal: 620, sodium: 1380, fat: 26.0, water: 0 },
+  { id: "f_35", name: "⚠️ Creamy Cheese-Foam Boba Milk Tea", baseServing: "16 oz cup with tapioca pearls", category: "Restaurant / Fast Food", kcal: 450, sodium: 95, fat: 14.0, water: 12 },
+  { id: "f_36", name: "⚠️ Fettuccine Alfredo or Mac & Cheese Bowl", baseServing: "1.5 cups creamy pasta", category: "Restaurant / Fast Food", kcal: 710, sodium: 990, fat: 38.0, water: 0 }
 ];
 
 export const NUTRITION_KEYWORD_RULES = [
-  { keys: ["pretzel", "pretzels", "crisps"], serving: "1 oz (~15 twists)", kcal: 110, sodium: 450, fat: 1.0, water: 0, cat: "Between Classes" },
+  { keys: ["pretzel", "pretzels", "crisps"], serving: "1 oz, ~15 twists", kcal: 110, sodium: 450, fat: 1.0, water: 0, cat: "Between Classes" },
   { keys: ["pickle", "brine", "olives"], serving: "2 spears or 2oz brine", kcal: 15, sodium: 620, fat: 0.0, water: 2, cat: "Between Classes" },
   { keys: ["lmnt", "liquid iv", "liquid i.v.", "dripdrop", "electrolyte", "pedialyte"], serving: "16oz prepared bottle", kcal: 45, sodium: 750, fat: 0.0, water: 16, cat: "Electrolyte / Drink" },
   { keys: ["gatorade", "powerade", "bodyarmor"], serving: "16oz sports bottle", kcal: 80, sodium: 380, fat: 0.0, water: 16, cat: "Electrolyte / Drink" },
@@ -53,23 +53,23 @@ export const NUTRITION_KEYWORD_RULES = [
   { keys: ["rice cake", "rice crisps", "rice roller"], serving: "2 salted cakes/rollers", kcal: 100, sodium: 240, fat: 0.5, water: 0, cat: "Between Classes" },
   { keys: ["oatmeal", "oats", "porridge"], serving: "1 cup cooked with pinch of salt", kcal: 240, sodium: 380, fat: 2.5, water: 8, cat: "Morning / School" },
   { keys: ["yogurt", "greek yogurt", "parfait"], serving: "3/4 cup 0% Greek yogurt + fruit", kcal: 170, sodium: 140, fat: 0.5, water: 6, cat: "Morning / School" },
-  { keys: ["banana", "apple", "berries", "grapes", "melon", "watermelon", "fruit", "applesauce"], serving: "1 cup fruit (add pinch of sea salt for POTS!)", kcal: 95, sodium: 280, fat: 0.3, water: 6, cat: "Between Classes" },
+  { keys: ["banana", "apple", "berries", "grapes", "melon", "watermelon", "fruit", "applesauce"], serving: "1 cup fruit — add a pinch of sea salt", kcal: 95, sodium: 280, fat: 0.3, water: 6, cat: "Between Classes" },
   { keys: ["potato", "sweet potato", "baked potato"], serving: "1 medium baked potato with sea salt", kcal: 220, sodium: 480, fat: 0.5, water: 6, cat: "Late-Night Recovery" },
   { keys: ["rice", "jasmine rice", "white rice", "teriyaki"], serving: "1 cup steamed rice + lean protein", kcal: 320, sodium: 590, fat: 2.5, water: 6, cat: "Late-Night Recovery" },
   { keys: ["bagel", "toast", "sourdough", "bread", "english muffin"], serving: "1 bagel thin or 2 slices toast + jam", kcal: 210, sodium: 410, fat: 1.5, water: 4, cat: "Morning / School" },
   { keys: ["egg white", "egg bites"], serving: "3 egg whites or 2 egg white bites", kcal: 150, sodium: 440, fat: 3.5, water: 4, cat: "Morning / School" },
   { keys: ["egg", "eggs", "omelet", "scramble"], serving: "2 whole eggs scrambled", kcal: 180, sodium: 340, fat: 11.0, water: 4, cat: "Morning / School" },
-  { keys: ["avocado", "guacamole"], serving: "1/2 avocado (Caution: check fat limit!)", kcal: 160, sodium: 250, fat: 14.5, water: 4, cat: "Morning / School" },
-  { keys: ["peanut butter", "almond butter", "nuts", "trail mix"], serving: "2 tbsp nut butter (High Fat — use PB2 instead!)", kcal: 190, sodium: 150, fat: 16.0, water: 0, cat: "Morning / School" },
+  { keys: ["avocado", "guacamole"], serving: "1/2 avocado — watch fat limit", kcal: 160, sodium: 250, fat: 14.5, water: 4, cat: "Morning / School" },
+  { keys: ["peanut butter", "almond butter", "nuts", "trail mix"], serving: "2 tbsp nut butter — try PB2 instead", kcal: 190, sodium: 150, fat: 16.0, water: 0, cat: "Morning / School" },
   { keys: ["pb2", "pbfit", "powdered peanut"], serving: "2 tbsp prepared powdered PB", kcal: 60, sodium: 180, fat: 1.5, water: 2, cat: "Between Classes" },
-  { keys: ["fries", "french fries", "fried", "tenders", "wings", "tempura"], serving: "1 medium order (Gallbladder Trigger)", kcal: 540, sodium: 950, fat: 27.0, water: 0, cat: "Restaurant / Fast Food" },
-  { keys: ["pizza", "pepperoni", "quesadilla", "grilled cheese", "nachos"], serving: "2 slices / 1 order (High Fat Trigger)", kcal: 590, sodium: 1250, fat: 25.0, water: 0, cat: "Restaurant / Fast Food" },
-  { keys: ["burger", "cheeseburger", "double", "bacon"], serving: "1 burger (High Gallbladder Fat Load)", kcal: 610, sodium: 1080, fat: 31.0, water: 0, cat: "Restaurant / Fast Food" },
-  { keys: ["ice cream", "milkshake", "boba", "frappuccino", "frosty", "donut"], serving: "1 medium cup (High Sugar/Fat — Low Sodium)", kcal: 440, sodium: 140, fat: 16.0, water: 8, cat: "Restaurant / Fast Food" },
-  { keys: ["sub", "sandwich", "wrap", "panini", "pita"], serving: "6-inch lean turkey/chicken sub (no mayo)", kcal: 330, sodium: 860, fat: 4.0, water: 8, cat: "Morning / School" },
-  { keys: ["taco", "burrito", "chipotle", "fajita"], serving: "2 grilled chicken corn tacos w/ salsa (no cheese/sour cream)", kcal: 310, sodium: 680, fat: 4.5, water: 8, cat: "Late-Night Recovery" },
-  { keys: ["sushi", "california roll", "cucumber roll", "edamame"], serving: "1 roll (6–8 pcs, no tempura/mayo) + soy sauce", kcal: 260, sodium: 790, fat: 3.5, water: 8, cat: "Late-Night Recovery" },
-  { keys: ["pasta", "spaghetti", "marinara", "noodles"], serving: "1 cup pasta with marinara (no cream/alfredo)", kcal: 310, sodium: 580, fat: 2.5, water: 6, cat: "Late-Night Recovery" },
+  { keys: ["fries", "french fries", "fried", "tenders", "wings", "tempura"], serving: "1 medium order — high fat", kcal: 540, sodium: 950, fat: 27.0, water: 0, cat: "Restaurant / Fast Food" },
+  { keys: ["pizza", "pepperoni", "quesadilla", "grilled cheese", "nachos"], serving: "2 slices / 1 order — high fat", kcal: 590, sodium: 1250, fat: 25.0, water: 0, cat: "Restaurant / Fast Food" },
+  { keys: ["burger", "cheeseburger", "double", "bacon"], serving: "1 burger — high fat", kcal: 610, sodium: 1080, fat: 31.0, water: 0, cat: "Restaurant / Fast Food" },
+  { keys: ["ice cream", "milkshake", "boba", "frappuccino", "frosty", "donut"], serving: "1 medium cup — high fat, low salt", kcal: 440, sodium: 140, fat: 16.0, water: 8, cat: "Restaurant / Fast Food" },
+  { keys: ["sub", "sandwich", "wrap", "panini", "pita"], serving: "6-inch lean turkey/chicken sub, no mayo", kcal: 330, sodium: 860, fat: 4.0, water: 8, cat: "Morning / School" },
+  { keys: ["taco", "burrito", "chipotle", "fajita"], serving: "2 grilled chicken corn tacos w/ salsa, no cheese", kcal: 310, sodium: 680, fat: 4.5, water: 8, cat: "Late-Night Recovery" },
+  { keys: ["sushi", "california roll", "cucumber roll", "edamame"], serving: "6–8 pc roll + soy sauce, no tempura/mayo", kcal: 260, sodium: 790, fat: 3.5, water: 8, cat: "Late-Night Recovery" },
+  { keys: ["pasta", "spaghetti", "marinara", "noodles"], serving: "1 cup pasta with marinara, no cream", kcal: 310, sodium: 580, fat: 2.5, water: 6, cat: "Late-Night Recovery" },
   { keys: ["popcorn", "crackers", "saltines", "goldfish", "cheez-it"], serving: "1.5 cups / 1 oz crackers", kcal: 140, sodium: 420, fat: 3.5, water: 0, cat: "Between Classes" }
 ];
 
@@ -90,20 +90,20 @@ export function evaluateFoodSafety(sodium, fat, kcal, maxMealFat = 5.5) {
 
   let potsRating;
   if (na < 250 && cal > 350) {
-    potsRating = { status: "caution", label: "POTS Caution (Heavy Carb / Low Salt)", isGood: false, tone: "badge-avoid" };
+    potsRating = { status: "caution", label: "Low Salt", isGood: false, tone: "badge-avoid" };
   } else if (na < 350) {
-    potsRating = { status: "fair", label: "POTS Fair (Pair w/ Electrolyte)", isGood: true, tone: "badge-caution" };
+    potsRating = { status: "fair", label: "Pair w/ Salt", isGood: true, tone: "badge-caution" };
   } else {
-    potsRating = { status: "great", label: "POTS Great (High Na)", isGood: true, tone: "badge-safe" };
+    potsRating = { status: "great", label: "High Na", isGood: true, tone: "badge-safe" };
   }
 
   let gbRating;
   if (f >= 8 || f > cap + 2.5) {
-    gbRating = { status: "avoid", label: `GB Avoid (${f}g Fat — Spasm Risk)`, isGood: false, tone: "badge-avoid" };
+    gbRating = { status: "avoid", label: `Avoid • ${f}g fat`, isGood: false, tone: "badge-avoid" };
   } else if (f > cap) {
-    gbRating = { status: "caution", label: `GB Caution (${f}g Fat > ${cap}g)`, isGood: false, tone: "badge-caution" };
+    gbRating = { status: "caution", label: `Caution • ${f}g fat`, isGood: false, tone: "badge-caution" };
   } else {
-    gbRating = { status: "safe", label: `GB Safe (${f}g Fat)`, isGood: true, tone: "badge-safe" };
+    gbRating = { status: "safe", label: `Safe • ${f}g fat`, isGood: true, tone: "badge-safe" };
   }
 
   // Overall combined badge for quick scanning
